@@ -1,0 +1,2 @@
+ttk_id,source_extraction_id,sandbox_version,weapon_hash,weapon_or_archetype,mode,resilience_tier,crit_damage,body_damage,rpm,burst_count,crit_required,body_required,optimal_ttk_ms,body_ttk_ms,formula_confidence,db_apply,conditions,notes
+TTK-0001,DMG-0001,post-2026-06-09,,Example adaptive hand cannon,PvP,7,,,140,1,,,,,Needs Verification,No,Simple RPM formula only; manual review required.,

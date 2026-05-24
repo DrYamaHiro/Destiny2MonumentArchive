@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>D2 Monument Archive</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">D2 Monument Archive</p>
+      <h1 id="pageTitle">Static DB Preview</h1>
+      <p class="meta" id="manifestMeta">Loading manifest...</p>
+    </div>
+    <div class="lang-switch" aria-label="Language">
+      <button class="seg" id="langJa" type="button" aria-pressed="true">日本語</button>
+      <button class="seg" id="langEn" type="button" aria-pressed="false">English</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <nav class="tabs" aria-label="Views">
+        <button class="tab is-active" data-view="weapons" type="button">Weapons</button>
+        <button class="tab" data-view="armor" type="button">Exotic Armor</button>
+        <button class="tab" data-view="ttk" type="button">TTK</button>
+      </nav>
+
+      <div class="toolbar">
+        <label class="field">
+          <span id="searchLabel">Search</span>
+          <input id="searchInput" type="search" autocomplete="off">
+        </label>
+        <div class="filter-grid">
+          <label class="field">
+            <span id="filterPrimaryLabel">Type</span>
+            <select id="primaryFilter"></select>
+          </label>
+          <label class="field">
+            <span id="filterSecondaryLabel">Ammo</span>
+            <select id="secondaryFilter"></select>
+          </label>
+        </div>
+      </div>
+
+      <div class="result-status" id="resultStatus">0 results</div>
+      <div class="results" id="results" aria-live="polite"></div>
+    </aside>
+
+    <section class="detail" id="detail">
+      <div class="empty-state">
+        <h2 id="emptyTitle">Select an item</h2>
+        <p id="emptyBody">Choose a row from the list.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>

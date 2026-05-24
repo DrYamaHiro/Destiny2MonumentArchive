@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Destiny 2 PvP Database Plan</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1d2430;
+      --muted: #5f6978;
+      --line: #d9dee8;
+      --paper: #f7f8fb;
+      --panel: #ffffff;
+      --navy: #243b59;
+      --teal: #0f766e;
+      --gold: #b7791f;
+      --red: #b42318;
+      --green: #247a3d;
+      --blue-soft: #e9f1fb;
+      --teal-soft: #e8f5f2;
+      --gold-soft: #fff3d8;
+      --red-soft: #fff0ef;
+      --shadow: 0 10px 24px rgba(31, 42, 68, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Yu Gothic", "Meiryo", "Segoe UI", system-ui, sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.68;
+    }
+
+    body[data-lang="ja"] .en,
+    body[data-lang="en"] .ja {
+      display: none !important;
+    }
+
+    a {
+      color: #0b5cad;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #182536 0%, #264865 52%, #0f766e 100%);
+      color: #fff;
+      padding: 38px 24px 34px;
+    }
+
+    .wrap {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.08);
+    }
+
+    h1 {
+      margin: 18px 0 8px;
+      font-size: clamp(30px, 5vw, 54px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      max-width: 920px;
+      margin: 0;
+      font-size: 17px;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      padding-top: 2px;
+    }
+
+    button.lang {
+      border: 1px solid rgba(255,255,255,0.42);
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 9px 13px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    button.lang[aria-pressed="true"] {
+      color: #112034;
+      background: #fff;
+    }
+
+    main {
+      padding: 28px 0 54px;
+    }
+
+    section {
+      margin: 22px 0;
+      padding: 26px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 25px;
+      line-height: 1.22;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 22px 0 8px;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 9px 0;
+    }
+
+    ul, ol {
+      margin: 8px 0 0 22px;
+      padding: 0;
+    }
+
+    li {
+      margin: 5px 0;
+    }
+
+    code {
+      font-family: Consolas, "Cascadia Mono", monospace;
+      color: #17324d;
+      background: #edf2f7;
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    pre {
+      overflow: auto;
+      background: #142033;
+      color: #f7fafc;
+      padding: 18px;
+      border-radius: 8px;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    pre code {
+      color: inherit;
+      background: transparent;
+      padding: 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 10px 12px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #edf2f7;
+      text-align: left;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .tri-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .note {
+      border-left: 5px solid var(--teal);
+      background: var(--teal-soft);
+      padding: 13px 15px;
+      border-radius: 6px;
+      margin: 14px 0;
+    }
+
+    .warn {
+      border-left: 5px solid var(--gold);
+      background: var(--gold-soft);
+      padding: 13px 15px;
+      border-radius: 6px;
+      margin: 14px 0;
+    }
+
+    .risk {
+      border-left: 5px solid var(--red);
+      background: var(--red-soft);
+      padding: 13px 15px;
+      border-radius: 6px;
+      margin: 14px 0;
+    }
+
+    .mini-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 15px;
+      background: #fff;
+    }
+
+    .mini-card h3 {
+      margin-top: 0;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      background: #eef4ff;
+      border: 1px solid #cbd7ea;
+      color: #243b59;
+      padding: 5px 10px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .timeline {
+      counter-reset: phase;
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .phase {
+      position: relative;
+      padding: 14px 16px 14px 52px;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+    }
+
+    .phase::before {
+      counter-increment: phase;
+      content: counter(phase);
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .source-list {
+      columns: 2;
+      column-gap: 28px;
+    }
+
+    .source-list li {
+      break-inside: avoid;
+      margin-bottom: 7px;
+    }
+
+    footer {
+      color: var(--muted);
+      font-size: 13px;
+      padding: 0 0 32px;
+    }
+
+    @media (max-width: 820px) {
+      .grid,
+      .tri-grid {
+        grid-template-columns: 1fr;
+      }
+      .source-list {
+        columns: 1;
+      }
+      section {
+        padding: 20px;
+      }
+      .wrap {
+        width: min(100% - 24px, 1180px);
+      }
+    }
+  </style>
+</head>
+<body data-lang="ja">
+  <header>
+    <div class="wrap">
+      <div class="topline">
+        <div>
+          <span class="badge ja">計画書 / 調査時点: 2026-05-24 18:48 JST</span>
+          <span class="badge en">Planning document / Research timestamp: 2026-05-24 18:48 JST</span>
+          <h1 class="ja">Destiny 2 PvP データベース設計プラン</h1>
+          <h1 class="en">Destiny 2 PvP Database Plan</h1>
+          <p class="subtitle ja">静的DBと動的DBを分離し、英語/日本語切替、TTK、武器使用率、K/U、パーク差分、エキゾチック防具採用率を、低コストで継続公開するための初期設計です。</p>
+          <p class="subtitle en">Initial architecture for a low-cost, bilingual Destiny 2 PvP database with separate static and dynamic layers, TTK, usage, K/U, perk deltas, and exotic armor adoption metrics.</p>
+        </div>
+        <div class="controls" aria-label="Language">
+          <button class="lang" id="jaBtn" aria-pressed="true" type="button">日本語</button>
+          <button class="lang" id="enBtn" aria-pressed="false" type="button">English</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section>
+      <h2 class="ja">結論</h2>
+      <h2 class="en">Recommendation</h2>
+      <div class="ja">
+        <p>まずはこのフォルダ内で「静的生成サイト + バージョン管理されたテキストデータ」として作り始めます。GitHubはテキストデータとコードの保管に限定し、画像と武器データ参照のコミュニティ基盤は、最終大型アップデート後に新設するDiscordサーバーで整えます。</p>
+        <p>重要なのは、Bungie APIには「全世界のPvP試合を横断取得する公式firehose」が見当たらない点です。したがって動的DBは、最初から「観測サンプルに基づく統計」として設計し、対象母集団、取得経路、信頼区間を明示するべきです。</p>
+      </div>
+      <div class="en">
+        <p>Start inside this folder with a static-generated site and versioned text data. GitHub will be limited to text data and source code, while the community layer for images and weapon-data reference will be built later through a new Discord server after the final major update.</p>
+        <p>The key constraint is that Bungie does not appear to expose an official global PvP match firehose. Dynamic metrics should therefore be presented as observed-sample statistics, with sample coverage and confidence clearly displayed.</p>
+      </div>
+      <div class="pill-list">
+        <span class="pill">Static first</span>
+        <span class="pill">Versioned manifest</span>
+        <span class="pill">Bilingual labels</span>
+        <span class="pill">Sample-aware PvP stats</span>
+        <span class="pill">GitHub text only</span>
+        <span class="pill">Discord after final update</span>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="ja">フォルダ確認</h2>
+      <h2 class="en">Folder Check</h2>
+      <div class="grid">
+        <div class="mini-card">
+          <h3 class="ja">対象フォルダ</h3>
+          <h3 class="en">Target Folder</h3>
+          <p><code>H:\マイドライブ\eSport\Destiny2</code></p>
+          <p class="ja">現時点では空のフォルダでした。追加の <code>AGENTS.md</code> は見つかりませんでした。</p>
+          <p class="en">The folder is currently empty. No additional <code>AGENTS.md</code> was found.</p>
+        </div>
+        <div class="mini-card">
+          <h3 class="ja">この文書</h3>
+          <h3 class="en">This Document</h3>
+          <p><code>destiny2_db_plan.html</code></p>
+          <p class="ja">当面はこのフォルダ内で設計・テキストDB・試作を完結させます。GitHub化する場合も、画像や秘密情報は含めません。</p>
+          <p class="en">For now, design, text DB, and prototypes stay inside this folder. If this becomes a GitHub repository, images and secrets stay out of it.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="ja">DB分離方針</h2>
+      <h2 class="en">Static and Dynamic DB Split</h2>
+      <div class="grid">
+        <div class="mini-card">
+          <h3 class="ja">静的DB</h3>
+          <h3 class="en">Static DB</h3>
+          <p class="ja">武器・防具・パーク・ローカライズ・TTKモデルなど、パッチ単位で変わる情報を扱います。Bungie Manifestを土台にし、TTKは別テーブルで手動検証/コミュニティ検証/計算式をバージョン管理します。</p>
+          <p class="en">Stores items, armor, perks, localization, and TTK models that change by patch. Bungie Manifest is the foundation; TTK is maintained in separate versioned tables with measured data, community references, and formulas.</p>
+          <ul class="ja">
+            <li><code>entity</code>: hash、分類、装備スロット、アイコン、レアリティ</li>
+            <li><code>entity_i18n</code>: hash、language、name、description</li>
+            <li><code>weapon_static</code>: weaponHash、RPM、frame、ammo、stats、perk pool</li>
+            <li><code>ttk_profile</code>: sandboxVersion、weapon/archetype、resilienceTier、optimal/body TTK、crit/body requirement</li>
+            <li><code>sandbox_version</code>: 有効開始日、Manifest version、出典、検証状態</li>
+          </ul>
+          <ul class="en">
+            <li><code>entity</code>: hash, category, slot, icon, rarity</li>
+            <li><code>entity_i18n</code>: hash, language, name, description</li>
+            <li><code>weapon_static</code>: weapon hash, RPM, frame, ammo type, stats, perk pool</li>
+            <li><code>ttk_profile</code>: sandbox version, weapon/archetype, resilience tier, optimal/body TTK, crit/body requirements</li>
+            <li><code>sandbox_version</code>: effective date, manifest version, source, validation status</li>
+          </ul>
+        </div>
+        <div class="mini-card">
+          <h3 class="ja">動的DB</h3>
+          <h3 class="en">Dynamic DB</h3>
+          <p class="ja">試合ログ、武器別キル、観測されたロードアウト、日次/週次集計を扱います。PGCRには武器別キルはありますが、武器ロールのソケット/パークはそのまま入らないため、パーク差分には装備スナップショット設計が必要です。</p>
+          <p class="en">Stores match logs, weapon kills, observed loadouts, and daily/weekly aggregates. PGCR includes weapon-level kill stats, but not full roll sockets/perks, so perk-delta analysis requires a loadout snapshot strategy.</p>
+          <ul class="ja">
+            <li><code>match</code>: activityId、mode、map、period、manifestVersion</li>
+            <li><code>match_player</code>: activityId、匿名playerKey、class、team、result、scoreboard stats</li>
+            <li><code>match_weapon</code>: activityId、playerKey、weaponHash、kills、precision、使用区分</li>
+            <li><code>loadout_snapshot</code>: playerKey、characterId、取得時刻、武器/防具itemHash</li>
+            <li><code>perk_snapshot</code>: itemInstanceIdHash、weaponHash、plugHash、slotIndex</li>
+            <li><code>agg_weapon_daily</code>: mode、date、weaponHash、usage、killShare、K/U</li>
+            <li><code>agg_exotic_armor_daily</code>: mode、class、exoticArmorHash、adoptionRate、winRate proxy</li>
+          </ul>
+          <ul class="en">
+            <li><code>match</code>: activity ID, mode, map, period, manifest version</li>
+            <li><code>match_player</code>: activity ID, anonymized player key, class, team, result, scoreboard stats</li>
+            <li><code>match_weapon</code>: activity ID, player key, weapon hash, kills, precision, usage flag</li>
+            <li><code>loadout_snapshot</code>: player key, character ID, timestamp, equipped weapon/armor hashes</li>
+            <li><code>perk_snapshot</code>: item instance hash, weapon hash, plug hash, slot index</li>
+            <li><code>agg_weapon_daily</code>: mode, date, weapon hash, usage, kill share, K/U</li>
+            <li><code>agg_exotic_armor_daily</code>: mode, class, exotic armor hash, adoption rate, win-rate proxy</li>
+          </ul>
+        </div>
+      </div>
+      <div class="warn ja">TTKはBungie Manifestだけで完全自動生成できる情報ではありません。RPMや武器定義は取れますが、PvPダメージ値、バースト間隔、ダメージ減衰、パーク補正、耐久Tierごとの閾値は、パッチノートと検証データを組み合わせる前提で設計します。</div>
+      <div class="warn en">TTK cannot be fully generated from the Bungie Manifest alone. RPM and item definitions are available, but PvP damage values, burst timing, falloff, perk modifiers, and resilience breakpoints should be managed from patch notes plus verified test data.</div>
+    </section>
+
+    <section>
+      <h2 class="ja">データ取得パイプライン</h2>
+      <h2 class="en">Data Pipeline</h2>
+      <div class="timeline ja">
+        <div class="phase"><strong>Manifest同期。</strong> <code>/Destiny2/Manifest/</code> でversionを確認し、英語と日本語の定義を取得。hashを主キーにして差分を保存。</div>
+        <div class="phase"><strong>観測対象の収集。</strong> opt-inプレイヤー、クラン、コミュニティ協力者、公開プロフィール許可ユーザーからキャラクターとActivity Historyを取得。</div>
+        <div class="phase"><strong>PGCR取得。</strong> activityIdでPost Game Carnage Reportを取得し、プレイヤー、武器別キル、試合結果、モード、マップを正規化。</div>
+        <div class="phase"><strong>ロードアウトスナップショット。</strong> 試合履歴取得直後にCharacterEquipmentとItemSocketsを取得。タイミングずれを記録し、信頼度を付与。</div>
+        <div class="phase"><strong>集計と公開。</strong> 生ログは非公開/圧縮保管、公開サイトには日次/週次の集計JSONと小さな検索インデックスだけを出す。</div>
+      </div>
+      <div class="timeline en">
+        <div class="phase"><strong>Manifest sync.</strong> Check <code>/Destiny2/Manifest/</code>, download English and Japanese definitions, and store diffs by hash.</div>
+        <div class="phase"><strong>Observed population.</strong> Use opt-in players, clans, community contributors, and public profiles that allow access.</div>
+        <div class="phase"><strong>PGCR ingestion.</strong> Fetch Post Game Carnage Reports by activity ID and normalize players, weapon kills, outcomes, mode, and map.</div>
+        <div class="phase"><strong>Loadout snapshots.</strong> Fetch CharacterEquipment and ItemSockets immediately after activity discovery. Store timing lag and confidence.</div>
+        <div class="phase"><strong>Aggregation and publishing.</strong> Keep raw logs compressed/private; publish daily/weekly aggregate JSON and compact search indexes.</div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="ja">指標定義</h2>
+      <h2 class="en">Metric Definitions</h2>
+      <table class="ja">
+        <thead>
+          <tr><th>指標</th><th>初期定義</th><th>注意点</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Usage</td><td>観測ロードアウト内でその武器が出現した割合。武器種別・枠別・モード別に集計。</td><td>「装備されている」と「実際に撃った」は別。PGCRのweapon entryと装備snapshotを分ける。</td></tr>
+          <tr><td>Kill Share</td><td>全武器キルに対する、その武器のキル割合。</td><td>特殊/ヘビーは弾薬経済の影響が大きいため、Primaryと分けて見る。</td></tr>
+          <tr><td>K/U</td><td><code>Kill Share / Usage Share</code>。1.00を平均、100%表記も併記可能。</td><td>やまひろ先生の想定が「Kills per User」なら名称を分ける。初期UIでは定義ツールチップ必須。</td></tr>
+          <tr><td>Perk Delta</td><td>同一武器内で、特定perkあり/なしのK/U、killShare、precision、win proxyの差分。</td><td>因果ではなく相関。最低サンプル数、モード、マップ、プレイヤースキル proxyで補正。</td></tr>
+          <tr><td>Exotic Armor Adoption</td><td>クラス別・モード別に、観測ロードアウト内でそのエキゾ防具が採用された割合。</td><td>装備snapshotの取得遅延があるため、信頼度を表示する。</td></tr>
+          <tr><td>TTK</td><td>最適TTK、body TTK、crit/body要求、耐久Tier、perk補正、sandboxVersion。</td><td>バースト武器、チャージ武器、特殊条件perkは個別モデル。</td></tr>
+        </tbody>
+      </table>
+      <table class="en">
+        <thead>
+          <tr><th>Metric</th><th>Initial Definition</th><th>Caution</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Usage</td><td>Share of observed loadouts in which the weapon appears, grouped by weapon type, slot, and mode.</td><td>Equipped and actually fired are different. Keep PGCR weapon entries separate from equipment snapshots.</td></tr>
+          <tr><td>Kill Share</td><td>Weapon kills divided by all observed weapon kills.</td><td>Analyze primary, special, and heavy separately because ammo economy changes interpretation.</td></tr>
+          <tr><td>K/U</td><td><code>Kill Share / Usage Share</code>. Show 1.00 baseline and optionally 100% format.</td><td>If the intended meaning is "Kills per User", use a separate label. The first UI should include a definition tooltip.</td></tr>
+          <tr><td>Perk Delta</td><td>Within the same weapon, compare K/U, kill share, precision, and win proxy between rolls with and without a perk.</td><td>Correlation, not causation. Use minimum sample counts and adjust by mode, map, and skill proxy.</td></tr>
+          <tr><td>Exotic Armor Adoption</td><td>Class/mode-specific share of observed loadouts using a given exotic armor piece.</td><td>Display confidence because equipment snapshots may be delayed.</td></tr>
+          <tr><td>TTK</td><td>Optimal TTK, body TTK, crit/body requirements, resilience tier, perk modifiers, sandbox version.</td><td>Burst, charge, and conditional-perk weapons require custom models.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2 class="ja">英語/日本語切替設計</h2>
+      <h2 class="en">Bilingual Design</h2>
+      <div class="grid">
+        <div class="mini-card">
+          <h3 class="ja">DB側</h3>
+          <h3 class="en">Database Layer</h3>
+          <p class="ja">hashやactivityIdなど言語非依存IDを主キーにし、表示文字列だけ <code>entity_i18n</code> に分離します。Bungie Manifestは言語別ファイルを持つため、<code>en</code> と <code>ja</code> を同時に取り込みます。</p>
+          <p class="en">Use language-independent IDs such as hashes and activity IDs as primary keys. Keep display strings in <code>entity_i18n</code>. Bungie Manifest exposes language-specific definition files, so import <code>en</code> and <code>ja</code> together.</p>
+        </div>
+        <div class="mini-card">
+          <h3 class="ja">UI側</h3>
+          <h3 class="en">UI Layer</h3>
+          <p class="ja">URLパラメータ <code>?lang=ja</code> / <code>?lang=en</code> とブラウザ保存を併用します。日本語欠落時は英語にフォールバックし、管理画面では「翻訳欠落リスト」を出します。</p>
+          <p class="en">Use <code>?lang=ja</code> / <code>?lang=en</code> plus local browser preference. Fall back to English when Japanese is missing, and expose a missing-translation report for maintenance.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="ja">2026年6月9日アップデートへの備え</h2>
+      <h2 class="en">Preparing for the June 9, 2026 Update</h2>
+      <div class="note ja">
+        Bungie公式発表では、2026年6月9日に <strong>Destiny 2: Monument of Triumph</strong> が全プレイヤー向けに提供され、これがDestiny 2の最終ライブサービスコンテンツ更新になるとされています。PvPでは新モード、Iron Banner/Trialsの運用、Competitive報酬、エキゾ防具Tier 5、武器/防具更新など、DBに影響する変更が多いです。
+      </div>
+      <div class="note en">
+        Bungie announced that <strong>Destiny 2: Monument of Triumph</strong> launches for all players on June 9, 2026, and will be Destiny 2's final live-service content update. PvP modes, Iron Banner/Trials cadence, Competitive rewards, exotic armor Tier 5 stats, and weapon/armor updates can all affect the database.
+      </div>
+      <ul class="ja">
+        <li><strong>Pre/Post分割:</strong> <code>season_window</code> または <code>sandbox_version</code> で、2026-06-09前後の集計を絶対に混ぜない。</li>
+        <li><strong>Manifest差分:</strong> 新規/削除/再発行/名称変更/パークプール変更を差分レポート化。</li>
+        <li><strong>新モード対応:</strong> Arena、Glass Cannon、Software、SRLなどはmode taxonomyに追加できるようにする。</li>
+        <li><strong>ライブ終了後:</strong> 更新頻度を「週次集計 + コミュニティ検証TTK + アーカイブ保全」に落として継続可能にする。</li>
+      </ul>
+      <ul class="en">
+        <li><strong>Pre/post split:</strong> Never mix pre- and post-June 9 data. Partition by <code>season_window</code> or <code>sandbox_version</code>.</li>
+        <li><strong>Manifest diffs:</strong> Produce reports for new, removed, reprised, renamed, and perk-pool-changed items.</li>
+        <li><strong>New modes:</strong> Keep the mode taxonomy extensible for Arena, Glass Cannon, Software, SRL, and future community categories.</li>
+        <li><strong>After live-service end:</strong> Reduce maintenance to weekly aggregates, community-verified TTK, and archival preservation.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="ja">GitHub/Discord分担方針</h2>
+      <h2 class="en">GitHub/Discord Responsibility Split</h2>
+      <div class="tri-grid">
+        <div class="mini-card">
+          <h3 class="ja">GitHub</h3>
+          <h3 class="en">GitHub</h3>
+          <ul class="ja">
+            <li>保管対象はテキストデータ、スキーマ、コード、小さなJSON/CSV/Markdownのみ</li>
+            <li>静的DB: Manifest由来の英日名称、武器/パーク定義、TTK表</li>
+            <li>動的DB: 集計済みの武器Usage、K/U、perk差分、エキゾ防具採用率</li>
+            <li>画像、API Key、生ログ、個人単位データは置かない</li>
+          </ul>
+          <ul class="en">
+            <li>Store text data, schemas, source code, and compact JSON/CSV/Markdown only</li>
+            <li>Static DB: bilingual names, weapon/perk definitions, TTK tables</li>
+            <li>Dynamic DB: aggregated weapon usage, K/U, perk deltas, exotic armor adoption</li>
+            <li>No images, API keys, raw logs, or player-level data</li>
+          </ul>
+        </div>
+        <div class="mini-card">
+          <h3 class="ja">Discord</h3>
+          <h3 class="en">Discord</h3>
+          <p class="ja">最終大型アップデート後に新設し、交流、画像参照、装備データ参照、検証募集、更新告知の拠点にします。既に課金アカウントがある前提なので、初期はDiscordの運用資産を活かします。</p>
+          <p class="en">Create it after the final major update as the hub for community discussion, image reference, equipment data lookup, validation requests, and update notices. Since a paid Discord account already exists, use that operational base first.</p>
+        </div>
+        <div class="mini-card">
+          <h3 class="ja">保留するもの</h3>
+          <h3 class="en">Deferred Choices</h3>
+          <p class="ja">Cloudflare Pages/R2などの外部公開・外部画像保管は、Discord運用で不足が見えた段階で再検討します。最初から固定費や追加インフラを増やさない方針です。</p>
+          <p class="en">External publishing and image storage such as Cloudflare Pages/R2 will be revisited only if Discord operations show a real gap. Avoid adding fixed cost or extra infrastructure at the start.</p>
+        </div>
+      </div>
+      <div class="note ja">
+        最初のMVPでは、GitHubに上げる前提のデータをテキストに絞ります。画像はDiscordで参照できる形にし、GitHub側は画像URL/Discord投稿参照/manifest icon pathなどの参照情報だけを持つ設計にします。
+      </div>
+      <div class="note en">
+        For the MVP, keep GitHub-bound data text-only. Images should be referenced through Discord, while GitHub stores only references such as image URLs, Discord post references, or Manifest icon paths.
+      </div>
+    </section>
+
+    <section>
+      <h2 class="ja">パーク差分とエキゾ防具評価の設計</h2>
+      <h2 class="en">Perk Delta and Exotic Armor Analysis</h2>
+      <table class="ja">
+        <thead>
+          <tr><th>分析</th><th>方法</th><th>表示方針</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>武器パーク差分</td><td>同一武器内でperk有無を比較。モード、マップ、プラットフォーム、期間、プレイヤースキルproxyで層別化。</td><td>「+8% K/U」だけでなく、サンプル数、信頼区間、取得信頼度を併記。</td></tr>
+          <tr><td>組み合わせパーク</td><td>3列目+4列目など主要組み合わせを集計。ただし組み合わせ爆発を避け、最低サンプル数未満は非表示。</td><td>roll heatmapとして表示。上位だけでなく、武器内平均との差分で見る。</td></tr>
+          <tr><td>エキゾ防具採用率</td><td>クラス/サブクラス/モード/期間別のロードアウト採用率を計算。</td><td>採用率、勝率proxy、K/D proxyは分ける。強さランキングに直結させない。</td></tr>
+        </tbody>
+      </table>
+      <table class="en">
+        <thead>
+          <tr><th>Analysis</th><th>Method</th><th>Display</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Weapon perk delta</td><td>Compare perk-present vs perk-absent within the same weapon, stratified by mode, map, platform, period, and skill proxy.</td><td>Show sample size, confidence interval, and snapshot confidence, not only "+8% K/U".</td></tr>
+          <tr><td>Perk combinations</td><td>Aggregate major combinations such as columns 3+4. Hide combinations below minimum sample thresholds.</td><td>Use roll heatmaps and compare against the weapon's own baseline.</td></tr>
+          <tr><td>Exotic armor adoption</td><td>Compute adoption by class, subclass, mode, and period.</td><td>Keep adoption, win proxy, and K/D proxy separate. Do not present adoption as direct power ranking.</td></tr>
+        </tbody>
+      </table>
+      <div class="risk ja">パーク差分は、強いプレイヤーが好むrollが高く出るバイアスを強く受けます。初期段階では「観測された相関」として表示し、「このperkが勝率を上げた」と断定しない運用が安全です。</div>
+      <div class="risk en">Perk deltas are strongly biased by skilled players preferring certain rolls. Present them as observed correlations and avoid claiming that a perk caused higher win rate.</div>
+    </section>
+
+    <section>
+      <h2 class="ja">推奨フォルダ構成</h2>
+      <h2 class="en">Suggested Folder Structure</h2>
+      <pre><code>Destiny2/
+  docs/
+    destiny2_db_plan.html
+    metric_definitions.md
+    source_policy.md
+  site/
+    index.html
+    assets/
+    scripts/
+    styles/
+  schema/
+    static.sql
+    dynamic.sql
+    json_schemas/
+  etl/
+    manifest_sync/
+    pgcr_ingest/
+    aggregate/
+  data/
+    static/
+      manifest_versions/
+      ttk/
+      i18n/
+    dynamic/
+      public_aggregates/
+      private_raw/
+  research/
+    ttk_sources/
+    sandbox_notes/
+  archive/
+    pre_2026_06_09/
+    post_2026_06_09/</code></pre>
+    </section>
+
+    <section>
+      <h2 class="ja">実装ロードマップ</h2>
+      <h2 class="en">Implementation Roadmap</h2>
+      <div class="timeline ja">
+        <div class="phase"><strong>MVP 1: 静的カタログ。</strong> Manifest同期、英日ローカライズ、武器/パーク/エキゾ防具一覧、検索UI。</div>
+        <div class="phase"><strong>MVP 2: TTK表。</strong> archetypeごとのTTK schema、入力根拠、sandboxVersion、検証状態を整備。</div>
+        <div class="phase"><strong>MVP 3: 動的集計。</strong> opt-inまたはクランをseedにActivity HistoryとPGCRを取得し、武器Usage/Kill Share/K/Uを週次集計としてテキスト出力。</div>
+        <div class="phase"><strong>MVP 4: パーク/エキゾ分析。</strong> 装備snapshotとItemSocketsを加え、信頼度つきでperk deltaとexotic adoptionをテキストDB化。</div>
+        <div class="phase"><strong>Post-June Discord基盤。</strong> 2026-06-09後にDiscordサーバーを新設し、交流、画像参照、装備データ参照、検証募集を集約。</div>
+      </div>
+      <div class="timeline en">
+        <div class="phase"><strong>MVP 1: Static catalog.</strong> Manifest sync, English/Japanese localization, weapon/perk/exotic armor lists, search UI.</div>
+        <div class="phase"><strong>MVP 2: TTK tables.</strong> TTK schema by archetype, source evidence, sandbox version, validation status.</div>
+        <div class="phase"><strong>MVP 3: Dynamic aggregates.</strong> Use opt-in or clan seeds to fetch Activity History and PGCR, then generate weekly Usage/Kill Share/K/U as text outputs.</div>
+        <div class="phase"><strong>MVP 4: Perk/exotic analysis.</strong> Add equipment snapshots and ItemSockets, then convert perk deltas and exotic adoption into text DB outputs.</div>
+        <div class="phase"><strong>Post-June Discord base.</strong> After June 9, 2026, create the Discord server and centralize discussion, image reference, equipment lookup, and validation requests.</div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="ja">未確定事項</h2>
+      <h2 class="en">Open Decisions</h2>
+      <ul class="ja">
+        <li><strong>K/Uの定義:</strong> 本計画では <code>Kill Share / Usage Share</code> を仮採用。やまひろ先生の意図が「Kills per User」なら別指標として設計変更します。</li>
+        <li><strong>Discord設計:</strong> サーバー構成、ロール、チャンネル、画像参照ルール、AI更新フローは最終大型アップデート後に決めます。</li>
+        <li><strong>公開範囲:</strong> プレイヤー単位の生データは匿名化しても扱いが繊細です。公開は集計値のみを推奨します。</li>
+        <li><strong>取得母集団:</strong> opt-in/クラン中心ではバイアスが出ます。UIに「観測範囲」を必ず出します。</li>
+        <li><strong>画像保管:</strong> Bungieアセットは非商用ファンコンテンツとして扱い、著作権/商標の注意書きをサイトに明記します。</li>
+        <li><strong>API継続性:</strong> ライブサービス終了後もAPIが同様に維持される保証は未確認です。Manifestと集計データの定期アーカイブが保険になります。</li>
+      </ul>
+      <ul class="en">
+        <li><strong>K/U definition:</strong> This plan assumes <code>Kill Share / Usage Share</code>. If the intended meaning is "Kills per User", design it as a separate metric.</li>
+        <li><strong>Discord design:</strong> Server structure, roles, channels, image reference rules, and AI update flow will be decided after the final major update.</li>
+        <li><strong>Publication scope:</strong> Player-level raw data remains sensitive even when anonymized. Publish aggregate values only.</li>
+        <li><strong>Observed population:</strong> Opt-in and clan-based sampling creates bias. Always show sample coverage.</li>
+        <li><strong>Image storage:</strong> Treat Bungie assets as non-commercial fan content and include copyright/trademark notes on the site.</li>
+        <li><strong>API continuity:</strong> API behavior after the end of live-service updates is not guaranteed. Regular Manifest and aggregate archives are the hedge.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="ja">参考リンク</h2>
+      <h2 class="en">References</h2>
+      <ul class="source-list">
+        <li><a href="https://www.bungie.net/7/en/News/Article/d2_may_21_2026">Bungie: Destiny 2: Every End is a New Beginning</a></li>
+        <li><a href="https://bungie-net.github.io/">Bungie.Net API Overview</a></li>
+        <li><a href="https://bungie-net.github.io/multi/operation_get_Destiny2-GetDestinyManifest.html">Bungie API: GetDestinyManifest</a></li>
+        <li><a href="https://bungie-net.github.io/multi/operation_get_Destiny2-GetPostGameCarnageReport.html">Bungie API: GetPostGameCarnageReport</a></li>
+        <li><a href="https://github.com/Bungie-net/api/wiki/Obtaining-Destiny-Definitions-%22The-Manifest%22">Bungie API Wiki: Obtaining the Manifest</a></li>
+        <li><a href="https://bungie-net.github.io/multi/schema_Destiny-DestinyComponentType.html">Bungie API: DestinyComponentType</a></li>
+        <li><a href="https://bungie-net.github.io/multi/schema_Destiny-HistoricalStats-DestinyPostGameCarnageReportExtendedData.html">Bungie API: PGCR Extended Data</a></li>
+        <li><a href="https://bungie-net.github.io/multi/schema_Destiny-HistoricalStats-DestinyHistoricalWeaponStats.html">Bungie API: Historical Weapon Stats</a></li>
+        <li><a href="https://github.com/Bungie-net/api/wiki/OAuth-Documentation">Bungie API Wiki: OAuth Documentation</a></li>
+        <li><a href="https://help.bungie.net/hc/en-us/articles/360049201911-Intellectual-Property-and-Trademarks">Bungie Help: Intellectual Property and Trademarks</a></li>
+        <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits">GitHub Docs: GitHub Pages Limits</a></li>
+        <li><a href="https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions">GitHub Docs: Actions Billing</a></li>
+        <li><a href="https://developers.cloudflare.com/pages/platform/limits/">Cloudflare Pages Limits</a></li>
+        <li><a href="https://developers.cloudflare.com/r2/pricing/">Cloudflare R2 Pricing</a></li>
+        <li><a href="https://developers.cloudflare.com/d1/platform/pricing/">Cloudflare D1 Pricing</a></li>
+        <li><a href="https://d2-ttk-cheatsheet.vercel.app/">Community Reference: D2 TTK Cheatsheet</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <p class="ja">注: この計画書は2026-05-24 18:48 JST時点の公開情報に基づきます。Bungie API、Cloudflare、GitHubの制限や料金は変更される可能性があります。</p>
+    <p class="en">Note: This plan is based on public information checked at 2026-05-24 18:48 JST. Bungie API behavior and Cloudflare/GitHub limits or pricing can change.</p>
+  </footer>
+
+  <script>
+    const jaBtn = document.getElementById("jaBtn");
+    const enBtn = document.getElementById("enBtn");
+
+    function setLanguage(lang) {
+      document.body.dataset.lang = lang;
+      document.documentElement.lang = lang;
+      jaBtn.setAttribute("aria-pressed", String(lang === "ja"));
+      enBtn.setAttribute("aria-pressed", String(lang === "en"));
+      try {
+        localStorage.setItem("destiny2PlanLang", lang);
+      } catch (_) {}
+    }
+
+    jaBtn.addEventListener("click", () => setLanguage("ja"));
+    enBtn.addEventListener("click", () => setLanguage("en"));
+
+    const params = new URLSearchParams(location.search);
+    const requested = params.get("lang");
+    let saved = "ja";
+    try {
+      saved = localStorage.getItem("destiny2PlanLang") || "ja";
+    } catch (_) {}
+    setLanguage(requested === "en" ? "en" : saved === "en" ? "en" : "ja");
+  </script>
+</body>
+</html>

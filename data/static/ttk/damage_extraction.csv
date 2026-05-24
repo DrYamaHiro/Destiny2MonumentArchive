@@ -1,0 +1,2 @@
+extraction_id,status,source_id,source_date,weapon_or_archetype,weapon_hash,weapon_type,scope,change_type,old_body,new_body,body_delta_pct,old_crit,new_crit,crit_delta_pct,rpm,burst_count,charge_draw_ms,pvp_only,raw_bungie_text_or_paraphrase,assumptions,verification,notes
+DMG-0001,Needs Verification,SRC-2026-06-09-001,2026-06-09,Example adaptive hand cannon,,Hand Cannon,PvP,Damage scalar,0,0,,0,0,,140,1,,Yes,Example row. Replace with source-backed Bungie wording.,Manual verification required.,Needs Calculation,

@@ -1,0 +1,58 @@
+{
+  "apiKeyProvided": false,
+  "application": "D2 Monument Archive - Local Dev",
+  "components": [
+    "DestinyInventoryItemDefinition",
+    "DestinyItemCategoryDefinition",
+    "DestinyInventoryBucketDefinition",
+    "DestinyStatDefinition",
+    "DestinySandboxPerkDefinition",
+    "DestinyPlugSetDefinition",
+    "DestinyDamageTypeDefinition",
+    "DestinyClassDefinition"
+  ],
+  "counts": {
+    "en": {
+      "exoticArmor": 348,
+      "plugs": 12120,
+      "sandboxPerks": 3681,
+      "weapons": 1837
+    },
+    "ja": {
+      "exoticArmor": 348,
+      "plugs": 12120,
+      "sandboxPerks": 3681,
+      "weapons": 1837
+    }
+  },
+  "languages": [
+    "en",
+    "ja"
+  ],
+  "manifestVersion": "243523.26.04.28.2000-3-bnet.64859",
+  "metadataEndpoint": "https://www.bungie.net/Platform/Destiny2/Manifest/",
+  "notes": [
+    "Raw component JSON is cached under data/local_cache/manifest and should not be committed.",
+    "Image files are not downloaded; icon fields keep Bungie manifest paths only.",
+    "TTK tables are not derived from manifest data and must be maintained separately."
+  ],
+  "outputs": {
+    "exoticArmor": [
+      "exotic_armor.en.json",
+      "exotic_armor.ja.json"
+    ],
+    "plugs": [
+      "plugs.en.json",
+      "plugs.ja.json"
+    ],
+    "sandboxPerks": [
+      "sandbox_perks.en.json",
+      "sandbox_perks.ja.json"
+    ],
+    "weapons": [
+      "weapons.en.json",
+      "weapons.ja.json"
+    ]
+  },
+  "syncedAt": "2026-05-24T18:54:35+00:00"
+}

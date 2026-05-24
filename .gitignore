@@ -1,0 +1,46 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.secret
+*.key
+.secrets/
+
+# Local/private runtime data
+data/private_raw/
+data/local_cache/
+logs/
+tmp/
+*.log
+*.xlsx
+*.xls
+*.xlsm
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# GitHub is text-only for this project.
+# Keep images local or in the later Discord/community layer.
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.avif
+*.bmp
+*.tif
+*.tiff
+*.psd
+*.ai
+*.svg
+images/
+assets/images/
+media/
+
+# OS/editor noise
+Thumbs.db
+Desktop.ini
+.DS_Store
+.vscode/
+node_modules/
