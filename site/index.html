@@ -7,51 +7,65 @@
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <header class="app-header">
-    <div>
-      <p class="eyebrow">D2 Monument Archive</p>
-      <h1 id="pageTitle">Static DB Preview</h1>
-      <p class="meta" id="manifestMeta">Loading manifest...</p>
+  <header class="topbar">
+    <div class="brand">
+      <p class="brand-kicker">D2 Monument Archive</p>
+      <h1 id="pageTitle">静的DB</h1>
+      <p class="manifest" id="manifestMeta">Manifest</p>
     </div>
-    <div class="lang-switch" aria-label="Language">
-      <button class="seg" id="langJa" type="button" aria-pressed="true">日本語</button>
-      <button class="seg" id="langEn" type="button" aria-pressed="false">English</button>
+    <div class="header-actions">
+      <div class="lang-switch" aria-label="Language">
+        <button class="seg" id="langJa" type="button" aria-pressed="true">日本語</button>
+        <button class="seg" id="langEn" type="button" aria-pressed="false">English</button>
+      </div>
     </div>
   </header>
 
-  <main class="layout">
-    <aside class="sidebar">
-      <nav class="tabs" aria-label="Views">
-        <button class="tab is-active" data-view="weapons" type="button">Weapons</button>
-        <button class="tab" data-view="armor" type="button">Exotic Armor</button>
-        <button class="tab" data-view="ttk" type="button">TTK</button>
-      </nav>
+  <nav class="view-tabs" aria-label="Views">
+    <button class="tab is-active" data-view="weapons" type="button">武器</button>
+    <button class="tab" data-view="armor" type="button">エキゾ防具</button>
+    <button class="tab" data-view="ttk" type="button">TTK</button>
+  </nav>
 
-      <div class="toolbar">
-        <label class="field">
-          <span id="searchLabel">Search</span>
+  <section class="summary-band" id="summaryBand" aria-label="Summary"></section>
+
+  <main class="catalog-shell">
+    <aside class="browse-panel">
+      <div class="search-row">
+        <label class="field search-field">
+          <span id="searchLabel">検索</span>
           <input id="searchInput" type="search" autocomplete="off">
         </label>
-        <div class="filter-grid">
-          <label class="field">
-            <span id="filterPrimaryLabel">Type</span>
-            <select id="primaryFilter"></select>
-          </label>
-          <label class="field">
-            <span id="filterSecondaryLabel">Ammo</span>
-            <select id="secondaryFilter"></select>
-          </label>
-        </div>
+        <button class="clear-btn" id="clearButton" type="button">Reset</button>
       </div>
 
-      <div class="result-status" id="resultStatus">0 results</div>
+      <div class="filter-grid">
+        <label class="field">
+          <span id="filterPrimaryLabel">タイプ</span>
+          <select id="primaryFilter"></select>
+        </label>
+        <label class="field">
+          <span id="filterSecondaryLabel">弾薬</span>
+          <select id="secondaryFilter"></select>
+        </label>
+        <label class="field">
+          <span id="sortLabel">並び替え</span>
+          <select id="sortSelect"></select>
+        </label>
+      </div>
+
+      <div class="result-head">
+        <span id="resultStatus">0</span>
+        <span id="activeFilterLabel"></span>
+      </div>
+
+      <div class="column-head" id="columnHead"></div>
       <div class="results" id="results" aria-live="polite"></div>
     </aside>
 
-    <section class="detail" id="detail">
+    <section class="detail-panel" id="detail">
       <div class="empty-state">
-        <h2 id="emptyTitle">Select an item</h2>
-        <p id="emptyBody">Choose a row from the list.</p>
+        <h2 id="emptyTitle">項目</h2>
       </div>
     </section>
   </main>

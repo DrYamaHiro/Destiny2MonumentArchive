@@ -139,6 +139,19 @@ def unique_sorted(rows: list[dict[str, Any]], key: str) -> list[str]:
     return sorted({str(row.get(key) or "") for row in rows if row.get(key)})
 
 
+def counts(rows: list[dict[str, Any]], key: str) -> list[dict[str, Any]]:
+    bucket: dict[str, int] = {}
+    for row in rows:
+        label = str(row.get(key) or "")
+        if not label:
+            continue
+        bucket[label] = bucket.get(label, 0) + 1
+    return [
+        {"label": label, "count": count}
+        for label, count in sorted(bucket.items(), key=lambda item: (-item[1], item[0]))
+    ]
+
+
 def main() -> int:
     manifest = read_json(TEXTDB_DIR / "index.json")
     site_index = {
@@ -174,6 +187,18 @@ def main() -> int:
             "armorTypes": unique_sorted(armor, "type"),
         }
         write_json(SITE_DATA_DIR / f"facets.{lang}.json", facets)
+
+        summary = {
+            "manifestVersion": manifest.get("manifestVersion"),
+            "builtAt": site_index["builtAt"],
+            "weaponCount": len(weapons),
+            "exoticArmorCount": len(armor),
+            "weaponTypes": counts(weapons, "type"),
+            "ammo": counts(weapons, "ammo"),
+            "armorClasses": counts(armor, "class"),
+            "armorTypes": counts(armor, "type"),
+        }
+        write_json(SITE_DATA_DIR / f"summary.{lang}.json", summary)
 
     print(json.dumps({"built": str(SITE_DATA_DIR), "manifestVersion": site_index["manifestVersion"]}, ensure_ascii=False))
     return 0
