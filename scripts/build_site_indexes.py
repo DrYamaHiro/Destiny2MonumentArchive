@@ -65,8 +65,8 @@ WEAPON_TIERING_SOCKET_TYPE_HASHES = {939327520, 1680508191, 2433793611}
 
 WEAPON_GENERATION_LABELS = {
     "en": {
-        "year1_fixed": "Year 1 / fixed roll",
-        "year2_random": "Year 2+ / random roll",
+        "year1_fixed": "Fixed roll",
+        "year2_random": "Random roll",
         "craftable": "Craftable",
         "enhanceable": "Enhanceable",
         "new_tiered": "New / tiered",
@@ -74,8 +74,8 @@ WEAPON_GENERATION_LABELS = {
         "fixed_legacy": "Legacy fixed roll",
     },
     "ja": {
-        "year1_fixed": "1年目 / 固定パーク",
-        "year2_random": "2年目以降 / ランダムパーク",
+        "year1_fixed": "固定パーク",
+        "year2_random": "ランダムパーク",
         "craftable": "クラフト武器",
         "enhanceable": "強化武器",
         "new_tiered": "新武器 / Tier付き",
