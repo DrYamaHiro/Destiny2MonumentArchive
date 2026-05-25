@@ -29,7 +29,7 @@ const text = {
     synced: "同期",
     loading: "読み込み中",
     search: "検索",
-    searchPlaceholder: "名称、説明、カテゴリ、Hash",
+    searchPlaceholder: "名称、説明、カテゴリ、入手元",
     reset: "リセット",
     all: "すべて",
     results: "件",
@@ -51,7 +51,6 @@ const text = {
     sortSlot: "スロット",
     sortDamage: "属性",
     sortFrame: "フレーム",
-    sortTtk: "PvP Potential",
     sortWeaponSystem: "新武器",
     filterWeaponType: "武器種",
     filterAmmo: "弾薬",
@@ -96,8 +95,8 @@ const text = {
     weaponSlot: "武器スロット",
     weaponFrame: "フレーム",
     weaponArchetype: "アーキタイプ",
-    weaponSystemNew: "新武器 / Tier式",
-    weaponSystemLegacy: "旧式 / 非Tier",
+    weaponSystemNew: "新武器 / Tier付き・エキゾチック",
+    weaponSystemLegacy: "旧武器 / 非Tierレジェンダリー",
     release: "追加情報",
     releaseWatermark: "シーズン/拡張アイコン",
     releaseInline: "追加時期",
@@ -193,7 +192,7 @@ const text = {
     synced: "Synced",
     loading: "Loading",
     search: "Search",
-    searchPlaceholder: "Name, description, category, hash",
+    searchPlaceholder: "Name, description, category, source",
     reset: "Reset",
     all: "All",
     results: "results",
@@ -215,7 +214,6 @@ const text = {
     sortSlot: "Slot",
     sortDamage: "Damage",
     sortFrame: "Frame",
-    sortTtk: "PvP Potential",
     sortWeaponSystem: "New weapon",
     filterWeaponType: "Weapon type",
     filterAmmo: "Ammo",
@@ -260,8 +258,8 @@ const text = {
     weaponSlot: "Weapon slot",
     weaponFrame: "Frame",
     weaponArchetype: "Archetype",
-    weaponSystemNew: "New / tiered",
-    weaponSystemLegacy: "Legacy / non-tiered",
+    weaponSystemNew: "New / tiered Legendary or Exotic",
+    weaponSystemLegacy: "Legacy / non-tiered Legendary",
     release: "Release info",
     releaseWatermark: "Season/expansion watermark",
     releaseInline: "Release",
@@ -590,16 +588,28 @@ function ttkScopeLabel(scope) {
   return t("ttkScopePending");
 }
 
-function releaseSummary(row) {
+function formatTtkSource(source) {
+  const value = String(source || "").trim();
+  if (!value) return state.lang === "ja" ? "PvP Potential台帳" : "PvP Potential table";
+  if (/^DrYamaHiro:/i.test(value)) return state.lang === "ja" ? "DrYamaHiro検証台帳" : "DrYamaHiro reference sheet";
+  if (/data\/static\/ttk|ttk_candidates/i.test(value)) return state.lang === "ja" ? "PvP Potential台帳" : "PvP Potential table";
+  return value;
+}
+
+function releaseSummary(row, includeInternal = true) {
   const release = row.release || {};
   const parts = [];
+  const season = releaseSeasonLabel(row);
+  if (season) {
+    parts.push(season);
+  }
   if (release.sourceString) {
     parts.push(release.sourceString);
   }
   if (release.watermarkIcon || release.watermarkShelvedIcon || release.versionWatermarkIcons?.length) {
     parts.push(t("releaseWatermark"));
   }
-  if (release.collectibleHash) {
+  if (includeInternal && release.collectibleHash) {
     parts.push(`${t("collectible")} ${release.collectibleHash}`);
   }
   return parts.join(" / ");
@@ -608,6 +618,13 @@ function releaseSummary(row) {
 function releaseIcon(row) {
   const release = row.release || {};
   return release.watermarkIcon || release.watermarkShelvedIcon || release.versionWatermarkIcons?.[0] || "";
+}
+
+function releaseSeasonLabel(row) {
+  const release = row.release || {};
+  if (release.seasonNumber && release.seasonName) return `S${release.seasonNumber} ${release.seasonName}`;
+  if (release.seasonNumber) return `S${release.seasonNumber}`;
+  return release.releaseVersion ? release.releaseVersion.toUpperCase() : "";
 }
 
 function releaseSourceLabel(row) {
@@ -622,10 +639,11 @@ function releaseSourceLabel(row) {
 }
 
 function releaseListLabel(row) {
+  const season = releaseSeasonLabel(row);
+  if (season) return season;
   const source = releaseSourceLabel(row);
   if (source && !/コレクションから再入手|Collections/i.test(source)) return source;
   if (releaseIcon(row)) return t("releaseInline");
-  if (row.release?.collectibleHash) return `${t("collectible")} ${row.release.collectibleHash}`;
   return "";
 }
 
@@ -633,7 +651,7 @@ function renderReleaseInline(row) {
   const icon = releaseIcon(row);
   const label = releaseListLabel(row);
   if (!icon && !label) return "";
-  const title = releaseSummary(row) || label || t("releaseInline");
+  const title = releaseSummary(row, false) || label || t("releaseInline");
   return `
     <span class="row-release" title="${esc(title)}">
       ${icon ? `<img src="${esc(icon)}" alt="">` : ""}
@@ -660,19 +678,8 @@ function isWeaponRow(row) {
   return (row.sections || []).includes("weapons");
 }
 
-function masterworkPlugOptions(row) {
-  const options = langData().plugOptions || {};
-  return (row.plugSockets || [])
-    .filter((socket) => socket.kind === "masterwork")
-    .flatMap((socket) => (socket.plugHashes || []).map((hash) => options[String(hash)]).filter(Boolean));
-}
-
 function isTieredWeapon(row) {
-  if (!isWeaponRow(row)) return false;
-  return masterworkPlugOptions(row).some((plug) => {
-    const text = `${plug.name || ""} ${plug.description || ""} ${plug.identifier || ""}`.toLowerCase();
-    return /\btier\s+\d+\s*:/.test(text) || /weapon's tier|equal to the weapon|武器のレベル|武器のティア|ティア\s*\d+|レベル\s*\d+/.test(text);
-  });
+  return isWeaponRow(row) && Boolean(row.isNewWeapon || row.weaponSystem === "new");
 }
 
 function weaponSystemLabel(row) {
@@ -727,18 +734,79 @@ async function ensureData() {
     state.data.index = await loadJson("./data/index.json");
   }
   if (!state.data[state.lang]) {
-    const [catalog, facets, summary, plugOptions] = await Promise.all([
-      loadJson(`./data/catalog.${state.lang}.json`),
+    const [facets, summary, plugOptions] = await Promise.all([
       loadJson(`./data/facets.${state.lang}.json`),
       loadJson(`./data/summary.${state.lang}.json`),
       loadJson(`./data/plug_options.${state.lang}.json`).catch(() => ({})),
     ]);
-    state.data[state.lang] = { catalog, facets, summary, plugOptions };
+    state.data[state.lang] = { catalog: [], catalogContexts: {}, catalogShards: {}, facets, summary, plugOptions };
   }
+  await ensureCatalogForContext();
 }
 
 function langData() {
   return state.data[state.lang] || {};
+}
+
+function shardIndexForLang() {
+  return state.data.index?.catalogShards?.[state.lang] || {};
+}
+
+function catalogShardPathsForContext(group = state.group, section = state.section) {
+  const shards = shardIndexForLang();
+  const sections = shards.sections || {};
+
+  if (group === "all") {
+    if (section === "all") {
+      return Object.values(sections).flatMap((groupSections) => Object.values(groupSections || {}));
+    }
+    return Object.values(sections)
+      .map((groupSections) => groupSections?.[section])
+      .filter(Boolean);
+  }
+
+  if (section === "all") {
+    return Object.values(sections[group] || {});
+  }
+
+  return sections[group]?.[section] ? [sections[group][section]] : [];
+}
+
+function catalogContextKey(group = state.group, section = state.section) {
+  return `${group}:${section}`;
+}
+
+function mergeCatalogRows(shards) {
+  const seen = new Set();
+  const rows = [];
+  shards.flat().forEach((row) => {
+    const key = String(row.hash || "");
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    rows.push(row);
+  });
+  return rows;
+}
+
+async function loadCatalogShard(path) {
+  const data = langData();
+  if (!data.catalogShards[path]) {
+    data.catalogShards[path] = loadJson(`./data/${path}`);
+  }
+  return data.catalogShards[path];
+}
+
+async function ensureCatalogForContext() {
+  const data = langData();
+  const key = catalogContextKey();
+  if (data.catalogContexts[key]) {
+    data.catalog = data.catalogContexts[key];
+    return;
+  }
+  const paths = catalogShardPathsForContext();
+  const shardRows = await Promise.all(paths.map(loadCatalogShard));
+  data.catalogContexts[key] = mergeCatalogRows(shardRows);
+  data.catalog = data.catalogContexts[key];
 }
 
 function currentTaxonomy() {
@@ -831,7 +899,6 @@ function sortOptions() {
       ["damageType", t("sortDamage")],
       ["weaponFrame", t("sortFrame")],
       ["weaponSystem", t("sortWeaponSystem")],
-      ["ttk", t("sortTtk")],
       ["rpm", t("sortRpm")],
       ["range", t("sortRange")],
       ["impact", t("sortImpact")],
@@ -1073,22 +1140,6 @@ function weaponSystemRank(row) {
   return isTieredWeapon(row) ? 0 : 1;
 }
 
-function ttkHasValue(row) {
-  const ttk = row.ttk || {};
-  return [
-    ttk.basePrecisionDamage,
-    ttk.baseBodyDamage,
-    ttk.precisionDamage,
-    ttk.bodyDamage,
-    ttk.optimalTtkMs,
-    ttk.bodyTtkMs,
-    ttk.critShots,
-    ttk.bodyShots,
-    ttk.bodyForgivenessShots,
-    ttk.bodyForgivenessPct,
-  ].some(hasDisplayValue);
-}
-
 function sortRows(rows) {
   const sorted = [...rows];
   const sort = state.sort;
@@ -1114,9 +1165,6 @@ function sortRows(rows) {
     }
     if (sort === "weaponSystem") {
       return weaponSystemRank(a) - weaponSystemRank(b) || compareText(a.weaponType, b.weaponType) || fallback;
-    }
-    if (sort === "ttk") {
-      return Number(!ttkHasValue(a)) - Number(!ttkHasValue(b)) || compareNumberAsc(a.ttk?.optimalTtkMs, b.ttk?.optimalTtkMs) || compareText(a.weaponType, b.weaponType) || fallback;
     }
     if (["section", "type", "class", "armorSlot", "tier"].includes(sort)) {
       return compareText(valueFor(a, sort), valueFor(b, sort)) || fallback;
@@ -1895,14 +1943,6 @@ function renderTtk(row) {
         [t("bodyShots"), displayValue(ttk.bodyShots)],
         [t("bodyForgiveness"), formatBodyForgiveness(ttk)],
       ], "pvp-metric-grid")}
-      ${renderKv([
-        [t("ttkScope"), ttkScopeLabel(ttk.sourceScope)],
-        [t("status"), ttkStatusLabel(ttk.status)],
-        [t("mode"), ttk.mode || "PvP"],
-        [t("sandboxVersion"), displayValue(ttk.sandboxVersion)],
-        [t("conditions"), ttk.conditions],
-        [t("source"), ttk.sourceExtractionId || "data/static/ttk/ttk_candidates.csv"],
-      ])}
     </section>
   `;
 }
@@ -1923,9 +1963,20 @@ function renderDetail(row) {
   const plugSets = row.plugSetHashes ? row.plugSetHashes.length : 0;
   const statDeltas = statDeltasFor(row);
   const release = releaseSummary(row);
+  const ttk = row.ttk || {};
+  const ttkAudit = (row.sections || []).includes("weapons")
+    ? [
+        [t("ttkScope"), ttkScopeLabel(ttk.sourceScope)],
+        [t("status"), ttkStatusLabel(ttk.status)],
+        [t("mode"), ttk.mode || "PvP"],
+        [t("sandboxVersion"), displayValue(ttk.sandboxVersion)],
+        [t("conditions"), ttk.conditions],
+        [t("source"), formatTtkSource(ttk.sourceExtractionId)],
+      ]
+    : [];
   const plugBuilder = renderPlugBuilder(row);
   const ttkPanel = renderTtk(row);
-  const metadata = metadataRows(row, release, plugSets);
+  const metadata = [...metadataRows(row, release, plugSets), ...ttkAudit];
 
   els.detail.innerHTML = `
     <div class="detail-shell">

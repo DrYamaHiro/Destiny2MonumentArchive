@@ -7,6 +7,7 @@ import csv
 import json
 import math
 import re
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -23,6 +24,41 @@ DEFAULT_PVP_TARGET_HP = 230
 DEFAULT_WEAPON_PARAMETER = 100
 DEFAULT_WP_MAX_BONUS_PCT = 0.05
 MAX_PLUG_OPTIONS_PER_SOCKET = 240
+
+RELEASE_SEASON_BY_VERSION = {
+    "v300": 1,
+    "v310": 2,
+    "v320": 3,
+    "v400": 4,
+    "v410": 5,
+    "v420": 6,
+    "v450": 7,
+    "v460": 8,
+    "v470": 9,
+    "v480": 10,
+    "v490": 11,
+    "v500": 12,
+    "v510": 13,
+    "v520": 14,
+    "v530": 15,
+    "v540": 15,
+    "v600": 16,
+    "v610": 17,
+    "v620": 18,
+    "v630": 19,
+    "v700": 20,
+    "v710": 21,
+    "v720": 22,
+    "v730": 23,
+    "v800": 24,
+    "v810": 25,
+    "v820": 26,
+    "v900": 27,
+    "v910": 28,
+    "v950": 29,
+}
+
+NEW_WEAPON_RELEASE_VERSION = 900
 
 STAT_HASH_ALIASES = {
     4043523819: "impact",
@@ -375,6 +411,16 @@ def write_json(path: Path, payload: Any) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
 
 
+def reset_catalog_shards() -> None:
+    shard_root = (SITE_DATA_DIR / "catalog").resolve()
+    site_data_root = SITE_DATA_DIR.resolve()
+    if shard_root.exists() and site_data_root in shard_root.parents:
+        shutil.rmtree(shard_root)
+    for pattern in ("catalog.*.json", "weapons.*.json", "armor.*.json", "exotic_armor.*.json"):
+        for path in SITE_DATA_DIR.glob(pattern):
+            path.unlink()
+
+
 def clean_text(value: str | None, limit: int = 280) -> str:
     if not value:
         return ""
@@ -401,12 +447,44 @@ def latest_manifest_definition_path(lang: str, filename: str) -> Path | None:
     return next((path for path in candidates if path.exists()), None)
 
 
+def load_season_names(lang: str) -> dict[int, str]:
+    path = latest_manifest_definition_path(lang, "DestinySeasonDefinition.json")
+    if not path:
+        return {}
+    output: dict[int, str] = {}
+    for season in read_json(path).values():
+        season_number = season.get("seasonNumber")
+        name = ((season.get("displayProperties") or {}).get("name") or "").strip()
+        if season_number is not None and name:
+            output[int(season_number)] = name
+    return output
+
+
+def release_trait_info(item: dict[str, Any], season_names: dict[int, str]) -> dict[str, Any]:
+    trait_ids = [str(trait_id) for trait_id in item.get("traitIds") or []]
+    release_trait = next((trait_id for trait_id in trait_ids if trait_id.startswith("releases.")), "")
+    version = ""
+    season_number = None
+    if release_trait:
+        match = re.search(r"\.(v\d+)(?:\.|$)", release_trait)
+        if match:
+            version = match.group(1)
+            season_number = RELEASE_SEASON_BY_VERSION.get(version)
+    return {
+        "releaseTraitId": release_trait,
+        "releaseVersion": version,
+        "seasonNumber": season_number,
+        "seasonName": season_names.get(int(season_number)) if season_number else "",
+    }
+
+
 def load_release_lookup(lang: str) -> dict[int, dict[str, Any]]:
     path = latest_manifest_definition_path(lang, "DestinyInventoryItemDefinition.json")
     if not path:
         return {}
     collectible_path = latest_manifest_definition_path(lang, "DestinyCollectibleDefinition.json")
     collectibles = read_json(collectible_path) if collectible_path else {}
+    season_names = load_season_names(lang)
     output: dict[int, dict[str, Any]] = {}
     for hash_key, item in read_json(path).items():
         icon_watermark = item.get("iconWatermark") or ""
@@ -416,12 +494,14 @@ def load_release_lookup(lang: str) -> dict[int, dict[str, Any]]:
         collectible = collectibles.get(str(collectible_hash)) if collectible_hash else {}
         source_string = (collectible or {}).get("sourceString") or item.get("displaySource") or ""
         source_hash = (collectible or {}).get("sourceHash") or ""
+        release_trait = release_trait_info(item, season_names)
         if (
             not icon_watermark
             and not icon_watermark_shelved
             and not display_watermarks
             and not collectible_hash
             and not source_string
+            and not release_trait.get("releaseTraitId")
         ):
             continue
         output[int(hash_key)] = {
@@ -431,6 +511,7 @@ def load_release_lookup(lang: str) -> dict[int, dict[str, Any]]:
             "collectibleHash": collectible_hash,
             "sourceString": source_string,
             "sourceHash": source_hash,
+            **release_trait,
         }
     return output
 
@@ -452,8 +533,33 @@ def release_info_for(row: dict[str, Any], release_lookup: dict[int, dict[str, An
         "collectibleHash": collectible_hash,
         "sourceString": clean_text(source_string),
         "sourceHash": source_hash,
+        "releaseTraitId": release.get("releaseTraitId") or "",
+        "releaseVersion": release.get("releaseVersion") or "",
+        "seasonNumber": release.get("seasonNumber"),
+        "seasonName": release.get("seasonName") or "",
     }
     return {key: value for key, value in compact.items() if value}
+
+
+def release_version_number(release: dict[str, Any]) -> int:
+    match = re.search(r"v(\d+)", str(release.get("releaseVersion") or ""))
+    return int(match.group(1)) if match else 0
+
+
+def is_exotic_item(row: dict[str, Any]) -> bool:
+    return str(row.get("tierTypeName") or "").lower() == "exotic" or row.get("tierType") == 6
+
+
+def is_legendary_item(row: dict[str, Any]) -> bool:
+    return str(row.get("tierTypeName") or "").lower() == "legendary" or row.get("tierType") == 5
+
+
+def is_new_weapon(row: dict[str, Any], release: dict[str, Any]) -> bool:
+    if row.get("itemType") != 3:
+        return False
+    if is_exotic_item(row):
+        return True
+    return is_legendary_item(row) and release_version_number(release) >= NEW_WEAPON_RELEASE_VERSION
 
 
 def stat_map(row: dict[str, Any]) -> dict[str, int | float]:
@@ -1445,6 +1551,9 @@ def compact_catalog_item(
             weapon_archetype,
             release.get("sourceString") or "",
             str(release.get("collectibleHash") or ""),
+            release.get("releaseVersion") or "",
+            str(release.get("seasonNumber") or ""),
+            release.get("seasonName") or "",
             " ".join(row.get("categoryNames") or []),
             " ".join(SECTION_LABELS[lang].get(section, section) for section in classification["sections"]),
         ]
@@ -1474,6 +1583,8 @@ def compact_catalog_item(
         "weaponFrame": weapon_frame if classification["isWeapon"] else "",
         "weaponArchetype": weapon_archetype if classification["isWeapon"] else "",
         "weaponSlot": weapon_slot if classification["isWeapon"] else "",
+        "weaponSystem": "new" if classification["isWeapon"] and is_new_weapon(row, release) else ("legacy" if classification["isWeapon"] else ""),
+        "isNewWeapon": bool(classification["isWeapon"] and is_new_weapon(row, release)),
         "ammoType": ammo_type,
         "ammo": AMMO_LABEL.get(ammo_type, AMMO_LABEL[0]).get(lang, ""),
         "damageTypes": damage_types,
@@ -1528,6 +1639,56 @@ def counts_from_list(rows: list[dict[str, Any]], key: str) -> list[dict[str, Any
     ]
 
 
+def dedupe_catalog_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen: set[int] = set()
+    unique: list[dict[str, Any]] = []
+    for row in rows:
+        row_hash = row.get("hash")
+        if row_hash is None:
+            continue
+        row_hash = int(row_hash)
+        if row_hash in seen:
+            continue
+        seen.add(row_hash)
+        unique.append(row)
+    return unique
+
+
+def catalog_shard_path(lang: str, folder: str, shard_id: str) -> str:
+    return f"catalog/{lang}/{folder}/{shard_id}.json"
+
+
+def write_catalog_shards(lang: str, catalog: list[dict[str, Any]]) -> dict[str, Any]:
+    groups = sorted({str(group) for row in catalog for group in row.get("groups") or []})
+    section_paths: dict[str, dict[str, str]] = {}
+    group_counts: dict[str, int] = {}
+    section_counts: dict[str, dict[str, int]] = {}
+
+    for group in groups:
+        group_rows = dedupe_catalog_rows([row for row in catalog if group in (row.get("groups") or [])])
+        if not group_rows:
+            continue
+        group_counts[group] = len(group_rows)
+
+        sections = sorted({str(section) for row in group_rows for section in row.get("sections") or []})
+        for section in sections:
+            section_rows = dedupe_catalog_rows([row for row in group_rows if section in (row.get("sections") or [])])
+            if not section_rows:
+                continue
+            section_path = catalog_shard_path(lang, "sections", f"{group}.{section}")
+            write_json(SITE_DATA_DIR / section_path, section_rows)
+            section_paths.setdefault(group, {})[section] = section_path
+            section_counts.setdefault(group, {})[section] = len(section_rows)
+
+    return {
+        "sections": section_paths,
+        "counts": {
+            "groups": group_counts,
+            "sections": section_counts,
+        },
+    }
+
+
 def load_catalog_raw(lang: str) -> list[dict[str, Any]]:
     catalog_path = TEXTDB_DIR / f"catalog_items.{lang}.json"
     if catalog_path.exists():
@@ -1548,13 +1709,15 @@ def main() -> int:
         "manifestVersion": manifest.get("manifestVersion"),
         "sourceSyncedAt": manifest.get("syncedAt"),
         "languages": list(LANGUAGES),
+        "catalogShards": {},
         "notes": [
             "Site data is compact text JSON generated from data/static/textdb.",
             "Image fields reference Bungie icon URLs; image files are not stored locally.",
             "PvP Potential is modeled as per-weapon PvP data and is filled from curated text tables.",
+            "Catalog rows are split by language, group, and section for GitHub Pages-friendly static loading.",
         ],
     }
-    write_json(SITE_DATA_DIR / "index.json", site_index)
+    reset_catalog_shards()
     ttk_by_hash = ttk_rows_by_hash()
     ttk_by_archetype = reference_ttk_by_archetype()
 
@@ -1578,10 +1741,7 @@ def main() -> int:
             if plug_hash in plugs_by_hash
         }
 
-        write_json(SITE_DATA_DIR / f"catalog.{lang}.json", catalog)
-        write_json(SITE_DATA_DIR / f"weapons.{lang}.json", weapons)
-        write_json(SITE_DATA_DIR / f"armor.{lang}.json", armor)
-        write_json(SITE_DATA_DIR / f"exotic_armor.{lang}.json", exotic_armor)
+        site_index["catalogShards"][lang] = write_catalog_shards(lang, catalog)
         write_json(SITE_DATA_DIR / f"plug_options.{lang}.json", plug_options)
 
         facets = {
@@ -1617,6 +1777,7 @@ def main() -> int:
         }
         write_json(SITE_DATA_DIR / f"summary.{lang}.json", summary)
 
+    write_json(SITE_DATA_DIR / "index.json", site_index)
     print(json.dumps({"built": str(SITE_DATA_DIR), "manifestVersion": site_index["manifestVersion"]}, ensure_ascii=False))
     return 0
 

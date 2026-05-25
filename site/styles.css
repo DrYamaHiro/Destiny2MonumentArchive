@@ -629,7 +629,7 @@ h1 {
 
 .detail-workspace {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
   align-items: start;
   margin-top: 14px;
@@ -859,10 +859,6 @@ h1 {
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
-}
-
-.pvp-panel .kv {
-  margin-top: 4px;
 }
 
 .kv {
@@ -1389,7 +1385,7 @@ h1 {
   }
 
   .detail-workspace {
-    grid-template-columns: minmax(320px, 1fr) minmax(320px, 0.86fr);
+    grid-template-columns: minmax(420px, 1.15fr) minmax(260px, 0.62fr);
   }
 
   .detail-workspace--no-ttk {
@@ -1507,7 +1503,7 @@ h1 {
 @container (min-width: 640px) {
   .detail-workspace,
   .detail-workspace--no-ttk {
-    grid-template-columns: minmax(320px, 1fr) minmax(300px, 0.82fr);
+    grid-template-columns: minmax(420px, 1.15fr) minmax(260px, 0.62fr);
   }
 
   .detail-workspace--no-ttk {
@@ -1521,7 +1517,7 @@ h1 {
 
 @container (min-width: 1020px) {
   .detail-workspace {
-    grid-template-columns: minmax(440px, 1fr) minmax(340px, 0.72fr);
+    grid-template-columns: minmax(620px, 1.35fr) minmax(280px, 0.55fr);
   }
 
   .detail-workspace--no-ttk {
