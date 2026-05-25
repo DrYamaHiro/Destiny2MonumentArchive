@@ -1,4 +1,4 @@
--- D2 Monument Archive static DB schema draft
+-- D2 Monument Archive DATABASE schema draft
 -- Text-first schema for GitHub-friendly storage.
 
 CREATE TABLE IF NOT EXISTS manifest_version (

@@ -1,4 +1,4 @@
--- D2 Monument Archive dynamic DB schema draft
+-- D2 Monument Archive BATTLE LOG schema draft
 -- Public outputs should be aggregate-only. Raw player/match logs stay private/local.
 
 CREATE TABLE IF NOT EXISTS match_observed (

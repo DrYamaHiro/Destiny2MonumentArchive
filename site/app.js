@@ -20,7 +20,7 @@ const taxonomy = [
 
 const text = {
   ja: {
-    title: "閲覧DB",
+    title: "データベース",
     manifest: "Manifest",
     synced: "同期",
     loading: "読み込み中",
@@ -57,7 +57,7 @@ const text = {
     ttkPending: "未反映。Bungie更新情報、検証台帳、PvP体力+シールド基準を確認してから武器別に反映します。",
     ttkNote: "TTKは武器ごとのPvPデータとして保持します。タブではなく、この武器詳細に紐づく値です。",
     serverRequiredTitle: "ローカルサーバーで開いてください",
-    serverRequiredBody: "この閲覧DBはJSONデータを読み込むため、HTMLファイルを直接開く file:// 表示では動きません。",
+    serverRequiredBody: "このデータベースはJSONデータを読み込むため、HTMLファイルを直接開く file:// 表示では動きません。",
     serverRequiredCommand: "powershell -ExecutionPolicy Bypass -File scripts\\serve_site.ps1",
     serverRequiredUrl: "http://127.0.0.1:8788/",
     hash: "Hash",
@@ -139,7 +139,7 @@ const text = {
     },
   },
   en: {
-    title: "Catalog DB",
+    title: "DATABASE",
     manifest: "Manifest",
     synced: "Synced",
     loading: "Loading",

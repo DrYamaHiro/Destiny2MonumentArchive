@@ -12,8 +12,8 @@ Discordサーバーは、Destiny 2の最終大型アップデート後に新設�
 
 - スキーマ
 - ETLコード
-- 静的DBのテキストデータ
-- 動的DBの集計済みテキストデータ
+- データベース（DATABASE）のテキストデータ
+- バトルログ（BATTLE LOG）の集計済みテキストデータ
 - JSON / CSV / Markdown / SQL
 - 画像への参照情報
 - Discord投稿やチャンネルへの参照ID
@@ -49,7 +49,7 @@ Discordサーバー新設は、2026年6月9日の最終大型アップデート�
 
 ## AI運用の考え方
 
-AIには、静的DBの整備、動的DBの集計、差分検出、Discord投稿文の下書き、更新ログ生成を委ねます。
+AIには、DATABASEの整備、BATTLE LOGの集計、差分検出、Discord投稿文の下書き、更新ログ生成を委ねます。
 
 ただし、以下はDr.YamaHiroが最終判断します。
 

@@ -330,8 +330,8 @@
           <span class="badge en">Planning document / Research timestamp: 2026-05-24 18:48 JST</span>
           <h1 class="ja">Destiny 2 PvP データベース設計プラン</h1>
           <h1 class="en">Destiny 2 PvP Database Plan</h1>
-          <p class="subtitle ja">静的DBと動的DBを分離し、英語/日本語切替、TTK、武器使用率、K/U、パーク差分、エキゾチック防具採用率を、低コストで継続公開するための初期設計です。</p>
-          <p class="subtitle en">Initial architecture for a low-cost, bilingual Destiny 2 PvP database with separate static and dynamic layers, TTK, usage, K/U, perk deltas, and exotic armor adoption metrics.</p>
+          <p class="subtitle ja">データベース（DATABASE）とバトルログ（BATTLE LOG）を分離し、英語/日本語切替、TTK、武器使用率、K/U、パーク差分、エキゾチック防具採用率を、低コストで継続公開するための初期設計です。</p>
+          <p class="subtitle en">Initial architecture for a low-cost, bilingual Destiny 2 PvP archive with separate DATABASE and BATTLE LOG layers, TTK, usage, K/U, perk deltas, and exotic armor adoption metrics.</p>
         </div>
         <div class="controls" aria-label="Language">
           <button class="lang" id="jaBtn" aria-pressed="true" type="button">日本語</button>
@@ -347,7 +347,7 @@
       <h2 class="en">Recommendation</h2>
       <div class="ja">
         <p>まずはこのフォルダ内で「静的生成サイト + バージョン管理されたテキストデータ」として作り始めます。GitHubはテキストデータとコードの保管に限定し、画像と武器データ参照のコミュニティ基盤は、最終大型アップデート後に新設するDiscordサーバーで整えます。</p>
-        <p>重要なのは、Bungie APIには「全世界のPvP試合を横断取得する公式firehose」が見当たらない点です。したがって動的DBは、最初から「観測サンプルに基づく統計」として設計し、対象母集団、取得経路、信頼区間を明示するべきです。</p>
+        <p>重要なのは、Bungie APIには「全世界のPvP試合を横断取得する公式firehose」が見当たらない点です。したがってBATTLE LOGは、最初から「観測サンプルに基づく統計」として設計し、対象母集団、取得経路、信頼区間を明示するべきです。</p>
       </div>
       <div class="en">
         <p>Start inside this folder with a static-generated site and versioned text data. GitHub will be limited to text data and source code, while the community layer for images and weapon-data reference will be built later through a new Discord server after the final major update.</p>
@@ -385,12 +385,12 @@
     </section>
 
     <section>
-      <h2 class="ja">DB分離方針</h2>
-      <h2 class="en">Static and Dynamic DB Split</h2>
+      <h2 class="ja">DATABASE / BATTLE LOG 分離方針</h2>
+      <h2 class="en">DATABASE and BATTLE LOG Split</h2>
       <div class="grid">
         <div class="mini-card">
-          <h3 class="ja">静的DB</h3>
-          <h3 class="en">Static DB</h3>
+          <h3 class="ja">データベース</h3>
+          <h3 class="en">DATABASE</h3>
           <p class="ja">武器・防具・パーク・ローカライズ・TTKモデルなど、パッチ単位で変わる情報を扱います。Bungie Manifestを土台にし、TTKは別テーブルで手動検証/コミュニティ検証/計算式をバージョン管理します。</p>
           <p class="en">Stores items, armor, perks, localization, and TTK models that change by patch. Bungie Manifest is the foundation; TTK is maintained in separate versioned tables with measured data, community references, and formulas.</p>
           <ul class="ja">
@@ -409,8 +409,8 @@
           </ul>
         </div>
         <div class="mini-card">
-          <h3 class="ja">動的DB</h3>
-          <h3 class="en">Dynamic DB</h3>
+          <h3 class="ja">バトルログ</h3>
+          <h3 class="en">BATTLE LOG</h3>
           <p class="ja">試合ログ、武器別キル、観測されたロードアウト、日次/週次集計を扱います。PGCRには武器別キルはありますが、武器ロールのソケット/パークはそのまま入らないため、パーク差分には装備スナップショット設計が必要です。</p>
           <p class="en">Stores match logs, weapon kills, observed loadouts, and daily/weekly aggregates. PGCR includes weapon-level kill stats, but not full roll sockets/perks, so perk-delta analysis requires a loadout snapshot strategy.</p>
           <ul class="ja">
@@ -538,14 +538,14 @@
           <h3 class="en">GitHub</h3>
           <ul class="ja">
             <li>保管対象はテキストデータ、スキーマ、コード、小さなJSON/CSV/Markdownのみ</li>
-            <li>静的DB: Manifest由来の英日名称、武器/パーク定義、TTK表</li>
-            <li>動的DB: 集計済みの武器Usage、K/U、perk差分、エキゾ防具採用率</li>
+            <li>DATABASE: Manifest由来の英日名称、武器/パーク定義、TTK表</li>
+            <li>BATTLE LOG: 集計済みの武器Usage、K/U、perk差分、エキゾ防具採用率</li>
             <li>画像、API Key、生ログ、個人単位データは置かない</li>
           </ul>
           <ul class="en">
             <li>Store text data, schemas, source code, and compact JSON/CSV/Markdown only</li>
-            <li>Static DB: bilingual names, weapon/perk definitions, TTK tables</li>
-            <li>Dynamic DB: aggregated weapon usage, K/U, perk deltas, exotic armor adoption</li>
+            <li>DATABASE: bilingual names, weapon/perk definitions, TTK tables</li>
+            <li>BATTLE LOG: aggregated weapon usage, K/U, perk deltas, exotic armor adoption</li>
             <li>No images, API keys, raw logs, or player-level data</li>
           </ul>
         </div>
@@ -638,16 +638,16 @@
       <h2 class="ja">実装ロードマップ</h2>
       <h2 class="en">Implementation Roadmap</h2>
       <div class="timeline ja">
-        <div class="phase"><strong>MVP 1: 静的カタログ。</strong> Manifest同期、英日ローカライズ、武器/パーク/エキゾ防具一覧、検索UI。</div>
+        <div class="phase"><strong>MVP 1: DATABASE。</strong> Manifest同期、英日ローカライズ、武器/パーク/エキゾ防具一覧、検索UI。</div>
         <div class="phase"><strong>MVP 2: TTK表。</strong> archetypeごとのTTK schema、入力根拠、sandboxVersion、検証状態を整備。</div>
-        <div class="phase"><strong>MVP 3: 動的集計。</strong> opt-inまたはクランをseedにActivity HistoryとPGCRを取得し、武器Usage/Kill Share/K/Uを週次集計としてテキスト出力。</div>
+        <div class="phase"><strong>MVP 3: BATTLE LOG。</strong> opt-inまたはクランをseedにActivity HistoryとPGCRを取得し、武器Usage/Kill Share/K/Uを週次集計としてテキスト出力。</div>
         <div class="phase"><strong>MVP 4: パーク/エキゾ分析。</strong> 装備snapshotとItemSocketsを加え、信頼度つきでperk deltaとexotic adoptionをテキストDB化。</div>
         <div class="phase"><strong>Post-June Discord基盤。</strong> 2026-06-09後にDiscordサーバーを新設し、交流、画像参照、装備データ参照、検証募集を集約。</div>
       </div>
       <div class="timeline en">
-        <div class="phase"><strong>MVP 1: Static catalog.</strong> Manifest sync, English/Japanese localization, weapon/perk/exotic armor lists, search UI.</div>
+        <div class="phase"><strong>MVP 1: DATABASE.</strong> Manifest sync, English/Japanese localization, weapon/perk/exotic armor lists, search UI.</div>
         <div class="phase"><strong>MVP 2: TTK tables.</strong> TTK schema by archetype, source evidence, sandbox version, validation status.</div>
-        <div class="phase"><strong>MVP 3: Dynamic aggregates.</strong> Use opt-in or clan seeds to fetch Activity History and PGCR, then generate weekly Usage/Kill Share/K/U as text outputs.</div>
+        <div class="phase"><strong>MVP 3: BATTLE LOG.</strong> Use opt-in or clan seeds to fetch Activity History and PGCR, then generate weekly Usage/Kill Share/K/U as text outputs.</div>
         <div class="phase"><strong>MVP 4: Perk/exotic analysis.</strong> Add equipment snapshots and ItemSockets, then convert perk deltas and exotic adoption into text DB outputs.</div>
         <div class="phase"><strong>Post-June Discord base.</strong> After June 9, 2026, create the Discord server and centralize discussion, image reference, equipment lookup, and validation requests.</div>
       </div>

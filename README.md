@@ -7,9 +7,14 @@ Destiny 2の最終大型アップデート後も、コミュニティが武器�
 - GitHubに置くのはテキストデータとコードのみ
 - 画像はGitHubに置かない
 - API KeyやOAuth secretはプロジェクト内に置かない
-- Manifest由来の英日静的DBを整備する
-- PvP動的DBは集計済みテキストデータとして扱う
+- Manifest由来の英日データベース（DATABASE）を整備する
+- PvPバトルログ（BATTLE LOG）は集計済みテキストデータとして扱う
 - Discordサーバーは最終大型アップデート後に新設する
+
+## 呼称
+
+- 旧「静的DB」: データベース / DATABASE
+- 旧「動的DB」: バトルログ / BATTLE LOG
 
 ## 主要ファイル
 
@@ -19,12 +24,12 @@ Destiny 2の最終大型アップデート後も、コミュニティが武器�
 - `docs/github_discord_policy.md`: GitHub/Discord分担方針
 - `docs/manifest_sync.md`: Manifest同期手順
 - `docs/damage_update_tracking.md`: PvPダメージ更新追跡方針
-- `docs/static_viewer.md`: ローカル静的ビューア手順
-- `schema/static.sql`: 静的DBスキーマ案
-- `schema/dynamic.sql`: 動的DBスキーマ案
+- `docs/static_viewer.md`: ローカルDATABASEビューア手順
+- `schema/static.sql`: DATABASEスキーマ案
+- `schema/dynamic.sql`: BATTLE LOGスキーマ案
 - `scripts/sync_manifest.py`: Manifest同期スクリプト
 - `scripts/build_site_indexes.py`: サイト用軽量JSON生成
-- `site/index.html`: ローカル静的ビューア
+- `site/index.html`: ローカルDATABASEビューア
 
 ## Manifest同期
 
