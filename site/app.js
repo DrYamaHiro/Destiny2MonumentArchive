@@ -4,7 +4,7 @@ const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
   group: "equipment",
   section: "weapons",
-  sort: "name",
+  sort: "weaponType",
   data: {},
   selectedHash: null,
   selectedPlugs: {},
@@ -46,10 +46,18 @@ const text = {
     sortRange: "射程",
     sortImpact: "威力",
     sortRpm: "RPM",
+    sortWeaponType: "武器種",
+    sortAmmo: "弾薬",
+    sortSlot: "スロット",
+    sortDamage: "属性",
+    sortFrame: "フレーム",
+    sortTtk: "PvP Potential",
+    sortWeaponSystem: "新武器",
     filterWeaponType: "武器種",
     filterAmmo: "弾薬",
     filterDamage: "属性",
     filterWeaponSlot: "スロット",
+    filterWeaponSystem: "武器世代",
     filterClass: "クラス",
     filterArmorSlot: "防具部位",
     filterRarity: "レアリティ",
@@ -57,6 +65,7 @@ const text = {
     filterBucket: "所持枠",
     stats: "主要ステータス",
     metadata: "メタデータ",
+    metadataHint: "メタデータを見る",
     ttk: "PvP POTENTIAL",
     ttkPending: "未反映。Bungie更新情報、検証台帳、PvP体力+シールド基準を確認してから、フレーム基準でダメージ/TTK/BS許容を反映します。",
     ttkNote: "PvP POTENTIALはフレーム基準値を各武器へ継承し、武器固有の例外だけ個別値で上書きします。",
@@ -86,6 +95,8 @@ const text = {
     weaponSlot: "武器スロット",
     weaponFrame: "フレーム",
     weaponArchetype: "アーキタイプ",
+    weaponSystemNew: "新武器 / Tier式",
+    weaponSystemLegacy: "旧式 / 非Tier",
     release: "追加情報",
     releaseWatermark: "シーズン/拡張アイコン",
     collectible: "Collectible",
@@ -197,10 +208,18 @@ const text = {
     sortRange: "Range",
     sortImpact: "Impact",
     sortRpm: "RPM",
+    sortWeaponType: "Weapon type",
+    sortAmmo: "Ammo",
+    sortSlot: "Slot",
+    sortDamage: "Damage",
+    sortFrame: "Frame",
+    sortTtk: "PvP Potential",
+    sortWeaponSystem: "New weapon",
     filterWeaponType: "Weapon type",
     filterAmmo: "Ammo",
     filterDamage: "Damage",
     filterWeaponSlot: "Slot",
+    filterWeaponSystem: "Weapon generation",
     filterClass: "Class",
     filterArmorSlot: "Armor slot",
     filterRarity: "Rarity",
@@ -208,6 +227,7 @@ const text = {
     filterBucket: "Bucket",
     stats: "Core Stats",
     metadata: "Metadata",
+    metadataHint: "View metadata",
     ttk: "PvP POTENTIAL",
     ttkPending: "Not applied. Fill frame-baseline damage, TTK, and body-shot forgiveness after checking Bungie updates, verification tracking, and the PvP health+shield baseline.",
     ttkNote: "PvP Potential inherits frame-baseline values into each weapon, with weapon-specific exceptions applied as overrides.",
@@ -237,6 +257,8 @@ const text = {
     weaponSlot: "Weapon slot",
     weaponFrame: "Frame",
     weaponArchetype: "Archetype",
+    weaponSystemNew: "New / tiered",
+    weaponSystemLegacy: "Legacy / non-tiered",
     release: "Release info",
     releaseWatermark: "Season/expansion watermark",
     collectible: "Collectible",
@@ -445,11 +467,13 @@ const els = {
   filterSecondaryLabel: document.getElementById("filterSecondaryLabel"),
   filterTertiaryLabel: document.getElementById("filterTertiaryLabel"),
   filterQuaternaryLabel: document.getElementById("filterQuaternaryLabel"),
+  filterQuinaryLabel: document.getElementById("filterQuinaryLabel"),
   sortLabel: document.getElementById("sortLabel"),
   primaryFilter: document.getElementById("primaryFilter"),
   secondaryFilter: document.getElementById("secondaryFilter"),
   tertiaryFilter: document.getElementById("tertiaryFilter"),
   quaternaryFilter: document.getElementById("quaternaryFilter"),
+  quinaryFilter: document.getElementById("quinaryFilter"),
   sortSelect: document.getElementById("sortSelect"),
   resultStatus: document.getElementById("resultStatus"),
   activeFilterLabel: document.getElementById("activeFilterLabel"),
@@ -463,6 +487,7 @@ const filterControls = [
   { label: els.filterSecondaryLabel, select: els.secondaryFilter },
   { label: els.filterTertiaryLabel, select: els.tertiaryFilter },
   { label: els.filterQuaternaryLabel, select: els.quaternaryFilter },
+  { label: els.filterQuinaryLabel, select: els.quinaryFilter },
 ];
 
 function t(key) {
@@ -585,6 +610,66 @@ function compactMetaLabel(value) {
   return map[value] || value;
 }
 
+function isWeaponRow(row) {
+  return (row.sections || []).includes("weapons");
+}
+
+function masterworkPlugOptions(row) {
+  const options = langData().plugOptions || {};
+  return (row.plugSockets || [])
+    .filter((socket) => socket.kind === "masterwork")
+    .flatMap((socket) => (socket.plugHashes || []).map((hash) => options[String(hash)]).filter(Boolean));
+}
+
+function isTieredWeapon(row) {
+  if (!isWeaponRow(row)) return false;
+  return masterworkPlugOptions(row).some((plug) => {
+    const text = `${plug.name || ""} ${plug.description || ""} ${plug.identifier || ""}`.toLowerCase();
+    return /\btier\s+\d+\s*:/.test(text) || /weapon's tier|equal to the weapon|武器のレベル|武器のティア|ティア\s*\d+|レベル\s*\d+/.test(text);
+  });
+}
+
+function weaponSystemLabel(row) {
+  if (!isWeaponRow(row)) return "";
+  return isTieredWeapon(row) ? t("weaponSystemNew") : t("weaponSystemLegacy");
+}
+
+function metadataRows(row, release, plugSets) {
+  return [
+    [t("hash"), row.hash],
+    [t("category"), `${groupLabel(row.primaryGroup)} / ${row.sectionLabel || sectionLabel(row.primarySection)}`],
+    [t("type"), row.type],
+    [t("bucket"), row.bucket],
+    [t("rarity"), row.tier],
+    [t("class"), row.class],
+    [t("weaponSlot"), row.weaponSlot],
+    [t("weaponFrame"), row.weaponFrame],
+    [t("weaponArchetype"), row.weaponArchetype],
+    [t("filterWeaponSystem"), weaponSystemLabel(row)],
+    [t("ammo"), row.ammo],
+    [t("damage"), row.damageType],
+    [t("release"), release],
+    [t("categories"), row.categories],
+    [t("plugSets"), plugSets || ""],
+  ];
+}
+
+function hasKvRows(rows) {
+  return rows.some(([, value]) => value !== undefined && value !== null && value !== "" && (!Array.isArray(value) || value.length));
+}
+
+function renderMetadataHover(rows) {
+  if (!hasKvRows(rows)) return "";
+  return `
+    <span class="metadata-popover">
+      <button class="metadata-trigger" type="button" aria-label="${esc(t("metadataHint"))}" title="${esc(t("metadata"))}">i</button>
+      <span class="metadata-card" role="tooltip">
+        ${renderKv(rows)}
+      </span>
+    </span>
+  `;
+}
+
 async function loadJson(path) {
   const response = await fetch(path);
   if (!response.ok) throw new Error(`${response.status} ${path}`);
@@ -618,6 +703,10 @@ function defaultSection(group = state.group) {
   return (taxonomy.find((item) => item.id === group) || taxonomy[1]).defaultSection;
 }
 
+function defaultSort(section = state.section) {
+  return section === "weapons" ? "weaponType" : "name";
+}
+
 function countFrom(list, id) {
   return (list || []).find((row) => row.label === id)?.count || 0;
 }
@@ -635,10 +724,15 @@ function contextRows() {
 function valueFor(row, key) {
   if (key === "section") return row.sectionLabel || sectionLabel(row.primarySection);
   if (key === "group") return groupLabel(row.primaryGroup);
+  if (key === "weaponSystem") return weaponSystemLabel(row);
   return row[key] || "";
 }
 
 function distinct(rows, key) {
+  if (key === "weaponSystem") {
+    const ordered = [t("weaponSystemNew"), t("weaponSystemLegacy")];
+    return ordered.filter((value) => rows.some((row) => valueFor(row, key) === value));
+  }
   return [...new Set(rows.map((row) => valueFor(row, key)).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
 }
 
@@ -649,6 +743,7 @@ function filterDefinitions() {
       ["ammo", t("filterAmmo")],
       ["damageType", t("filterDamage")],
       ["weaponSlot", t("filterWeaponSlot")],
+      ["weaponSystem", t("filterWeaponSystem")],
     ];
   }
   if (state.section === "armor" || (state.group !== "character" && ["hunter", "warlock", "titan"].includes(state.section))) {
@@ -682,7 +777,28 @@ function sortOptions() {
     ["type", t("sortType")],
   ];
   if (state.section === "weapons") {
-    base.push(["range", t("sortRange")], ["impact", t("sortImpact")], ["rpm", t("sortRpm")]);
+    return [
+      ["name", t("sortName")],
+      ["weaponType", t("sortWeaponType")],
+      ["ammo", t("sortAmmo")],
+      ["weaponSlot", t("sortSlot")],
+      ["damageType", t("sortDamage")],
+      ["weaponFrame", t("sortFrame")],
+      ["weaponSystem", t("sortWeaponSystem")],
+      ["ttk", t("sortTtk")],
+      ["rpm", t("sortRpm")],
+      ["range", t("sortRange")],
+      ["impact", t("sortImpact")],
+    ];
+  }
+  if (state.section === "armor" || (state.group !== "character" && ["hunter", "warlock", "titan"].includes(state.section))) {
+    return [
+      ["name", t("sortName")],
+      ["class", t("filterClass")],
+      ["armorSlot", t("filterArmorSlot")],
+      ["tier", t("filterRarity")],
+      ["type", t("sortType")],
+    ];
   }
   return base;
 }
@@ -700,7 +816,7 @@ function setGroup(group) {
   state.group = group;
   state.section = defaultSection(group);
   state.selectedHash = null;
-  state.sort = "name";
+  state.sort = defaultSort(state.section);
   clearFilters(false);
   refresh();
 }
@@ -708,7 +824,7 @@ function setGroup(group) {
 function setSection(section) {
   state.section = section;
   state.selectedHash = null;
-  state.sort = "name";
+  state.sort = defaultSort(section);
   clearFilters(false);
   refresh();
 }
@@ -718,7 +834,7 @@ function clearFilters(render = true) {
   filterControls.forEach(({ select }) => {
     select.value = "";
   });
-  state.sort = "name";
+  state.sort = defaultSort();
   if (els.sortSelect) els.sortSelect.value = state.sort;
   if (render) renderList();
 }
@@ -834,7 +950,7 @@ function updateControls() {
   if (options.some(([value]) => value === state.sort)) {
     els.sortSelect.value = state.sort;
   } else {
-    state.sort = "name";
+    state.sort = defaultSort();
     els.sortSelect.value = state.sort;
   }
 }
@@ -850,20 +966,116 @@ function applyFilters(rows) {
     }));
 }
 
+function compareText(a, b) {
+  return String(a || "").localeCompare(String(b || ""), state.lang === "ja" ? "ja-JP" : "en-US", {
+    numeric: true,
+    sensitivity: "base",
+  });
+}
+
+function compareNumberDesc(a, b) {
+  return Number(b || 0) - Number(a || 0);
+}
+
+function compareNumberAsc(a, b) {
+  const aMissing = !hasDisplayValue(a);
+  const bMissing = !hasDisplayValue(b);
+  if (aMissing && bMissing) return 0;
+  if (aMissing) return 1;
+  if (bMissing) return -1;
+  const av = Number(a);
+  const bv = Number(b);
+  return av - bv;
+}
+
+function statSortValue(row, key) {
+  return Number(row.stats?.[key] || row[key] || 0);
+}
+
+function ammoRank(row) {
+  const label = String(row.ammo || "").toLowerCase();
+  if (row.ammoType === 1 || label.includes("primary") || label.includes("プライマリ")) return 0;
+  if (row.ammoType === 2 || label.includes("special") || label.includes("特殊")) return 1;
+  if (row.ammoType === 3 || label.includes("heavy") || label.includes("ヘビー")) return 2;
+  return 99;
+}
+
+function slotRank(row) {
+  const label = String(row.weaponSlot || row.bucket || "").toLowerCase();
+  if (label.includes("kinetic") || label.includes("キネティック")) return 0;
+  if (label.includes("energy") || label.includes("エネルギー")) return 1;
+  if (label.includes("power") || label.includes("heavy") || label.includes("パワー") || label.includes("ヘビー")) return 2;
+  return 99;
+}
+
+function damageRank(row) {
+  const label = String(row.damageType || "").toLowerCase();
+  const order = [
+    ["kinetic", "キネティック"],
+    ["strand", "ストランド"],
+    ["stasis", "ステイシス"],
+    ["arc", "アーク"],
+    ["solar", "ソーラー"],
+    ["void", "ボイド"],
+  ];
+  const index = order.findIndex((tokens) => tokens.some((token) => label.includes(token)));
+  return index === -1 ? 99 : index;
+}
+
+function weaponSystemRank(row) {
+  if (!isWeaponRow(row)) return 99;
+  return isTieredWeapon(row) ? 0 : 1;
+}
+
+function ttkHasValue(row) {
+  const ttk = row.ttk || {};
+  return [
+    ttk.basePrecisionDamage,
+    ttk.baseBodyDamage,
+    ttk.precisionDamage,
+    ttk.bodyDamage,
+    ttk.optimalTtkMs,
+    ttk.bodyTtkMs,
+    ttk.critShots,
+    ttk.bodyShots,
+    ttk.bodyForgivenessShots,
+    ttk.bodyForgivenessPct,
+  ].some(hasDisplayValue);
+}
+
 function sortRows(rows) {
   const sorted = [...rows];
   const sort = state.sort;
   sorted.sort((a, b) => {
+    const fallback = compareText(a.name, b.name) || Number(a.hash || 0) - Number(b.hash || 0);
     if (["range", "impact", "rpm"].includes(sort)) {
-      return Number(b.stats?.[sort] || b[sort] || 0) - Number(a.stats?.[sort] || a[sort] || 0) || String(a.name).localeCompare(String(b.name));
+      return compareNumberDesc(statSortValue(a, sort), statSortValue(b, sort)) || fallback;
     }
-    if (sort === "section") {
-      return String(a.sectionLabel || "").localeCompare(String(b.sectionLabel || "")) || String(a.name).localeCompare(String(b.name));
+    if (sort === "weaponType") {
+      return compareText(a.weaponType, b.weaponType) || ammoRank(a) - ammoRank(b) || compareNumberDesc(statSortValue(a, "rpm"), statSortValue(b, "rpm")) || fallback;
     }
-    if (sort === "type") {
-      return String(a.type || "").localeCompare(String(b.type || "")) || String(a.name).localeCompare(String(b.name));
+    if (sort === "ammo") {
+      return ammoRank(a) - ammoRank(b) || compareText(a.weaponType, b.weaponType) || fallback;
     }
-    return String(a.name || "").localeCompare(String(b.name || ""));
+    if (sort === "weaponSlot") {
+      return slotRank(a) - slotRank(b) || compareText(a.weaponType, b.weaponType) || fallback;
+    }
+    if (sort === "damageType") {
+      return damageRank(a) - damageRank(b) || compareText(a.weaponType, b.weaponType) || fallback;
+    }
+    if (sort === "weaponFrame") {
+      return compareText(a.weaponArchetype || a.weaponFrame, b.weaponArchetype || b.weaponFrame) || compareText(a.weaponType, b.weaponType) || fallback;
+    }
+    if (sort === "weaponSystem") {
+      return weaponSystemRank(a) - weaponSystemRank(b) || compareText(a.weaponType, b.weaponType) || fallback;
+    }
+    if (sort === "ttk") {
+      return Number(!ttkHasValue(a)) - Number(!ttkHasValue(b)) || compareNumberAsc(a.ttk?.optimalTtkMs, b.ttk?.optimalTtkMs) || compareText(a.weaponType, b.weaponType) || fallback;
+    }
+    if (["section", "type", "class", "armorSlot", "tier"].includes(sort)) {
+      return compareText(valueFor(a, sort), valueFor(b, sort)) || fallback;
+    }
+    return fallback;
   });
   return sorted;
 }
@@ -1417,6 +1629,29 @@ function renderServerRequired() {
   `;
 }
 
+function renderFrameSummary(row) {
+  if (!isWeaponRow(row)) return "";
+  const rows = [
+    [t("weaponFrame"), row.weaponFrame],
+    [t("weaponArchetype"), row.weaponArchetype],
+    [statLabel("rpm"), row.rpm],
+    [t("filterWeaponSystem"), weaponSystemLabel(row)],
+  ].filter(([, value]) => hasDisplayValue(value));
+  if (!rows.length) return "";
+  return `
+    <div class="frame-summary">
+      ${rows
+        .map(([label, value]) => `
+          <span class="frame-chip">
+            <span>${esc(label)}</span>
+            <strong>${esc(value)}</strong>
+          </span>
+        `)
+        .join("")}
+    </div>
+  `;
+}
+
 function renderStats(stats, deltas = {}, compactArmor = false) {
   const order = [
     "impact",
@@ -1574,6 +1809,7 @@ function renderDetail(row) {
   const release = releaseSummary(row);
   const plugBuilder = renderPlugBuilder(row);
   const ttkPanel = renderTtk(row);
+  const metadata = metadataRows(row, release, plugSets);
 
   els.detail.innerHTML = `
     <div class="detail-shell">
@@ -1582,8 +1818,7 @@ function renderDetail(row) {
         <div>
           <div class="detail-title-row">
             <h2>${esc(row.name)}</h2>
-            <span class="hash-chip">${esc(row.hash)}</span>
-            ${row.release?.watermarkIcon ? `<img class="release-mark" src="${esc(row.release.watermarkIcon)}" alt="" title="${esc(t("releaseWatermark"))}">` : ""}
+            ${renderMetadataHover(metadata)}
           </div>
           <div class="badge-line">
             ${badges.map((badge) => `<span class="badge">${esc(badge)}</span>`).join("")}
@@ -1592,33 +1827,15 @@ function renderDetail(row) {
         </div>
       </div>
 
-      <div class="detail-workspace${plugBuilder ? "" : " detail-workspace--no-builder"}${ttkPanel ? "" : " detail-workspace--no-ttk"}">
-        <div class="detail-core">
+      <div class="detail-workspace${ttkPanel ? "" : " detail-workspace--no-ttk"}">
+        <div class="detail-main">
           <section class="panel">
             <h3>${esc(t("stats"))}</h3>
+            ${renderFrameSummary(row)}
             ${renderStats(row.stats, statDeltas, isArmorRow(row))}
           </section>
-          <section class="panel">
-            <h3>${esc(t("metadata"))}</h3>
-            ${renderKv([
-              [t("hash"), row.hash],
-              [t("category"), `${groupLabel(row.primaryGroup)} / ${row.sectionLabel || sectionLabel(row.primarySection)}`],
-              [t("type"), row.type],
-              [t("bucket"), row.bucket],
-              [t("rarity"), row.tier],
-              [t("class"), row.class],
-              [t("weaponSlot"), row.weaponSlot],
-              [t("weaponFrame"), row.weaponFrame],
-              [t("weaponArchetype"), row.weaponArchetype],
-              [t("ammo"), row.ammo],
-              [t("damage"), row.damageType],
-              [t("release"), release],
-              [t("categories"), row.categories],
-              [t("plugSets"), plugSets || ""],
-            ])}
-          </section>
+          ${plugBuilder ? `<div class="detail-builder">${plugBuilder}</div>` : ""}
         </div>
-        ${plugBuilder ? `<div class="detail-builder">${plugBuilder}</div>` : ""}
         ${ttkPanel ? `<aside class="detail-side">${ttkPanel}</aside>` : ""}
       </div>
     </div>
