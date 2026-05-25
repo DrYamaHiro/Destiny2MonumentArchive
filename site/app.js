@@ -56,6 +56,10 @@ const text = {
     ttk: "PvP TTK",
     ttkPending: "未反映。Bungie更新情報、検証台帳、PvP体力+シールド基準を確認してから武器別に反映します。",
     ttkNote: "TTKは武器ごとのPvPデータとして保持します。タブではなく、この武器詳細に紐づく値です。",
+    serverRequiredTitle: "ローカルサーバーで開いてください",
+    serverRequiredBody: "この閲覧DBはJSONデータを読み込むため、HTMLファイルを直接開く file:// 表示では動きません。",
+    serverRequiredCommand: "powershell -ExecutionPolicy Bypass -File scripts\\serve_site.ps1",
+    serverRequiredUrl: "http://127.0.0.1:8788/",
     hash: "Hash",
     bucket: "スロット",
     rarity: "レアリティ",
@@ -171,6 +175,10 @@ const text = {
     ttk: "PvP TTK",
     ttkPending: "Not applied. Fill per weapon after checking Bungie updates, verification tracking, and the PvP health+shield baseline.",
     ttkNote: "TTK is stored as weapon-level PvP data. It belongs to this weapon detail, not a sibling tab.",
+    serverRequiredTitle: "Open through the local server",
+    serverRequiredBody: "This catalog loads JSON data, so it cannot run from a direct file:// HTML page.",
+    serverRequiredCommand: "powershell -ExecutionPolicy Bypass -File scripts\\serve_site.ps1",
+    serverRequiredUrl: "http://127.0.0.1:8788/",
     hash: "Hash",
     bucket: "Slot",
     rarity: "Rarity",
@@ -729,6 +737,36 @@ function renderEmpty() {
   `;
 }
 
+function renderServerRequired() {
+  els.groupNav.innerHTML = "";
+  els.sectionRail.innerHTML = "";
+  els.summaryBand.innerHTML = "";
+  els.columnHead.innerHTML = "";
+  els.results.innerHTML = "";
+  els.resultStatus.textContent = "file://";
+  els.activeFilterLabel.textContent = "";
+  els.searchInput.disabled = true;
+  els.clearButton.disabled = true;
+  filterControls.forEach(({ label, select }) => {
+    const field = label.closest(".field");
+    field.classList.add("is-hidden");
+    select.disabled = true;
+  });
+  els.sortSelect.disabled = true;
+  els.detail.innerHTML = `
+    <div class="detail-shell">
+      <section class="panel server-required">
+        <h2>${esc(t("serverRequiredTitle"))}</h2>
+        <p>${esc(t("serverRequiredBody"))}</p>
+        <div class="launch-box">
+          <span>${esc(t("serverRequiredCommand"))}</span>
+          <a href="${esc(t("serverRequiredUrl"))}">${esc(t("serverRequiredUrl"))}</a>
+        </div>
+      </section>
+    </div>
+  `;
+}
+
 function renderStats(stats) {
   const order = [
     "impact",
@@ -867,6 +905,10 @@ function renderDetail(row) {
 
 async function refresh() {
   updateLabels();
+  if (location.protocol === "file:") {
+    renderServerRequired();
+    return;
+  }
   els.resultStatus.textContent = t("loading");
   els.results.innerHTML = "";
   try {

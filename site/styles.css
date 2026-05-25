@@ -618,6 +618,33 @@ h1 {
   color: #334155;
 }
 
+.server-required {
+  max-width: 760px;
+}
+
+.server-required h2 {
+  margin-bottom: 10px;
+}
+
+.launch-box {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  color: #1e293b;
+  background: #f8fafc;
+  font-family: Consolas, "Cascadia Mono", monospace;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.launch-box a {
+  color: var(--blue);
+  font-weight: 900;
+}
+
 .error {
   border-left-color: var(--red);
   background: #fff0ef;
