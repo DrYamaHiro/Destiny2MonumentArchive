@@ -405,19 +405,32 @@ def load_release_lookup(lang: str) -> dict[int, dict[str, Any]]:
     path = latest_manifest_definition_path(lang, "DestinyInventoryItemDefinition.json")
     if not path:
         return {}
+    collectible_path = latest_manifest_definition_path(lang, "DestinyCollectibleDefinition.json")
+    collectibles = read_json(collectible_path) if collectible_path else {}
     output: dict[int, dict[str, Any]] = {}
     for hash_key, item in read_json(path).items():
         icon_watermark = item.get("iconWatermark") or ""
         icon_watermark_shelved = item.get("iconWatermarkShelved") or ""
         display_watermarks = item.get("displayVersionWatermarkIcons") or []
         collectible_hash = item.get("collectibleHash")
-        if not icon_watermark and not icon_watermark_shelved and not display_watermarks and not collectible_hash:
+        collectible = collectibles.get(str(collectible_hash)) if collectible_hash else {}
+        source_string = (collectible or {}).get("sourceString") or item.get("displaySource") or ""
+        source_hash = (collectible or {}).get("sourceHash") or ""
+        if (
+            not icon_watermark
+            and not icon_watermark_shelved
+            and not display_watermarks
+            and not collectible_hash
+            and not source_string
+        ):
             continue
         output[int(hash_key)] = {
             "iconWatermark": icon_watermark,
             "iconWatermarkShelved": icon_watermark_shelved,
             "displayVersionWatermarkIcons": display_watermarks,
             "collectibleHash": collectible_hash,
+            "sourceString": source_string,
+            "sourceHash": source_hash,
         }
     return output
 
@@ -430,11 +443,15 @@ def release_info_for(row: dict[str, Any], release_lookup: dict[int, dict[str, An
     if not isinstance(version_icons, list):
         version_icons = []
     collectible_hash = release.get("collectibleHash") or row.get("collectibleHash") or ""
+    source_string = release.get("sourceString") or row.get("displaySource") or ""
+    source_hash = release.get("sourceHash") or ""
     compact = {
         "watermarkIcon": icon_url(watermark),
         "watermarkShelvedIcon": icon_url(shelved),
         "versionWatermarkIcons": [icon_url(icon) for icon in version_icons if icon],
         "collectibleHash": collectible_hash,
+        "sourceString": clean_text(source_string),
+        "sourceHash": source_hash,
     }
     return {key: value for key, value in compact.items() if value}
 
@@ -588,7 +605,6 @@ def socket_plug_hashes(socket: dict[str, Any], plug_sets: dict[int, list[dict[st
             if plug.get("currentlyCanRoll") is False:
                 continue
             add(plug.get("hash"))
-        return hashes
 
     add(socket.get("singleInitialItemHash"))
     reusable_hashes = socket.get("reusablePlugItemHashes") or []
@@ -695,6 +711,50 @@ def is_adept_weapon(row: dict[str, Any]) -> bool:
 def is_adept_plug(option: dict[str, Any]) -> bool:
     folded = plug_search_text(option)
     return "adept" in folded or "熟練" in folded
+
+
+def is_weapon_mod_option(option: dict[str, Any]) -> bool:
+    identifier = (option.get("identifier") or "").lower()
+    category = (option.get("category") or "").lower()
+    folded = plug_search_text(option)
+    if is_hidden_weapon_system_plug(option):
+        return False
+    if "deprecated" in identifier or "damage_type" in identifier:
+        return False
+    return (
+        "weapon mod" in category
+        or "武器の改造パーツ" in category
+        or ".weapon.mod_" in identifier
+        or "weapon.mod_" in identifier
+        or "weapon.mod" in folded
+    )
+
+
+def weapon_mod_fits_row(row: dict[str, Any], option: dict[str, Any]) -> bool:
+    if not is_weapon_mod_option(option):
+        return False
+    if is_adept_plug(option) and not is_adept_weapon(row):
+        return False
+    identifier = (option.get("identifier") or "").lower()
+    weapon_type_id = weapon_type_id_for(row)
+    if "mod_sword" in identifier and weapon_type_id != "sword":
+        return False
+    return True
+
+
+def merged_options(options: list[dict[str, Any]], additions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen: set[int] = set()
+    merged: list[dict[str, Any]] = []
+    for option in [*options, *additions]:
+        option_hash = option.get("hash")
+        if option_hash is None:
+            continue
+        option_hash = int(option_hash)
+        if option_hash in seen:
+            continue
+        seen.add(option_hash)
+        merged.append(option)
+    return merged
 
 
 def is_hidden_weapon_system_plug(option: dict[str, Any]) -> bool:
@@ -810,15 +870,22 @@ def compact_socket_entries(
         ]
         options = [option for option in raw_options if is_relevant_plug(option) and not is_excluded_plug(option)]
         options = [option for option in options if option.get("name")]
-        if len(options) < 2:
+        if len(options) < 1:
             continue
         kind = plug_group_kind(options)
+        if row.get("itemType") == 3 and kind == "mod":
+            global_weapon_mods = [
+                option
+                for option in plugs_by_hash.values()
+                if weapon_mod_fits_row(row, option)
+            ]
+            options = merged_options(options, sorted(global_weapon_mods, key=lambda option: (option.get("category") or "", option.get("name") or "", int(option.get("hash") or 0))))
         options = filter_socket_options(row, options, kind)
-        if len(options) < 2:
+        if len(options) < 1:
             continue
         kind = plug_group_kind(options)
         options = trim_plug_options(options, kind)
-        if len(options) < 2:
+        if len(options) < 1:
             continue
         plug_hashes = [int(option["hash"]) for option in options if option.get("hash") is not None]
         used_plug_hashes.update(plug_hashes)
@@ -1376,6 +1443,8 @@ def compact_catalog_item(
             armor_slot,
             weapon_frame,
             weapon_archetype,
+            release.get("sourceString") or "",
+            str(release.get("collectibleHash") or ""),
             " ".join(row.get("categoryNames") or []),
             " ".join(SECTION_LABELS[lang].get(section, section) for section in classification["sections"]),
         ]

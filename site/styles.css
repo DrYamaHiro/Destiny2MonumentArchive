@@ -409,11 +409,48 @@ h1 {
 }
 
 .row-sub {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-top: 2px;
   color: var(--muted);
   font-size: 11px;
   white-space: nowrap;
+  overflow: hidden;
+}
+
+.row-sub-base {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row-release {
+  display: inline-flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 4px;
+  min-width: 28px;
+  max-width: min(62%, 220px);
+  border: 1px solid #cfdbe8;
+  border-radius: 4px;
+  padding: 1px 5px 1px 3px;
+  color: #1f3a56;
+  background: #f8fbfd;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.row-release img {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.row-release span {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -912,6 +949,51 @@ h1 {
 .plug-field.is-open .plug-toggle {
   border-color: var(--teal);
   background: #f7fcfb;
+}
+
+.plug-icon-wrap {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  justify-self: center;
+  line-height: 1;
+}
+
+.plug-toggle .plug-icon-wrap {
+  width: 40px;
+  height: 40px;
+}
+
+.plug-option .plug-icon-wrap {
+  width: 38px;
+  height: 38px;
+}
+
+.enhanced-mark {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #fff4b8;
+  border-radius: 999px;
+  color: #2f2200;
+  background: #facc15;
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.28);
+  font-size: 14px;
+  font-weight: 1000;
+  line-height: 1;
+}
+
+.plug-icon-wrap.is-enhanced .plug-toggle-icon,
+.plug-icon-wrap.is-enhanced .plug-option-icon {
+  border-color: #eab308;
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.18),
+    0 0 0 2px rgba(250, 204, 21, 0.32);
 }
 
 .plug-toggle-icon {

@@ -80,6 +80,7 @@ const text = {
     plugSets: "Plug sets",
     perksMods: "パーク / Mod",
     selectPlug: "未選択（基準値）",
+    enhancedPlug: "強化",
     selectedEffects: "選択中の効果",
     noPlugOptions: "選択候補なし",
     noStatChanges: "ステータス補正なし",
@@ -99,6 +100,7 @@ const text = {
     weaponSystemLegacy: "旧式 / 非Tier",
     release: "追加情報",
     releaseWatermark: "シーズン/拡張アイコン",
+    releaseInline: "追加時期",
     collectible: "Collectible",
     mode: "モード",
     status: "状態",
@@ -242,6 +244,7 @@ const text = {
     plugSets: "Plug sets",
     perksMods: "Perks / Mods",
     selectPlug: "No selection (base)",
+    enhancedPlug: "Enhanced",
     selectedEffects: "Selected effects",
     noPlugOptions: "No selectable options",
     noStatChanges: "No stat changes",
@@ -261,6 +264,7 @@ const text = {
     weaponSystemLegacy: "Legacy / non-tiered",
     release: "Release info",
     releaseWatermark: "Season/expansion watermark",
+    releaseInline: "Release",
     collectible: "Collectible",
     mode: "Mode",
     status: "Status",
@@ -452,6 +456,8 @@ const armorStatAbbrevLabels = {
   melee: "MEL",
 };
 
+const enhancedBadgeCache = new Map();
+
 const els = {
   pageTitle: document.getElementById("pageTitle"),
   manifestMeta: document.getElementById("manifestMeta"),
@@ -587,6 +593,9 @@ function ttkScopeLabel(scope) {
 function releaseSummary(row) {
   const release = row.release || {};
   const parts = [];
+  if (release.sourceString) {
+    parts.push(release.sourceString);
+  }
   if (release.watermarkIcon || release.watermarkShelvedIcon || release.versionWatermarkIcons?.length) {
     parts.push(t("releaseWatermark"));
   }
@@ -594,6 +603,43 @@ function releaseSummary(row) {
     parts.push(`${t("collectible")} ${release.collectibleHash}`);
   }
   return parts.join(" / ");
+}
+
+function releaseIcon(row) {
+  const release = row.release || {};
+  return release.watermarkIcon || release.watermarkShelvedIcon || release.versionWatermarkIcons?.[0] || "";
+}
+
+function releaseSourceLabel(row) {
+  const textValue = String(row.release?.sourceString || "").trim();
+  if (!textValue) return "";
+  return textValue
+    .replace(/^入手方法[:：]\s*/u, "")
+    .replace(/^Source[:：]\s*/i, "")
+    .replace(/^Random perks?:?\s*/i, "")
+    .replace(/^ランダムパーク[:：]\s*/u, "")
+    .trim();
+}
+
+function releaseListLabel(row) {
+  const source = releaseSourceLabel(row);
+  if (source && !/コレクションから再入手|Collections/i.test(source)) return source;
+  if (releaseIcon(row)) return t("releaseInline");
+  if (row.release?.collectibleHash) return `${t("collectible")} ${row.release.collectibleHash}`;
+  return "";
+}
+
+function renderReleaseInline(row) {
+  const icon = releaseIcon(row);
+  const label = releaseListLabel(row);
+  if (!icon && !label) return "";
+  const title = releaseSummary(row) || label || t("releaseInline");
+  return `
+    <span class="row-release" title="${esc(title)}">
+      ${icon ? `<img src="${esc(icon)}" alt="">` : ""}
+      <span>${esc(label || t("releaseInline"))}</span>
+    </span>
+  `;
 }
 
 function compactMetaLabel(value) {
@@ -1123,21 +1169,84 @@ function plugFieldOpen(row, socket) {
   return Boolean(state.openPlugSockets[selectionKey(row, socket)]);
 }
 
-function selectedPlugSummary(row, socket) {
+function isEnhancedPlug(plug) {
+  if (!plug) return false;
+  const category = `${plug.category || ""}`;
+  const name = `${plug.name || ""}`;
+  const identifier = `${plug.identifier || ""}`;
+  return /enhanced/i.test(category) || /強化/.test(category) || /^enhanced\s/i.test(name) || /^強化/.test(name) || /enhanced/i.test(identifier);
+}
+
+function enhancedBaseText(value) {
+  return String(value || "")
+    .replace(/^Enhanced\s+/i, "")
+    .replace(/^強化版\s*/u, "")
+    .replace(/^強化型\s*/u, "")
+    .replace(/^強化\s*/u, "")
+    .replace(/^強化版/u, "")
+    .trim()
+    .toLowerCase();
+}
+
+function enhancedCounterpartIcon(plug) {
+  if (!plug?.hash) return "";
+  const cacheKey = `${state.lang}:${plug.hash}`;
+  if (enhancedBadgeCache.has(cacheKey)) return enhancedBadgeCache.get(cacheKey);
+  const nameKey = enhancedBaseText(plug.name);
+  const categoryKey = enhancedBaseText(plug.category);
+  const counterpart = Object.values(langData().plugOptions || {}).find((candidate) => {
+    if (!candidate || Number(candidate.hash) === Number(plug.hash) || isEnhancedPlug(candidate)) return false;
+    if (enhancedBaseText(candidate.name) !== nameKey) return false;
+    return candidate.identifier === plug.identifier || enhancedBaseText(candidate.category) === categoryKey;
+  });
+  const icon = counterpart?.icon || "";
+  enhancedBadgeCache.set(cacheKey, icon);
+  return icon;
+}
+
+function shouldShowEnhancedMark(plug) {
+  if (!isEnhancedPlug(plug)) return false;
+  const counterpartIcon = enhancedCounterpartIcon(plug);
+  return !counterpartIcon || counterpartIcon === plug.icon;
+}
+
+function renderPlugIcon(plug, className, fallback = "") {
+  const enhanced = isEnhancedPlug(plug);
+  const showMark = shouldShowEnhancedMark(plug);
+  const label = enhanced ? ` title="${esc(t("enhancedPlug"))}" aria-label="${esc(t("enhancedPlug"))}"` : "";
+  const icon = plug?.icon
+    ? `<img class="${esc(className)}" src="${esc(plug.icon)}" alt="">`
+    : `<span class="${esc(className)} placeholder-icon">${esc(fallback)}</span>`;
+  return `
+    <span class="plug-icon-wrap${showMark ? " is-enhanced" : ""}"${label}>
+      ${icon}
+      ${showMark ? `<span class="enhanced-mark" aria-hidden="true">↑</span>` : ""}
+    </span>
+  `;
+}
+
+function fixedPlugFor(row, socket, options = plugOptionsFor(row, socket)) {
+  return options.length === 1 ? options[0] : null;
+}
+
+function selectedPlugSummary(row, socket, options = plugOptionsFor(row, socket)) {
   const plug = selectedPlugFor(row, socket);
-  if (!plug) {
+  const displayPlug = plug || fixedPlugFor(row, socket, options);
+  if (!displayPlug) {
     return {
       name: t("selectPlug"),
       icon: "",
       deltas: {},
       description: "",
+      plug: null,
     };
   }
   return {
-    name: plug.name,
-    icon: plug.icon,
-    deltas: displayStatDeltas(row, plug),
-    description: plug.description || "",
+    name: displayPlug.name,
+    icon: displayPlug.icon,
+    deltas: displayStatDeltas(row, displayPlug),
+    description: displayPlug.description || "",
+    plug: displayPlug,
   };
 }
 
@@ -1174,7 +1283,7 @@ function selectedPlugFor(row, socket) {
 }
 
 function selectedPlugsFor(row) {
-  return (row.plugSockets || []).map((socket) => selectedPlugFor(row, socket)).filter(Boolean);
+  return (row.plugSockets || []).map((socket) => selectedPlugFor(row, socket) || fixedPlugFor(row, socket)).filter(Boolean);
 }
 
 function armorArchetypeSocket(row) {
@@ -1419,13 +1528,15 @@ function renderSocketSelectors(row, sockets) {
           const options = plugOptionsFor(row, socket);
           if (!options.length) return "";
           const isOpen = plugFieldOpen(row, socket);
-          const summary = selectedPlugSummary(row, socket);
+          const summary = selectedPlugSummary(row, socket, options);
           const toggleLabel = isOpen ? t("closeChoices") : t("openChoices");
           const tertiarySelector = socket.kind === "armor_archetype" ? renderArmorTertiarySelector(row) : "";
+          const fixedOnly = options.length === 1;
+          const fixedHash = fixedOnly ? options[0].hash : "";
           return `
             <div class="plug-field${isOpen ? " is-open" : ""}">
               <button class="plug-toggle" type="button" data-plug-toggle data-socket-index="${esc(socket.index)}" aria-expanded="${esc(String(isOpen))}">
-                ${summary.icon ? `<img class="plug-toggle-icon" src="${esc(summary.icon)}" alt="">` : `<span class="plug-toggle-icon plug-toggle-icon--empty">OFF</span>`}
+                ${summary.plug ? renderPlugIcon(summary.plug, "plug-toggle-icon") : `<span class="plug-toggle-icon plug-toggle-icon--empty">OFF</span>`}
                 <span class="plug-toggle-main">
                   <strong>${esc(socket.label)}</strong>
                   <span>${esc(summary.name)}</span>
@@ -1436,11 +1547,15 @@ function renderSocketSelectors(row, sockets) {
               ${
                 isOpen
                   ? `<div class="plug-option-grid" role="listbox" aria-label="${esc(socket.label)}">
-                      <button class="plug-option plug-option--clear${selectedHash ? "" : " is-selected"}" type="button" data-plug-button data-socket-index="${esc(socket.index)}" data-plug-hash="" title="${esc(t("selectPlug"))}" aria-pressed="${esc(String(!selectedHash))}">
-                        <span class="plug-option-icon">OFF</span>
-                        <span class="plug-option-name">${esc(t("selectPlug"))}</span>
-                      </button>
-                      ${options.map((plug) => renderPlugOption(row, socket, plug, selectedHash)).join("")}
+                      ${
+                        fixedOnly
+                          ? ""
+                          : `<button class="plug-option plug-option--clear${selectedHash ? "" : " is-selected"}" type="button" data-plug-button data-socket-index="${esc(socket.index)}" data-plug-hash="" title="${esc(t("selectPlug"))}" aria-pressed="${esc(String(!selectedHash))}">
+                              <span class="plug-option-icon">OFF</span>
+                              <span class="plug-option-name">${esc(t("selectPlug"))}</span>
+                            </button>`
+                      }
+                      ${options.map((plug) => renderPlugOption(row, socket, plug, selectedHash, fixedHash)).join("")}
                     </div>`
                   : ""
               }
@@ -1494,12 +1609,12 @@ function renderArmorTertiarySelector(row) {
   `;
 }
 
-function renderPlugOption(row, socket, plug, selectedHash) {
-  const isSelected = Number(selectedHash) === Number(plug.hash);
+function renderPlugOption(row, socket, plug, selectedHash, fixedHash = "") {
+  const isSelected = Number(selectedHash) === Number(plug.hash) || (!selectedHash && Number(fixedHash) === Number(plug.hash));
   const title = plugOptionLabel(row, plug);
   return `
     <button class="plug-option${isSelected ? " is-selected" : ""}" type="button" data-plug-button data-socket-index="${esc(socket.index)}" data-plug-hash="${esc(plug.hash)}" title="${esc(title)}" aria-pressed="${esc(String(isSelected))}">
-      ${plug.icon ? `<img class="plug-option-icon" src="${esc(plug.icon)}" alt="">` : `<span class="plug-option-icon placeholder-icon"></span>`}
+      ${renderPlugIcon(plug, "plug-option-icon")}
       <span class="plug-option-name">${esc(plug.name)}</span>
     </button>
   `;
@@ -1577,12 +1692,13 @@ function renderResultRow(row) {
   const type = compactMetaLabel(row.weaponType || row.armorSlot || row.type || row.sectionLabel);
   const detail = detailSummary(row);
   const sub = [row.bucket, row.tier].filter(Boolean).map(compactMetaLabel).join(" / ");
+  const release = renderReleaseInline(row);
   return `
     <button class="result-row${selected}" type="button" data-hash="${esc(row.hash)}">
       ${renderIcon(row, "item-icon")}
       <span>
         <span class="row-name">${esc(row.name)}</span>
-        <span class="row-sub">${esc(sub)}</span>
+        <span class="row-sub"><span class="row-sub-base">${esc(sub)}</span>${release}</span>
       </span>
       <span class="row-cell">${esc(row.sectionLabel || sectionLabel(row.primarySection))}</span>
       <span class="row-cell mobile-hide">${esc(type)}</span>

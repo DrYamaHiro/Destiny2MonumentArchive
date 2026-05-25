@@ -37,6 +37,8 @@ DEFAULT_COMPONENTS = (
     "DestinyPlugSetDefinition",
     "DestinyDamageTypeDefinition",
     "DestinyClassDefinition",
+    "DestinyCollectibleDefinition",
+    "DestinySeasonDefinition",
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
