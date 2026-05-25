@@ -15,7 +15,7 @@ Manifestから抽出したDATABASEを、ローカルで検索・確認できる�
 - 英語/日本語切替
 - 名前/説明/カテゴリ/Hash検索
 - Manifest icon URL参照
-- 各武器詳細内のPvP TTK枠
+- 各武器詳細内のPvP POTENTIAL枠
 
 ## 生成方法
 
@@ -52,4 +52,4 @@ http://127.0.0.1:8788
 - 画像ファイルは保存しません。
 - アイコンはBungieのManifest icon URLを参照します。
 - `site/data/*.json` はGitHubに置いてよいテキストデータです。
-- TTKはManifestだけでは確定できないため、`data/static/ttk/` の台帳から各武器へ順次反映します。
+- PvP POTENTIALはManifestだけでは確定できないため、`data/static/ttk/` の台帳から各武器へ順次反映します。

@@ -16,6 +16,7 @@
       "armor": 5474,
       "catalogItems": 26819,
       "exoticArmor": 348,
+      "plugSets": 4397,
       "plugs": 12120,
       "sandboxPerks": 3681,
       "weapons": 1837
@@ -24,6 +25,7 @@
       "armor": 5474,
       "catalogItems": 26811,
       "exoticArmor": 348,
+      "plugSets": 4397,
       "plugs": 12120,
       "sandboxPerks": 3681,
       "weapons": 1837
@@ -53,6 +55,10 @@
       "exotic_armor.en.json",
       "exotic_armor.ja.json"
     ],
+    "plugSets": [
+      "plug_sets.en.json",
+      "plug_sets.ja.json"
+    ],
     "plugs": [
       "plugs.en.json",
       "plugs.ja.json"
@@ -66,5 +72,5 @@
       "weapons.ja.json"
     ]
   },
-  "syncedAt": "2026-05-25T01:50:55+00:00"
+  "syncedAt": "2026-05-25T10:36:17+00:00"
 }

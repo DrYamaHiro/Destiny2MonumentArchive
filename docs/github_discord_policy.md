@@ -28,12 +28,38 @@ Discordサーバーは、Destiny 2の最終大型アップデート後に新設�
 - プレイヤー単位の非公開・高粒度データ
 - Discord bot token
 
+## 画像ファイルについて
+
+GitHubに画像を置くことは技術的には可能です。ただし、このプロジェクトでは長期運用コストと公開速度を優先し、画像の実体はGitHubに置きません。
+
+理由:
+
+- GitHub通常リポジトリは単一ファイル100MiB超をブロックする
+- 50MiB超のファイルは警告対象になる
+- GitHub Pagesの公開サイトは1GB、月間帯域は100GBのソフトリミットがある
+- Git LFSは無料枠を超えると帯域・保存容量の課金または停止リスクがある
+- 画像をGit履歴に入れると、削除後も履歴が重くなりやすい
+
+保存するのは画像そのものではなく、以下の参照情報に限定します。
+
+- Bungie CDNのicon URL
+- Bungie.netページURL
+- 将来のDiscord attachment ID
+- 外部ストレージURL
+- 検証スクリーンショットの出典メモ
+
+参照:
+
+- https://docs.github.com/articles/what-is-the-size-limit-for-a-repository
+- https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits
+- https://docs.github.com/repositories/working-with-files/managing-large-files/about-storage-and-bandwidth-usage
+
 ## Discordで扱うもの
 
 - 武器画像、防具画像、検証スクリーンショット
 - 武器ページ/装備ページへの参照
 - コミュニティ検証依頼
-- TTK検証結果の議論
+- PvP POTENTIAL検証結果の議論
 - パーク差分の解釈
 - 更新告知
 

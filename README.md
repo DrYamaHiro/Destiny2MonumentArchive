@@ -1,6 +1,6 @@
 # D2 Monument Archive
 
-Destiny 2の最終大型アップデート後も、コミュニティが武器・防具・TTK・PvP/PvE装備情報を参照し続けられるようにするためのローカル開発プロジェクトです。
+Destiny 2の最終大型アップデート後も、コミュニティが武器・防具・PvP POTENTIAL・PvP/PvE装備情報を参照し続けられるようにするための静的DATABASEプロジェクトです。
 
 ## 方針
 
@@ -8,13 +8,13 @@ Destiny 2の最終大型アップデート後も、コミュニティが武器�
 - 画像はGitHubに置かない
 - API KeyやOAuth secretはプロジェクト内に置かない
 - Manifest由来の英日データベース（DATABASE）を整備する
-- PvPバトルログ（BATTLE LOG）は集計済みテキストデータとして扱う
+- PvPバトルログ（BATTLE LOG）は後工程で扱う
 - Discordサーバーは最終大型アップデート後に新設する
 
 ## 呼称
 
 - 旧「静的DB」: データベース / DATABASE
-- 旧「動的DB」: バトルログ / BATTLE LOG
+- 旧「動的DB」: バトルログ / BATTLE LOG（後工程）
 
 ## 主要ファイル
 
@@ -22,6 +22,7 @@ Destiny 2の最終大型アップデート後も、コミュニティが武器�
 - `docs/bungie_api_key_setup.md`: Bungie API Key取得手順
 - `docs/api_key_storage.md`: API Key保管ルール
 - `docs/github_discord_policy.md`: GitHub/Discord分担方針
+- `docs/github_data_operations.md`: GitHub Pages公開とDB運用方針
 - `docs/manifest_sync.md`: Manifest同期手順
 - `docs/damage_update_tracking.md`: PvPダメージ更新追跡方針
 - `docs/static_viewer.md`: ローカルDATABASEビューア手順
@@ -70,3 +71,15 @@ python .\scripts\build_site_indexes.py
 ```text
 http://127.0.0.1:8788
 ```
+
+## GitHub Pages
+
+`main` にpushすると `.github/workflows/deploy-pages.yml` が `site/` をGitHub Pagesへ公開します。
+
+想定URL:
+
+```text
+https://dryamahiro.github.io/Destiny2MonumentArchive/
+```
+
+GitHubにはテキストDBとコードだけを置きます。画像ファイルはGitに含めず、Bungie CDN URL、将来のDiscord添付ID、外部ストレージURLなどの参照情報だけを保存します。

@@ -330,8 +330,8 @@
           <span class="badge en">Planning document / Research timestamp: 2026-05-24 18:48 JST</span>
           <h1 class="ja">Destiny 2 PvP データベース設計プラン</h1>
           <h1 class="en">Destiny 2 PvP Database Plan</h1>
-          <p class="subtitle ja">データベース（DATABASE）とバトルログ（BATTLE LOG）を分離し、英語/日本語切替、TTK、武器使用率、K/U、パーク差分、エキゾチック防具採用率を、低コストで継続公開するための初期設計です。</p>
-          <p class="subtitle en">Initial architecture for a low-cost, bilingual Destiny 2 PvP archive with separate DATABASE and BATTLE LOG layers, TTK, usage, K/U, perk deltas, and exotic armor adoption metrics.</p>
+          <p class="subtitle ja">データベース（DATABASE）とバトルログ（BATTLE LOG）を分離し、英語/日本語切替、PvP POTENTIAL、武器使用率、K/U、パーク差分、エキゾチック防具採用率を、低コストで継続公開するための初期設計です。</p>
+          <p class="subtitle en">Initial architecture for a low-cost, bilingual Destiny 2 PvP archive with separate DATABASE and BATTLE LOG layers, PvP Potential, usage, K/U, perk deltas, and exotic armor adoption metrics.</p>
         </div>
         <div class="controls" aria-label="Language">
           <button class="lang" id="jaBtn" aria-pressed="true" type="button">日本語</button>
@@ -371,8 +371,8 @@
           <h3 class="ja">対象フォルダ</h3>
           <h3 class="en">Target Folder</h3>
           <p><code>H:\マイドライブ\eSport\Destiny2</code></p>
-          <p class="ja">現時点では空のフォルダでした。追加の <code>AGENTS.md</code> は見つかりませんでした。</p>
-          <p class="en">The folder is currently empty. No additional <code>AGENTS.md</code> was found.</p>
+          <p class="ja">現在はローカル閲覧サイト、静的テキストDB、設計文書、更新追跡台帳をこのフォルダ内で管理しています。追加の <code>AGENTS.md</code> は見つかりませんでした。</p>
+          <p class="en">The folder now contains the local viewer, static text DB, design docs, and update tracker. No additional <code>AGENTS.md</code> was found.</p>
         </div>
         <div class="mini-card">
           <h3 class="ja">この文書</h3>
@@ -391,20 +391,20 @@
         <div class="mini-card">
           <h3 class="ja">データベース</h3>
           <h3 class="en">DATABASE</h3>
-          <p class="ja">武器・防具・パーク・ローカライズ・TTKモデルなど、パッチ単位で変わる情報を扱います。Bungie Manifestを土台にし、TTKは別テーブルで手動検証/コミュニティ検証/計算式をバージョン管理します。</p>
-          <p class="en">Stores items, armor, perks, localization, and TTK models that change by patch. Bungie Manifest is the foundation; TTK is maintained in separate versioned tables with measured data, community references, and formulas.</p>
+          <p class="ja">武器・防具・パーク・ローカライズ・PvP POTENTIALモデルなど、パッチ単位で変わる情報を扱います。Bungie Manifestを土台にし、PvP POTENTIALは別テーブルで手動検証/コミュニティ検証/計算式をバージョン管理します。</p>
+          <p class="en">Stores items, armor, perks, localization, and PvP Potential models that change by patch. Bungie Manifest is the foundation; PvP Potential is maintained in separate versioned tables with measured data, community references, and formulas.</p>
           <ul class="ja">
             <li><code>entity</code>: hash、分類、装備スロット、アイコン、レアリティ</li>
             <li><code>entity_i18n</code>: hash、language、name、description</li>
             <li><code>weapon_static</code>: weaponHash、RPM、frame、ammo、stats、perk pool</li>
-            <li><code>ttk_profile</code>: sandboxVersion、weapon/archetype、resilienceTier、optimal/body TTK、crit/body requirement</li>
+            <li><code>ttk_profile</code>: sandboxVersion、weapon/archetype、resilienceTier、対象HP、WP、精密/ボディダメージ、Optimal TTK、BS TTK、BS許容</li>
             <li><code>sandbox_version</code>: 有効開始日、Manifest version、出典、検証状態</li>
           </ul>
           <ul class="en">
             <li><code>entity</code>: hash, category, slot, icon, rarity</li>
             <li><code>entity_i18n</code>: hash, language, name, description</li>
             <li><code>weapon_static</code>: weapon hash, RPM, frame, ammo type, stats, perk pool</li>
-            <li><code>ttk_profile</code>: sandbox version, weapon/archetype, resilience tier, optimal/body TTK, crit/body requirements</li>
+            <li><code>ttk_profile</code>: sandbox version, weapon/archetype, resilience tier, target HP, WP, precision/body damage, Optimal TTK, BS TTK, body-shot forgiveness</li>
             <li><code>sandbox_version</code>: effective date, manifest version, source, validation status</li>
           </ul>
         </div>
@@ -433,8 +433,8 @@
           </ul>
         </div>
       </div>
-      <div class="warn ja">TTKはBungie Manifestだけで完全自動生成できる情報ではありません。RPMや武器定義は取れますが、PvPダメージ値、バースト間隔、ダメージ減衰、パーク補正、耐久Tierごとの閾値は、パッチノートと検証データを組み合わせる前提で設計します。</div>
-      <div class="warn en">TTK cannot be fully generated from the Bungie Manifest alone. RPM and item definitions are available, but PvP damage values, burst timing, falloff, perk modifiers, and resilience breakpoints should be managed from patch notes plus verified test data.</div>
+      <div class="warn ja">PvP POTENTIALはBungie Manifestだけで完全自動生成できる情報ではありません。RPMや武器定義は取れますが、PvPダメージ値、バースト間隔、ダメージ減衰、パーク補正、耐久Tierごとの閾値は、パッチノートと検証データを組み合わせる前提で設計します。</div>
+      <div class="warn en">PvP Potential cannot be fully generated from the Bungie Manifest alone. RPM and item definitions are available, but PvP damage values, burst timing, falloff, perk modifiers, and resilience breakpoints should be managed from patch notes plus verified test data.</div>
     </section>
 
     <section>
@@ -469,7 +469,7 @@
           <tr><td>K/U</td><td><code>Kill Share / Usage Share</code>。1.00を平均、100%表記も併記可能。</td><td>やまひろ先生の想定が「Kills per User」なら名称を分ける。初期UIでは定義ツールチップ必須。</td></tr>
           <tr><td>Perk Delta</td><td>同一武器内で、特定perkあり/なしのK/U、killShare、precision、win proxyの差分。</td><td>因果ではなく相関。最低サンプル数、モード、マップ、プレイヤースキル proxyで補正。</td></tr>
           <tr><td>Exotic Armor Adoption</td><td>クラス別・モード別に、観測ロードアウト内でそのエキゾ防具が採用された割合。</td><td>装備snapshotの取得遅延があるため、信頼度を表示する。</td></tr>
-          <tr><td>TTK</td><td>最適TTK、body TTK、crit/body要求、耐久Tier、perk補正、sandboxVersion。</td><td>バースト武器、チャージ武器、特殊条件perkは個別モデル。</td></tr>
+          <tr><td>PvP POTENTIAL</td><td>対象HP、WP補正、精密/ボディダメージ、Optimal TTK、BS TTK、全弾精密/BSキル弾数、BS許容、耐久Tier、perk補正、sandboxVersion。</td><td>バースト武器、チャージ武器、特殊条件perkは個別モデル。</td></tr>
         </tbody>
       </table>
       <table class="en">
@@ -482,7 +482,7 @@
           <tr><td>K/U</td><td><code>Kill Share / Usage Share</code>. Show 1.00 baseline and optionally 100% format.</td><td>If the intended meaning is "Kills per User", use a separate label. The first UI should include a definition tooltip.</td></tr>
           <tr><td>Perk Delta</td><td>Within the same weapon, compare K/U, kill share, precision, and win proxy between rolls with and without a perk.</td><td>Correlation, not causation. Use minimum sample counts and adjust by mode, map, and skill proxy.</td></tr>
           <tr><td>Exotic Armor Adoption</td><td>Class/mode-specific share of observed loadouts using a given exotic armor piece.</td><td>Display confidence because equipment snapshots may be delayed.</td></tr>
-          <tr><td>TTK</td><td>Optimal TTK, body TTK, crit/body requirements, resilience tier, perk modifiers, sandbox version.</td><td>Burst, charge, and conditional-perk weapons require custom models.</td></tr>
+          <tr><td>PvP Potential</td><td>Target HP, WP bonus, precision/body damage, Optimal TTK, BS TTK, crit/body shots to kill, body-shot forgiveness, resilience tier, perk modifiers, sandbox version.</td><td>Burst, charge, and conditional-perk weapons require custom models.</td></tr>
         </tbody>
       </table>
     </section>
@@ -519,13 +519,13 @@
         <li><strong>Pre/Post分割:</strong> <code>season_window</code> または <code>sandbox_version</code> で、2026-06-09前後の集計を絶対に混ぜない。</li>
         <li><strong>Manifest差分:</strong> 新規/削除/再発行/名称変更/パークプール変更を差分レポート化。</li>
         <li><strong>新モード対応:</strong> Arena、Glass Cannon、Software、SRLなどはmode taxonomyに追加できるようにする。</li>
-        <li><strong>ライブ終了後:</strong> 更新頻度を「週次集計 + コミュニティ検証TTK + アーカイブ保全」に落として継続可能にする。</li>
+        <li><strong>ライブ終了後:</strong> 更新頻度を「週次集計 + コミュニティ検証PvP POTENTIAL + アーカイブ保全」に落として継続可能にする。</li>
       </ul>
       <ul class="en">
         <li><strong>Pre/post split:</strong> Never mix pre- and post-June 9 data. Partition by <code>season_window</code> or <code>sandbox_version</code>.</li>
         <li><strong>Manifest diffs:</strong> Produce reports for new, removed, reprised, renamed, and perk-pool-changed items.</li>
         <li><strong>New modes:</strong> Keep the mode taxonomy extensible for Arena, Glass Cannon, Software, SRL, and future community categories.</li>
-        <li><strong>After live-service end:</strong> Reduce maintenance to weekly aggregates, community-verified TTK, and archival preservation.</li>
+        <li><strong>After live-service end:</strong> Reduce maintenance to weekly aggregates, community-verified PvP Potential, and archival preservation.</li>
       </ul>
     </section>
 
@@ -538,13 +538,13 @@
           <h3 class="en">GitHub</h3>
           <ul class="ja">
             <li>保管対象はテキストデータ、スキーマ、コード、小さなJSON/CSV/Markdownのみ</li>
-            <li>DATABASE: Manifest由来の英日名称、武器/パーク定義、TTK表</li>
+            <li>DATABASE: Manifest由来の英日名称、武器/パーク定義、PvP POTENTIAL表</li>
             <li>BATTLE LOG: 集計済みの武器Usage、K/U、perk差分、エキゾ防具採用率</li>
             <li>画像、API Key、生ログ、個人単位データは置かない</li>
           </ul>
           <ul class="en">
             <li>Store text data, schemas, source code, and compact JSON/CSV/Markdown only</li>
-            <li>DATABASE: bilingual names, weapon/perk definitions, TTK tables</li>
+            <li>DATABASE: bilingual names, weapon/perk definitions, PvP Potential tables</li>
             <li>BATTLE LOG: aggregated weapon usage, K/U, perk deltas, exotic armor adoption</li>
             <li>No images, API keys, raw logs, or player-level data</li>
           </ul>
@@ -639,14 +639,14 @@
       <h2 class="en">Implementation Roadmap</h2>
       <div class="timeline ja">
         <div class="phase"><strong>MVP 1: DATABASE。</strong> Manifest同期、英日ローカライズ、武器/パーク/エキゾ防具一覧、検索UI。</div>
-        <div class="phase"><strong>MVP 2: TTK表。</strong> archetypeごとのTTK schema、入力根拠、sandboxVersion、検証状態を整備。</div>
+        <div class="phase"><strong>MVP 2: PvP POTENTIAL表。</strong> archetypeごとのPvP POTENTIAL schema、入力根拠、sandboxVersion、検証状態を整備。</div>
         <div class="phase"><strong>MVP 3: BATTLE LOG。</strong> opt-inまたはクランをseedにActivity HistoryとPGCRを取得し、武器Usage/Kill Share/K/Uを週次集計としてテキスト出力。</div>
         <div class="phase"><strong>MVP 4: パーク/エキゾ分析。</strong> 装備snapshotとItemSocketsを加え、信頼度つきでperk deltaとexotic adoptionをテキストDB化。</div>
         <div class="phase"><strong>Post-June Discord基盤。</strong> 2026-06-09後にDiscordサーバーを新設し、交流、画像参照、装備データ参照、検証募集を集約。</div>
       </div>
       <div class="timeline en">
         <div class="phase"><strong>MVP 1: DATABASE.</strong> Manifest sync, English/Japanese localization, weapon/perk/exotic armor lists, search UI.</div>
-        <div class="phase"><strong>MVP 2: TTK tables.</strong> TTK schema by archetype, source evidence, sandbox version, validation status.</div>
+        <div class="phase"><strong>MVP 2: PvP Potential tables.</strong> PvP Potential schema by archetype, source evidence, sandbox version, validation status.</div>
         <div class="phase"><strong>MVP 3: BATTLE LOG.</strong> Use opt-in or clan seeds to fetch Activity History and PGCR, then generate weekly Usage/Kill Share/K/U as text outputs.</div>
         <div class="phase"><strong>MVP 4: Perk/exotic analysis.</strong> Add equipment snapshots and ItemSockets, then convert perk deltas and exotic adoption into text DB outputs.</div>
         <div class="phase"><strong>Post-June Discord base.</strong> After June 9, 2026, create the Discord server and centralize discussion, image reference, equipment lookup, and validation requests.</div>

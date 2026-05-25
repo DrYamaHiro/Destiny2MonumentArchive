@@ -187,6 +187,25 @@ def stat_values(item: dict[str, Any], stat_defs: dict[str, Any]) -> list[dict[st
     return output
 
 
+def investment_stats(item: dict[str, Any], stat_defs: dict[str, Any]) -> list[dict[str, Any]]:
+    output: list[dict[str, Any]] = []
+    for stat in item.get("investmentStats") or []:
+        stat_hash = stat.get("statTypeHash")
+        if not stat_hash:
+            continue
+        stat_def = stat_defs.get(str(stat_hash)) or {}
+        output.append(
+            {
+                "statHash": int(stat_hash),
+                "name": display(stat_def).get("name") or "",
+                "value": stat.get("value"),
+                "isConditionallyActive": bool(stat.get("isConditionallyActive")),
+            }
+        )
+    output.sort(key=lambda row: (row["name"], row["statHash"]))
+    return output
+
+
 def bucket_name(item: dict[str, Any], bucket_defs: dict[str, Any]) -> str:
     bucket_hash = ((item.get("inventory") or {}).get("bucketTypeHash"))
     bucket = bucket_defs.get(str(bucket_hash)) or {}
@@ -211,6 +230,34 @@ def damage_type_names(item: dict[str, Any], damage_defs: dict[str, Any]) -> list
     return names
 
 
+def socket_entries(item: dict[str, Any]) -> list[dict[str, Any]]:
+    output: list[dict[str, Any]] = []
+    sockets = item.get("sockets") or {}
+    for index, socket in enumerate(sockets.get("socketEntries") or []):
+        reusable_hashes = [
+            plug.get("plugItemHash")
+            for plug in socket.get("reusablePlugItems") or []
+            if plug.get("plugItemHash")
+        ]
+        reusable_set = socket.get("reusablePlugSetHash")
+        randomized_set = socket.get("randomizedPlugSetHash")
+        initial_hash = socket.get("singleInitialItemHash")
+        if not reusable_hashes and not reusable_set and not randomized_set and not initial_hash:
+            continue
+        output.append(
+            {
+                "index": index,
+                "socketTypeHash": socket.get("socketTypeHash"),
+                "singleInitialItemHash": initial_hash,
+                "reusablePlugSetHash": reusable_set,
+                "randomizedPlugSetHash": randomized_set,
+                "reusablePlugItemHashes": reusable_hashes,
+                "defaultVisible": bool(socket.get("defaultVisible")),
+            }
+        )
+    return output
+
+
 def compact_item_base(
     hash_key: str,
     item: dict[str, Any],
@@ -225,6 +272,7 @@ def compact_item_base(
     equipping = item.get("equippingBlock") or {}
     sockets = item.get("sockets") or {}
     plug_set_hashes: list[int] = []
+    compact_sockets = socket_entries(item)
     for socket in sockets.get("socketEntries") or []:
         for key in ("randomizedPlugSetHash", "reusablePlugSetHash"):
             value = socket.get(key)
@@ -236,6 +284,10 @@ def compact_item_base(
         "name": shown["name"],
         "description": shown["description"],
         "icon": shown["icon"],
+        "iconWatermark": item.get("iconWatermark") or "",
+        "iconWatermarkShelved": item.get("iconWatermarkShelved") or "",
+        "displayVersionWatermarkIcons": item.get("displayVersionWatermarkIcons") or [],
+        "collectibleHash": item.get("collectibleHash"),
         "itemType": item.get("itemType"),
         "itemSubType": item.get("itemSubType"),
         "itemTypeDisplayName": item.get("itemTypeDisplayName") or "",
@@ -253,7 +305,9 @@ def compact_item_base(
         "damageTypeHashes": item.get("damageTypeHashes") or [],
         "damageTypeNames": damage_type_names(item, damage_defs),
         "statValues": stat_values(item, stat_defs),
+        "investmentStats": investment_stats(item, stat_defs),
         "plugSetHashes": sorted(set(plug_set_hashes)),
+        "socketEntries": compact_sockets,
     }
 
 
@@ -318,12 +372,14 @@ def extract_textdb(version: str, language: str, components: dict[str, dict[str, 
     classes = components.get("DestinyClassDefinition") or {}
     damage_types = components.get("DestinyDamageTypeDefinition") or {}
     sandbox_perks = components.get("DestinySandboxPerkDefinition") or {}
+    plug_sets = components.get("DestinyPlugSetDefinition") or {}
 
     catalog_items: list[dict[str, Any]] = []
     weapons: list[dict[str, Any]] = []
     armor: list[dict[str, Any]] = []
     exotic_armor: list[dict[str, Any]] = []
     plugs: list[dict[str, Any]] = []
+    referenced_plug_sets: set[int] = set()
 
     for hash_key, item in inventory.items():
         shown = display(item)
@@ -333,6 +389,7 @@ def extract_textdb(version: str, language: str, components: dict[str, dict[str, 
         item_type = item.get("itemType")
         tier_type = (item.get("inventory") or {}).get("tierType")
         base = compact_item_base(hash_key, item, categories, buckets, stats, classes, damage_types)
+        referenced_plug_sets.update(base["plugSetHashes"])
 
         if include_catalog_item(item):
             catalog_items.append(base)
@@ -359,6 +416,7 @@ def extract_textdb(version: str, language: str, components: dict[str, dict[str, 
                     "categoryNames": base["categoryNames"],
                     "plugCategoryHash": (item.get("plug") or {}).get("plugCategoryHash"),
                     "plugCategoryIdentifier": (item.get("plug") or {}).get("plugCategoryIdentifier") or "",
+                    "investmentStats": base["investmentStats"],
                     "perkHashes": [perk.get("perkHash") for perk in perks if perk.get("perkHash")],
                 }
             )
@@ -378,14 +436,47 @@ def extract_textdb(version: str, language: str, components: dict[str, dict[str, 
             }
         )
 
+    plug_set_rows: list[dict[str, Any]] = []
+    for hash_key, plug_set in plug_sets.items():
+        try:
+            plug_set_hash = int(plug_set.get("hash", int(hash_key)))
+        except (TypeError, ValueError):
+            continue
+        if plug_set_hash not in referenced_plug_sets:
+            continue
+        plug_items: list[dict[str, Any]] = []
+        seen_plug_hashes: set[int] = set()
+        for key in ("reusablePlugItems", "randomizedPlugItems"):
+            for plug in plug_set.get(key) or []:
+                plug_hash = plug.get("plugItemHash")
+                if plug_hash and plug_hash not in seen_plug_hashes:
+                    seen_plug_hashes.add(plug_hash)
+                    plug_items.append(
+                        {
+                            "hash": plug_hash,
+                            "currentlyCanRoll": plug.get("currentlyCanRoll"),
+                        }
+                    )
+        if not plug_items:
+            continue
+        plug_set_rows.append(
+            {
+                "hash": plug_set_hash,
+                "plugItems": plug_items,
+                "plugItemHashes": [plug["hash"] for plug in plug_items],
+            }
+        )
+
     for rows in (catalog_items, weapons, armor, exotic_armor, plugs, sandbox_rows):
         rows.sort(key=lambda row: (row.get("name") or "", row.get("hash") or 0))
+    plug_set_rows.sort(key=lambda row: row["hash"])
 
     write_json(TEXTDB_DIR / f"catalog_items.{language}.json", catalog_items)
     write_json(TEXTDB_DIR / f"weapons.{language}.json", weapons)
     write_json(TEXTDB_DIR / f"armor.{language}.json", armor)
     write_json(TEXTDB_DIR / f"exotic_armor.{language}.json", exotic_armor)
     write_json(TEXTDB_DIR / f"plugs.{language}.json", plugs)
+    write_json(TEXTDB_DIR / f"plug_sets.{language}.json", plug_set_rows)
     write_json(TEXTDB_DIR / f"sandbox_perks.{language}.json", sandbox_rows)
 
     return {
@@ -394,6 +485,7 @@ def extract_textdb(version: str, language: str, components: dict[str, dict[str, 
         "armor": len(armor),
         "exoticArmor": len(exotic_armor),
         "plugs": len(plugs),
+        "plugSets": len(plug_set_rows),
         "sandboxPerks": len(sandbox_rows),
     }
 
@@ -472,6 +564,7 @@ def main() -> int:
             "armor": [f"armor.{lang}.json" for lang in args.languages],
             "exoticArmor": [f"exotic_armor.{lang}.json" for lang in args.languages],
             "plugs": [f"plugs.{lang}.json" for lang in args.languages],
+            "plugSets": [f"plug_sets.{lang}.json" for lang in args.languages],
             "sandboxPerks": [f"sandbox_perks.{lang}.json" for lang in args.languages],
         },
         "notes": [

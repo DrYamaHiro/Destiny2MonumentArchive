@@ -51,7 +51,7 @@ python .\scripts\sync_manifest.py --metadata-only
 
 - `scripts/sync_manifest.py` は、`--env-file` を明示した時だけ秘密ファイルを読みます。
 - 生のManifest component JSONは大きいので、`data/local_cache/` に置き、GitHubには含めません。
-- TTKはManifestから完全自動生成できません。別途 `data/static/ttk/` に検証済みテーブルとして整備します。
+- PvP POTENTIALはManifestから完全自動生成できません。別途 `data/static/ttk/` に検証済みテーブルとして整備します。
 
 ## 公式情報
 

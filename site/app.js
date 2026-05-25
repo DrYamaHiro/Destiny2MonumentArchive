@@ -7,10 +7,14 @@ const state = {
   sort: "name",
   data: {},
   selectedHash: null,
+  selectedPlugs: {},
+  manualArmor: {},
+  armorTertiary: {},
+  openPlugSockets: {},
 };
 
 const taxonomy = [
-  { id: "character", defaultSection: "hunter", sections: ["all", "hunter", "warlock", "titan", "subclasses"] },
+  { id: "character", defaultSection: "subclasses", sections: ["all", "subclasses", "hunter", "warlock", "titan"] },
   { id: "equipment", defaultSection: "weapons", sections: ["all", "weapons", "armor", "ghosts", "ships", "sparrows", "emblems", "artifacts", "clan_banners"] },
   { id: "appearance", defaultSection: "emotes", sections: ["all", "emotes", "finishers", "shaders", "weapon_ornaments", "armor_ornaments", "ghost_projections", "transmat_effects"] },
   { id: "inventory", defaultSection: "quests", sections: ["all", "quests", "bounties", "lore", "engrams", "packages", "consumables", "materials", "currencies"] },
@@ -53,9 +57,9 @@ const text = {
     filterBucket: "所持枠",
     stats: "主要ステータス",
     metadata: "メタデータ",
-    ttk: "PvP TTK",
-    ttkPending: "未反映。Bungie更新情報、検証台帳、PvP体力+シールド基準を確認してから武器別に反映します。",
-    ttkNote: "TTKは武器ごとのPvPデータとして保持します。タブではなく、この武器詳細に紐づく値です。",
+    ttk: "PvP POTENTIAL",
+    ttkPending: "未反映。Bungie更新情報、検証台帳、PvP体力+シールド基準を確認してから、フレーム基準でダメージ/TTK/BS許容を反映します。",
+    ttkNote: "PvP POTENTIALはフレーム基準値を各武器へ継承し、武器固有の例外だけ個別値で上書きします。",
     serverRequiredTitle: "ローカルサーバーで開いてください",
     serverRequiredBody: "このデータベースはJSONデータを読み込むため、HTMLファイルを直接開く file:// 表示では動きません。",
     serverRequiredCommand: "powershell -ExecutionPolicy Bypass -File scripts\\serve_site.ps1",
@@ -65,19 +69,51 @@ const text = {
     rarity: "レアリティ",
     categories: "カテゴリ",
     plugSets: "Plug sets",
+    perksMods: "パーク / Mod",
+    selectPlug: "未選択（基準値）",
+    selectedEffects: "選択中の効果",
+    noPlugOptions: "選択候補なし",
+    noStatChanges: "ステータス補正なし",
+    openChoices: "候補を開く",
+    closeChoices: "候補を閉じる",
+    armorTertiary: "固有パラメータ",
+    armorTier5: "Tier 5基準",
+    manualArmorTuning: "旧防具ステータス調整",
+    manualArmorNote: "旧仕様防具は実値を0-42で手動調整します。",
     class: "クラス",
     ammo: "弾薬",
     damage: "属性",
     weaponSlot: "武器スロット",
+    weaponFrame: "フレーム",
+    weaponArchetype: "アーキタイプ",
+    release: "追加情報",
+    releaseWatermark: "シーズン/拡張アイコン",
+    collectible: "Collectible",
     mode: "モード",
     status: "状態",
     sandboxVersion: "Sandbox",
     resilienceTier: "耐久",
-    optimalTtk: "最適TTK",
-    bodyTtk: "胴撃ちTTK",
+    targetHp: "対象HP",
+    weaponParameter: "WP",
+    wpBonus: "WP補正",
+    basePrecisionDamage: "基準精密ダメージ",
+    baseBodyDamage: "基準ボディダメージ",
+    precisionDamage: "実効精密ダメージ",
+    bodyDamage: "実効ボディダメージ",
+    optimalTtk: "Optimal TTK",
+    bodyTtk: "BS TTK",
+    critShots: "全弾精密キル弾数",
+    bodyShots: "全弾BSキル弾数",
+    bodyForgiveness: "最速キルBS許容",
     conditions: "条件",
     source: "出典",
+    ttkScope: "適用単位",
+    ttkScopeFrame: "フレーム基準",
+    ttkScopeWeapon: "武器個別",
+    ttkScopePending: "未確定",
     notReady: "未反映",
+    referenceNeedsVerification: "参照値 / 要検証",
+    referenceEdgeCase: "参照値 / 特殊要検証",
     catalog: "全カタログ",
     weapons: "武器",
     armor: "防具",
@@ -92,7 +128,7 @@ const text = {
       all: "全データ",
     },
     groupSub: {
-      character: "ハンター、ウォーロック、タイタン",
+      character: "サブクラス、クラス設定",
       equipment: "武器、防具、ゴースト、船など",
       appearance: "感情表現、装飾、シェーダー",
       inventory: "クエスト、伝承、素材、通貨",
@@ -172,9 +208,9 @@ const text = {
     filterBucket: "Bucket",
     stats: "Core Stats",
     metadata: "Metadata",
-    ttk: "PvP TTK",
-    ttkPending: "Not applied. Fill per weapon after checking Bungie updates, verification tracking, and the PvP health+shield baseline.",
-    ttkNote: "TTK is stored as weapon-level PvP data. It belongs to this weapon detail, not a sibling tab.",
+    ttk: "PvP POTENTIAL",
+    ttkPending: "Not applied. Fill frame-baseline damage, TTK, and body-shot forgiveness after checking Bungie updates, verification tracking, and the PvP health+shield baseline.",
+    ttkNote: "PvP Potential inherits frame-baseline values into each weapon, with weapon-specific exceptions applied as overrides.",
     serverRequiredTitle: "Open through the local server",
     serverRequiredBody: "This catalog loads JSON data, so it cannot run from a direct file:// HTML page.",
     serverRequiredCommand: "powershell -ExecutionPolicy Bypass -File scripts\\serve_site.ps1",
@@ -184,19 +220,51 @@ const text = {
     rarity: "Rarity",
     categories: "Categories",
     plugSets: "Plug sets",
+    perksMods: "Perks / Mods",
+    selectPlug: "No selection (base)",
+    selectedEffects: "Selected effects",
+    noPlugOptions: "No selectable options",
+    noStatChanges: "No stat changes",
+    openChoices: "Open choices",
+    closeChoices: "Close choices",
+    armorTertiary: "Tertiary Stat",
+    armorTier5: "Tier 5 baseline",
+    manualArmorTuning: "Legacy Armor Stat Tuning",
+    manualArmorNote: "Legacy armor stats can be adjusted manually from 0-42.",
     class: "Class",
     ammo: "Ammo",
     damage: "Damage",
     weaponSlot: "Weapon slot",
+    weaponFrame: "Frame",
+    weaponArchetype: "Archetype",
+    release: "Release info",
+    releaseWatermark: "Season/expansion watermark",
+    collectible: "Collectible",
     mode: "Mode",
     status: "Status",
     sandboxVersion: "Sandbox",
     resilienceTier: "Resilience",
+    targetHp: "Target HP",
+    weaponParameter: "WP",
+    wpBonus: "WP Bonus",
+    basePrecisionDamage: "Base Precision Damage",
+    baseBodyDamage: "Base Body Damage",
+    precisionDamage: "Effective Precision Damage",
+    bodyDamage: "Effective Body Damage",
     optimalTtk: "Optimal TTK",
-    bodyTtk: "Body TTK",
+    bodyTtk: "BS TTK",
+    critShots: "Crits to Kill",
+    bodyShots: "Body Shots to Kill",
+    bodyForgiveness: "Body Shot Forgiveness",
     conditions: "Conditions",
     source: "Source",
+    ttkScope: "Scope",
+    ttkScopeFrame: "Frame baseline",
+    ttkScopeWeapon: "Weapon override",
+    ttkScopePending: "Pending",
     notReady: "Not applied",
+    referenceNeedsVerification: "Reference / needs verification",
+    referenceEdgeCase: "Reference / edge-case review",
     catalog: "Catalog",
     weapons: "Weapons",
     armor: "Armor",
@@ -211,7 +279,7 @@ const text = {
       all: "All Data",
     },
     groupSub: {
-      character: "Hunter, Warlock, Titan",
+      character: "Subclasses and class setup",
       equipment: "Weapons, armor, Ghosts, ships",
       appearance: "Emotes, ornaments, shaders",
       inventory: "Quests, lore, materials, currency",
@@ -279,6 +347,11 @@ const statLabels = {
     airborne: "空中効果",
     defense: "防御",
     health: "体力",
+    weaponStat: "武器",
+    melee: "近接",
+    grenade: "グレネード",
+    super: "スーパースキル",
+    classAbility: "クラス",
   },
   en: {
     impact: "Impact",
@@ -299,7 +372,62 @@ const statLabels = {
     airborne: "Airborne",
     defense: "Defense",
     health: "Health",
+    weaponStat: "Weapons",
+    melee: "Melee",
+    grenade: "Grenade",
+    super: "Super",
+    classAbility: "Class",
   },
+};
+
+const boundedStats = new Set([
+  "impact",
+  "range",
+  "stability",
+  "handling",
+  "reload",
+  "aimAssist",
+  "recoil",
+  "blastRadius",
+  "velocity",
+  "accuracy",
+  "airborne",
+  "defense",
+  "health",
+  "weaponStat",
+  "melee",
+  "grenade",
+  "super",
+  "classAbility",
+]);
+
+const armorStatKeys = ["weaponStat", "health", "classAbility", "grenade", "super", "melee"];
+const armorTier5Values = { primary: 30, secondary: 25, tertiary: 20 };
+const armorArchetypeStats = {
+  4227065942: { primary: "super", secondary: "melee" },
+  549468645: { primary: "health", secondary: "classAbility" },
+  2937665788: { primary: "grenade", secondary: "super" },
+  3349393475: { primary: "melee", secondary: "health" },
+  1807652646: { primary: "weaponStat", secondary: "grenade" },
+  2230428468: { primary: "classAbility", secondary: "weaponStat" },
+};
+
+const statGlyphLabels = {
+  weaponStat: "WPN",
+  health: "HP",
+  classAbility: "CLS",
+  grenade: "GRN",
+  super: "SUP",
+  melee: "MEL",
+};
+
+const armorStatAbbrevLabels = {
+  weaponStat: "WPN",
+  health: "HP",
+  classAbility: "CLS",
+  grenade: "GRN",
+  super: "SUP",
+  melee: "MEL",
 };
 
 const els = {
@@ -341,6 +469,13 @@ function t(key) {
   return text[state.lang][key] || text.en[key] || key;
 }
 
+function statLabel(key, compactArmor = false) {
+  if (compactArmor && armorStatKeys.includes(key)) {
+    return armorStatAbbrevLabels[key] || key.slice(0, 3).toUpperCase();
+  }
+  return statLabels[state.lang][key] || key;
+}
+
 function groupLabel(id) {
   return t("groupLabels")[id] || id;
 }
@@ -374,6 +509,82 @@ function displayValue(value) {
   return value === undefined || value === null || value === "" ? "-" : value;
 }
 
+function hasDisplayValue(value) {
+  return value !== undefined && value !== null && value !== "";
+}
+
+function formatMs(value) {
+  return hasDisplayValue(value) ? `${displayValue(value)} ms` : displayValue(value);
+}
+
+function formatPercent(value) {
+  if (!hasDisplayValue(value)) return "";
+  const raw = String(value).trim();
+  if (raw.endsWith("%")) return raw;
+  const numeric = Number(raw);
+  if (!Number.isFinite(numeric)) return raw;
+  const percent = numeric > 1 ? numeric : numeric * 100;
+  return `${new Intl.NumberFormat(state.lang === "ja" ? "ja-JP" : "en-US", {
+    maximumFractionDigits: 1,
+  }).format(percent)}%`;
+}
+
+function formatBodyForgiveness(ttk) {
+  const shots = hasDisplayValue(ttk.bodyForgivenessShots) ? displayValue(ttk.bodyForgivenessShots) : "";
+  const pct = formatPercent(ttk.bodyForgivenessPct);
+  if (shots && pct) return `${shots} (${pct})`;
+  return shots || pct || "-";
+}
+
+function formatWpBonus(ttk) {
+  const bonus = formatPercent(ttk.wpBonusPct);
+  const maxBonus = formatPercent(ttk.wpMaxBonusPct);
+  if (bonus && maxBonus) return `${bonus} / max ${maxBonus}`;
+  return bonus || "-";
+}
+
+function ttkStatusLabel(status) {
+  if (!status) return t("notReady");
+  const normalized = String(status).toLowerCase();
+  if (normalized === "reference_needs_verification") return t("referenceNeedsVerification");
+  if (normalized === "reference_edge_case") return t("referenceEdgeCase");
+  if (normalized === "pending") return t("notReady");
+  return status;
+}
+
+function ttkScopeLabel(scope) {
+  const normalized = String(scope || "").toLowerCase();
+  if (normalized === "frame_baseline") return t("ttkScopeFrame");
+  if (normalized === "weapon_override") return t("ttkScopeWeapon");
+  return t("ttkScopePending");
+}
+
+function releaseSummary(row) {
+  const release = row.release || {};
+  const parts = [];
+  if (release.watermarkIcon || release.watermarkShelvedIcon || release.versionWatermarkIcons?.length) {
+    parts.push(t("releaseWatermark"));
+  }
+  if (release.collectibleHash) {
+    parts.push(`${t("collectible")} ${release.collectibleHash}`);
+  }
+  return parts.join(" / ");
+}
+
+function compactMetaLabel(value) {
+  const map = {
+    キネティックウェポン: "キネティック",
+    エネルギーウェポン: "エネルギー",
+    パワーウェポン: "パワー",
+    ヘビーウェポン: "ヘビー",
+    "Kinetic Weapons": "Kinetic",
+    "Energy Weapons": "Energy",
+    "Power Weapons": "Power",
+    "Heavy Weapons": "Heavy",
+  };
+  return map[value] || value;
+}
+
 async function loadJson(path) {
   const response = await fetch(path);
   if (!response.ok) throw new Error(`${response.status} ${path}`);
@@ -385,12 +596,13 @@ async function ensureData() {
     state.data.index = await loadJson("./data/index.json");
   }
   if (!state.data[state.lang]) {
-    const [catalog, facets, summary] = await Promise.all([
+    const [catalog, facets, summary, plugOptions] = await Promise.all([
       loadJson(`./data/catalog.${state.lang}.json`),
       loadJson(`./data/facets.${state.lang}.json`),
       loadJson(`./data/summary.${state.lang}.json`),
+      loadJson(`./data/plug_options.${state.lang}.json`).catch(() => ({})),
     ]);
-    state.data[state.lang] = { catalog, facets, summary };
+    state.data[state.lang] = { catalog, facets, summary, plugOptions };
   }
 }
 
@@ -439,12 +651,20 @@ function filterDefinitions() {
       ["weaponSlot", t("filterWeaponSlot")],
     ];
   }
-  if (state.section === "armor" || ["hunter", "warlock", "titan"].includes(state.section)) {
+  if (state.section === "armor" || (state.group !== "character" && ["hunter", "warlock", "titan"].includes(state.section))) {
     return [
       ["class", t("filterClass")],
       ["armorSlot", t("filterArmorSlot")],
       ["tier", t("filterRarity")],
       ["type", t("type")],
+    ];
+  }
+  if (state.group === "character") {
+    return [
+      ["type", t("type")],
+      ["class", t("filterClass")],
+      ["bucket", t("filterBucket")],
+      ["tier", t("filterRarity")],
     ];
   }
   return [
@@ -662,19 +882,449 @@ function statValue(row, key) {
 }
 
 function statPercent(row, key) {
+  if (!boundedStats.has(key)) return null;
   const value = Number(statValue(row, key) || 0);
-  const max = key === "rpm" || key === "chargeTime" || key === "drawTime" ? 1000 : key === "magazine" ? 120 : 100;
-  return Math.max(0, Math.min(100, (value / max) * 100));
+  return Math.max(0, Math.min(100, value));
+}
+
+function clampStat(value) {
+  const numeric = Number(value || 0);
+  return Math.max(0, Math.min(100, numeric));
+}
+
+function signedValue(value) {
+  const numeric = Number(value || 0);
+  if (!Number.isFinite(numeric) || numeric === 0) return "";
+  const formatted = Number.isInteger(numeric) ? String(numeric) : numeric.toFixed(1).replace(/\.0$/, "");
+  return `${numeric > 0 ? "+" : ""}${formatted}`;
+}
+
+function selectionKey(row, socket) {
+  return `${row.hash}:${socket.index}`;
+}
+
+function tertiarySelectionKey(row) {
+  return `${row.hash}:tertiary-toggle`;
+}
+
+function plugFieldOpen(row, socket) {
+  return Boolean(state.openPlugSockets[selectionKey(row, socket)]);
+}
+
+function selectedPlugSummary(row, socket) {
+  const plug = selectedPlugFor(row, socket);
+  if (!plug) {
+    return {
+      name: t("selectPlug"),
+      icon: "",
+      deltas: {},
+      description: "",
+    };
+  }
+  return {
+    name: plug.name,
+    icon: plug.icon,
+    deltas: displayStatDeltas(row, plug),
+    description: plug.description || "",
+  };
+}
+
+function dedupePlugOptions(socket, plugs) {
+  if (["masterwork", "armor_archetype"].includes(socket.kind)) return plugs;
+  const seen = new Set();
+  return plugs.filter((plug) => {
+    const key = [
+      plug.name || "",
+      plug.description || "",
+      plug.icon || "",
+      plug.identifier || "",
+      JSON.stringify(plug.statDeltas || {}),
+    ].join("|");
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function plugOptionsFor(row, socket) {
+  const options = langData().plugOptions || {};
+  let plugs = (socket.plugHashes || []).map((hash) => options[String(hash)]).filter(Boolean);
+  if (isArmorRow(row) && socket.kind === "armor_tuning") {
+    plugs = plugs.filter((plug) => isArmorTuningAllowed(row, plug));
+  }
+  return dedupePlugOptions(socket, plugs);
+}
+
+function selectedPlugFor(row, socket) {
+  const hash = state.selectedPlugs[selectionKey(row, socket)];
+  if (!hash) return null;
+  return (langData().plugOptions || {})[String(hash)] || null;
+}
+
+function selectedPlugsFor(row) {
+  return (row.plugSockets || []).map((socket) => selectedPlugFor(row, socket)).filter(Boolean);
+}
+
+function armorArchetypeSocket(row) {
+  return (row.plugSockets || []).find((socket) => socket.kind === "armor_archetype") || null;
+}
+
+function armorArchetypeConfigForPlug(plug) {
+  return armorArchetypeStats[String(plug?.hash)] || null;
+}
+
+function armorTertiaryStateKey(row) {
+  return `${row.hash}:tertiary`;
+}
+
+function armorArchetypeSelection(row) {
+  const socket = armorArchetypeSocket(row);
+  if (!socket) return null;
+  const plug = selectedPlugFor(row, socket);
+  const config = armorArchetypeConfigForPlug(plug);
+  if (!plug || !config) return null;
+  return { socket, plug, config };
+}
+
+function armorTertiaryOptions(row) {
+  const selection = armorArchetypeSelection(row);
+  if (!selection) return [];
+  const fixed = new Set([selection.config.primary, selection.config.secondary]);
+  return armorStatKeys.filter((key) => !fixed.has(key));
+}
+
+function selectedArmorTertiary(row) {
+  const selected = state.armorTertiary[armorTertiaryStateKey(row)];
+  return armorTertiaryOptions(row).includes(selected) ? selected : "";
+}
+
+function armorArchetypeBaseDeltas(plug) {
+  const config = armorArchetypeConfigForPlug(plug);
+  if (!config) return {};
+  return {
+    [config.primary]: armorTier5Values.primary,
+    [config.secondary]: armorTier5Values.secondary,
+  };
+}
+
+function armorArchetypeDeltas(row) {
+  const selection = armorArchetypeSelection(row);
+  if (!selection) return {};
+  const deltas = armorArchetypeBaseDeltas(selection.plug);
+  const tertiary = selectedArmorTertiary(row);
+  if (tertiary) {
+    deltas[tertiary] = armorTier5Values.tertiary;
+  }
+  return deltas;
+}
+
+function isArmorMasterworkPlug(plug) {
+  return /v460\.plugs\.armor\.masterworks/i.test(plug?.identifier || "");
+}
+
+function isArmorTuningPlug(plug) {
+  return /core\.gear_systems\.armor_tiering\.plugs\.tuning\.mods/i.test(plug?.identifier || "");
+}
+
+function positiveArmorStatForPlug(plug) {
+  const positives = armorStatKeys.filter((key) => Number(plug?.statDeltas?.[key] || 0) > 0);
+  return positives.length === 1 ? positives[0] : "";
+}
+
+function isBalancedArmorTuningPlug(plug) {
+  const deltas = plug?.statDeltas || {};
+  return armorStatKeys.every((key) => Number(deltas[key] || 0) === 1);
+}
+
+function isArmorTuningAllowed(row, plug) {
+  if (!isArmorRow(row) || !isArmorTuningPlug(plug)) return true;
+  const deltas = plug?.statDeltas || {};
+  if (!Object.keys(deltas).length || isBalancedArmorTuningPlug(plug)) return true;
+  const tertiary = selectedArmorTertiary(row);
+  return Boolean(tertiary && positiveArmorStatForPlug(plug) === tertiary);
+}
+
+function clearInvalidArmorTuningSelection(row) {
+  (row.plugSockets || [])
+    .filter((socket) => socket.kind === "armor_tuning")
+    .forEach((socket) => {
+      const key = selectionKey(row, socket);
+      const plug = selectedPlugFor(row, socket);
+      if (plug && !isArmorTuningAllowed(row, plug)) {
+        delete state.selectedPlugs[key];
+      }
+    });
+}
+
+function armorMasterworkDeltas(row, plug) {
+  if (!isArmorRow(row) || !isArmorMasterworkPlug(plug)) return null;
+  const selection = armorArchetypeSelection(row);
+  if (!selection) return plug?.statDeltas || {};
+  const tertiary = selectedArmorTertiary(row);
+  if (!tertiary) return {};
+  const topStats = new Set([selection.config.primary, selection.config.secondary, tertiary]);
+  return Object.fromEntries(
+    Object.entries(plug?.statDeltas || {}).filter(([key]) => armorStatKeys.includes(key) && !topStats.has(key))
+  );
+}
+
+function applicableStatDeltas(row, plug) {
+  if (armorArchetypeConfigForPlug(plug)) return {};
+  if (!isArmorTuningAllowed(row, plug)) return {};
+  const deltas = armorMasterworkDeltas(row, plug) ?? plug?.statDeltas ?? {};
+  const allowed = new Set(Object.keys(row.stats || {}));
+  if (isArmorRow(row)) {
+    armorStatKeys.forEach((key) => allowed.add(key));
+  }
+  if (!allowed.size) return deltas;
+  return Object.fromEntries(
+    Object.entries(deltas).filter(([key]) => allowed.has(key))
+  );
+}
+
+function displayStatDeltas(row, plug) {
+  if (armorArchetypeConfigForPlug(plug)) {
+    const selection = armorArchetypeSelection(row);
+    if (selection && Number(selection.plug.hash) === Number(plug.hash)) {
+      return armorArchetypeDeltas(row);
+    }
+    return armorArchetypeBaseDeltas(plug);
+  }
+  return applicableStatDeltas(row, plug);
+}
+
+function statDeltasFor(row) {
+  const deltas = {};
+  Object.entries(armorArchetypeDeltas(row)).forEach(([key, value]) => {
+    const numeric = Number(value || 0);
+    if (!Number.isFinite(numeric) || numeric === 0) return;
+    deltas[key] = (deltas[key] || 0) + numeric;
+  });
+  selectedPlugsFor(row).forEach((plug) => {
+    Object.entries(applicableStatDeltas(row, plug)).forEach(([key, value]) => {
+      const numeric = Number(value || 0);
+      if (!Number.isFinite(numeric) || numeric === 0) return;
+      deltas[key] = (deltas[key] || 0) + numeric;
+    });
+  });
+  Object.entries(manualArmorDeltas(row)).forEach(([key, value]) => {
+    deltas[key] = (deltas[key] || 0) + Number(value || 0);
+  });
+  return deltas;
+}
+
+function isArmorRow(row) {
+  return (row.sections || []).includes("armor");
+}
+
+function isClassItem(row) {
+  return /class items|class armor|cloak|mark|bond|クラス/i.test(`${row.armorSlot || ""} ${row.type || ""}`);
+}
+
+function hasNewArmorStats(row) {
+  return armorStatKeys.some((key) => Number(row.stats?.[key] || 0) > 0);
+}
+
+function hasNewArmorSystem(row) {
+  return (row.plugSockets || []).some((socket) => ["armor_archetype", "armor_tuning"].includes(socket.kind));
+}
+
+function shouldShowManualArmor(row) {
+  return isArmorRow(row) && !isClassItem(row) && !hasNewArmorStats(row) && !hasNewArmorSystem(row);
+}
+
+function manualArmorValues(row) {
+  const existing = state.manualArmor[row.hash] || {};
+  const values = {};
+  armorStatKeys.forEach((key) => {
+    const raw = existing[key] ?? row.stats?.[key] ?? 0;
+    values[key] = Math.max(0, Math.min(42, Number(raw || 0)));
+  });
+  return values;
+}
+
+function manualArmorDeltas(row) {
+  if (!shouldShowManualArmor(row)) return {};
+  const values = manualArmorValues(row);
+  const deltas = {};
+  armorStatKeys.forEach((key) => {
+    const base = Number(row.stats?.[key] || 0);
+    deltas[key] = values[key] - base;
+  });
+  return deltas;
+}
+
+function adjustedStats(stats, deltas) {
+  const merged = { ...(stats || {}) };
+  Object.entries(deltas || {}).forEach(([key, delta]) => {
+    const base = Number(merged[key] || 0);
+    if (!Number.isFinite(base)) return;
+    merged[key] = base + Number(delta || 0);
+  });
+  return merged;
+}
+
+function statDeltaChips(deltas, compactArmor = false) {
+  const entries = Object.entries(deltas || {}).filter(([, value]) => Number(value || 0) !== 0);
+  if (!entries.length) return `<span class="delta-empty">${esc(t("noStatChanges"))}</span>`;
+  return entries
+    .map(([key, value]) => {
+      const numeric = Number(value || 0);
+      const tone = numeric > 0 ? "positive" : "negative";
+      const label = statLabel(key, compactArmor);
+      return `<span class="delta-chip delta-chip--${tone}">${esc(label)} ${esc(signedValue(numeric))}</span>`;
+    })
+    .join("");
+}
+
+function plugOptionLabel(row, plug) {
+  const deltaText = Object.entries(displayStatDeltas(row, plug))
+    .filter(([, value]) => Number(value || 0) !== 0)
+    .map(([key, value]) => `${statLabel(key, isArmorRow(row))} ${signedValue(value)}`)
+    .join(" / ");
+  return deltaText ? `${plug.name} (${deltaText})` : plug.name;
+}
+
+function renderPlugBuilder(row) {
+  const sockets = row.plugSockets || [];
+  const manualArmor = renderManualArmorTuning(row);
+  if (!sockets.length && !manualArmor) return "";
+  return `
+    <section class="panel plug-builder">
+      <h3>${esc(t("perksMods"))}</h3>
+      ${sockets.length ? renderSocketSelectors(row, sockets) : ""}
+      ${manualArmor}
+    </section>
+  `;
+}
+
+function renderSocketSelectors(row, sockets) {
+  return `
+    <div class="plug-grid">
+      ${sockets
+        .map((socket) => {
+          const selectedHash = state.selectedPlugs[selectionKey(row, socket)] || "";
+          const options = plugOptionsFor(row, socket);
+          if (!options.length) return "";
+          const isOpen = plugFieldOpen(row, socket);
+          const summary = selectedPlugSummary(row, socket);
+          const toggleLabel = isOpen ? t("closeChoices") : t("openChoices");
+          const tertiarySelector = socket.kind === "armor_archetype" ? renderArmorTertiarySelector(row) : "";
+          return `
+            <div class="plug-field${isOpen ? " is-open" : ""}">
+              <button class="plug-toggle" type="button" data-plug-toggle data-socket-index="${esc(socket.index)}" aria-expanded="${esc(String(isOpen))}">
+                ${summary.icon ? `<img class="plug-toggle-icon" src="${esc(summary.icon)}" alt="">` : `<span class="plug-toggle-icon plug-toggle-icon--empty">OFF</span>`}
+                <span class="plug-toggle-main">
+                  <strong>${esc(socket.label)}</strong>
+                  <span>${esc(summary.name)}</span>
+                  <span class="plug-toggle-deltas">${statDeltaChips(summary.deltas, isArmorRow(row))}</span>
+                </span>
+                <span class="plug-toggle-action">${esc(toggleLabel)}</span>
+              </button>
+              ${
+                isOpen
+                  ? `<div class="plug-option-grid" role="listbox" aria-label="${esc(socket.label)}">
+                      <button class="plug-option plug-option--clear${selectedHash ? "" : " is-selected"}" type="button" data-plug-button data-socket-index="${esc(socket.index)}" data-plug-hash="" title="${esc(t("selectPlug"))}" aria-pressed="${esc(String(!selectedHash))}">
+                        <span class="plug-option-icon">OFF</span>
+                        <span class="plug-option-name">${esc(t("selectPlug"))}</span>
+                      </button>
+                      ${options.map((plug) => renderPlugOption(row, socket, plug, selectedHash)).join("")}
+                    </div>`
+                  : ""
+              }
+            </div>
+            ${tertiarySelector}
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
+function renderArmorTertiarySelector(row) {
+  const options = armorTertiaryOptions(row);
+  if (!options.length) return "";
+  const current = selectedArmorTertiary(row);
+  const isOpen = Boolean(state.openPlugSockets[tertiarySelectionKey(row)]);
+  const currentLabel = current ? statLabel(current, true) : t("selectPlug");
+  const toggleLabel = isOpen ? t("closeChoices") : t("openChoices");
+  return `
+    <div class="plug-field plug-field--tertiary${isOpen ? " is-open" : ""}">
+      <button class="plug-toggle" type="button" data-armor-tertiary-toggle aria-expanded="${esc(String(isOpen))}">
+        <span class="plug-toggle-icon stat-glyph">${esc(current ? statGlyphLabels[current] || current.slice(0, 3).toUpperCase() : "T5")}</span>
+        <span class="plug-toggle-main">
+          <strong>${esc(t("armorTertiary"))} <span class="plug-field-sub">${esc(t("armorTier5"))}</span></strong>
+          <span>${esc(currentLabel)}</span>
+          <span class="plug-toggle-deltas">${current ? statDeltaChips({ [current]: armorTier5Values.tertiary }, true) : statDeltaChips({})}</span>
+        </span>
+        <span class="plug-toggle-action">${esc(toggleLabel)}</span>
+      </button>
+      ${
+        isOpen
+          ? `<div class="plug-option-grid plug-option-grid--stat" role="listbox" aria-label="${esc(t("armorTertiary"))}">
+              ${options
+                .map((key) => {
+                  const label = statLabel(key, true);
+                  const isSelected = current === key;
+                  return `
+                    <button class="plug-option plug-option--stat${isSelected ? " is-selected" : ""}" type="button" data-armor-tertiary="${esc(key)}" title="${esc(`${label} +${armorTier5Values.tertiary}`)}" aria-pressed="${esc(String(isSelected))}">
+                      <span class="plug-option-icon stat-glyph">${esc(statGlyphLabels[key] || label.slice(0, 3).toUpperCase())}</span>
+                      <span class="plug-option-name">${esc(label)}</span>
+                      <span class="plug-option-delta">+${esc(armorTier5Values.tertiary)}</span>
+                    </button>
+                  `;
+                })
+                .join("")}
+            </div>`
+          : ""
+      }
+    </div>
+  `;
+}
+
+function renderPlugOption(row, socket, plug, selectedHash) {
+  const isSelected = Number(selectedHash) === Number(plug.hash);
+  const title = plugOptionLabel(row, plug);
+  return `
+    <button class="plug-option${isSelected ? " is-selected" : ""}" type="button" data-plug-button data-socket-index="${esc(socket.index)}" data-plug-hash="${esc(plug.hash)}" title="${esc(title)}" aria-pressed="${esc(String(isSelected))}">
+      ${plug.icon ? `<img class="plug-option-icon" src="${esc(plug.icon)}" alt="">` : `<span class="plug-option-icon placeholder-icon"></span>`}
+      <span class="plug-option-name">${esc(plug.name)}</span>
+    </button>
+  `;
+}
+
+function renderManualArmorTuning(row) {
+  if (!shouldShowManualArmor(row)) return "";
+  const values = manualArmorValues(row);
+  return `
+    <div class="manual-armor">
+      <div class="manual-armor-head">
+        <h4>${esc(t("manualArmorTuning"))}</h4>
+        <span>${esc(t("manualArmorNote"))}</span>
+      </div>
+      <div class="manual-armor-grid">
+        ${armorStatKeys
+          .map((key) => `
+            <label class="manual-stat">
+              <span>${esc(statLabel(key, true))}</span>
+              <input type="range" min="0" max="42" step="1" value="${esc(values[key])}" data-armor-stat="${esc(key)}">
+              <strong>${esc(values[key])}</strong>
+            </label>
+          `)
+          .join("")}
+      </div>
+    </div>
+  `;
 }
 
 function detailSummary(row) {
   if ((row.sections || []).includes("weapons")) {
-    return [row.ammo, row.damageType, row.weaponSlot].filter(Boolean).join(" / ");
+    return [row.ammo, row.damageType, row.weaponSlot].filter(Boolean).map(compactMetaLabel).join(" / ");
   }
   if ((row.sections || []).includes("armor")) {
-    return [row.class, row.armorSlot, row.tier].filter(Boolean).join(" / ");
+    return [row.class, row.armorSlot, row.tier].filter(Boolean).map(compactMetaLabel).join(" / ");
   }
-  return [row.bucket, row.tier].filter(Boolean).join(" / ");
+  return [row.bucket, row.tier].filter(Boolean).map(compactMetaLabel).join(" / ");
 }
 
 function renderList() {
@@ -712,9 +1362,9 @@ function renderIcon(row, className) {
 
 function renderResultRow(row) {
   const selected = row.hash === state.selectedHash ? " is-selected" : "";
-  const type = row.weaponType || row.armorSlot || row.type || row.sectionLabel;
+  const type = compactMetaLabel(row.weaponType || row.armorSlot || row.type || row.sectionLabel);
   const detail = detailSummary(row);
-  const sub = [row.bucket, row.tier].filter(Boolean).join(" / ");
+  const sub = [row.bucket, row.tier].filter(Boolean).map(compactMetaLabel).join(" / ");
   return `
     <button class="result-row${selected}" type="button" data-hash="${esc(row.hash)}">
       ${renderIcon(row, "item-icon")}
@@ -767,7 +1417,7 @@ function renderServerRequired() {
   `;
 }
 
-function renderStats(stats) {
+function renderStats(stats, deltas = {}, compactArmor = false) {
   const order = [
     "impact",
     "range",
@@ -785,22 +1435,53 @@ function renderStats(stats) {
     "drawTime",
     "accuracy",
     "airborne",
-    "defense",
+    "weaponStat",
     "health",
+    "classAbility",
+    "grenade",
+    "super",
+    "melee",
+    "defense",
   ];
-  const rows = order.filter((key) => stats?.[key] !== undefined);
+  const rows = order.filter((key) => stats?.[key] !== undefined || deltas?.[key] !== undefined);
   if (!rows.length) return `<div class="notice">${esc(t("notReady"))}</div>`;
   return `
     <div class="stat-grid">
       ${rows
         .map((key) => {
-          const value = stats[key];
+          const value = stats?.[key] ?? 0;
+          const delta = Number(deltas[key] || 0);
+          const adjusted = Number(value || 0) + delta;
           const pct = statPercent({ stats }, key);
+          const adjustedPct = boundedStats.has(key) ? clampStat(adjusted) : null;
+          const deltaText = signedValue(delta);
+          const deltaTone = delta > 0 ? "positive" : "negative";
+          const deltaBar =
+            pct !== null && delta > 0 && adjustedPct > pct
+              ? `<span class="bar-delta bar-delta--positive" style="left:${pct}%;width:${adjustedPct - pct}%"></span>`
+              : pct !== null && delta < 0 && adjustedPct < pct
+                ? `<span class="bar-delta bar-delta--negative" style="left:${adjustedPct}%;width:${pct - adjustedPct}%"></span>`
+                : "";
           return `
-            <div class="stat-row">
-              <span>${esc(statLabels[state.lang][key] || key)}</span>
-              <span class="bar"><span style="width:${pct}%"></span></span>
-              <strong>${esc(displayValue(value))}</strong>
+            <div class="stat-row${pct === null ? " stat-row--raw" : ""}">
+              <div class="stat-head">
+                <span>${esc(statLabel(key, compactArmor))}</span>
+                <strong class="stat-value">
+                  ${esc(displayValue(delta ? adjusted : value))}
+                  ${deltaText ? `<em class="stat-delta stat-delta--${deltaTone}">${esc(deltaText)}</em>` : ""}
+                </strong>
+              </div>
+              ${
+                pct === null
+                  ? ""
+                  : `<div class="stat-meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${esc(adjustedPct)}">
+                      <span class="bar">
+                        <span class="bar-base" style="width:${pct}%"></span>
+                        ${deltaBar}
+                      </span>
+                      <span class="stat-scale"><span>0</span><span>100</span></span>
+                    </div>`
+              }
             </div>
           `;
         })
@@ -820,27 +1501,58 @@ function renderKv(rows) {
   `;
 }
 
+function renderMetricCards(rows, className = "") {
+  const cards = rows
+    .filter(([, value]) => value !== undefined && value !== null && value !== "")
+    .map(([label, value]) => `
+      <div class="metric-card">
+        <span>${esc(label)}</span>
+        <strong>${esc(value)}</strong>
+      </div>
+    `)
+    .join("");
+  return `<div class="metric-grid ${esc(className)}">${cards}</div>`;
+}
+
 function renderTtk(row) {
   if (!(row.sections || []).includes("weapons")) return "";
   const ttk = row.ttk || {};
-  const hasValue = ttk.optimalTtkMs || ttk.bodyTtkMs;
+  const hasValue = [
+    ttk.basePrecisionDamage,
+    ttk.baseBodyDamage,
+    ttk.precisionDamage,
+    ttk.bodyDamage,
+    ttk.optimalTtkMs,
+    ttk.bodyTtkMs,
+    ttk.critShots,
+    ttk.bodyShots,
+    ttk.bodyForgivenessShots,
+    ttk.bodyForgivenessPct,
+  ].some(hasDisplayValue);
   return `
-    <div class="detail-grid wide-grid">
-      <section class="panel">
-        <h3>${esc(t("ttk"))}</h3>
-        <div class="notice">${esc(hasValue ? t("ttkNote") : t("ttkPending"))}</div>
-        ${renderKv([
-          [t("status"), ttk.status || t("notReady")],
-          [t("mode"), ttk.mode || "PvP"],
-          [t("sandboxVersion"), ttk.sandboxVersion],
-          [t("resilienceTier"), ttk.resilienceTier],
-          [t("optimalTtk"), ttk.optimalTtkMs ? `${ttk.optimalTtkMs} ms` : ""],
-          [t("bodyTtk"), ttk.bodyTtkMs ? `${ttk.bodyTtkMs} ms` : ""],
-          [t("conditions"), ttk.conditions],
-          [t("source"), ttk.sourceExtractionId || "data/static/ttk/ttk_candidates.csv"],
-        ])}
-      </section>
-    </div>
+    <section class="panel pvp-panel">
+      <h3>${esc(t("ttk"))}</h3>
+      <div class="notice compact-notice">${esc(hasValue ? t("ttkNote") : t("ttkPending"))}</div>
+      ${renderMetricCards([
+        [t("basePrecisionDamage"), displayValue(ttk.basePrecisionDamage)],
+        [t("baseBodyDamage"), displayValue(ttk.baseBodyDamage)],
+        [t("precisionDamage"), displayValue(ttk.precisionDamage)],
+        [t("bodyDamage"), displayValue(ttk.bodyDamage)],
+        [t("optimalTtk"), formatMs(ttk.optimalTtkMs)],
+        [t("bodyTtk"), formatMs(ttk.bodyTtkMs)],
+        [t("critShots"), displayValue(ttk.critShots)],
+        [t("bodyShots"), displayValue(ttk.bodyShots)],
+        [t("bodyForgiveness"), formatBodyForgiveness(ttk)],
+      ], "pvp-metric-grid")}
+      ${renderKv([
+        [t("ttkScope"), ttkScopeLabel(ttk.sourceScope)],
+        [t("status"), ttkStatusLabel(ttk.status)],
+        [t("mode"), ttk.mode || "PvP"],
+        [t("sandboxVersion"), displayValue(ttk.sandboxVersion)],
+        [t("conditions"), ttk.conditions],
+        [t("source"), ttk.sourceExtractionId || "data/static/ttk/ttk_candidates.csv"],
+      ])}
+    </section>
   `;
 }
 
@@ -858,6 +1570,10 @@ function renderDetail(row) {
     row.tier,
   ].filter(Boolean);
   const plugSets = row.plugSetHashes ? row.plugSetHashes.length : 0;
+  const statDeltas = statDeltasFor(row);
+  const release = releaseSummary(row);
+  const plugBuilder = renderPlugBuilder(row);
+  const ttkPanel = renderTtk(row);
 
   els.detail.innerHTML = `
     <div class="detail-shell">
@@ -867,6 +1583,7 @@ function renderDetail(row) {
           <div class="detail-title-row">
             <h2>${esc(row.name)}</h2>
             <span class="hash-chip">${esc(row.hash)}</span>
+            ${row.release?.watermarkIcon ? `<img class="release-mark" src="${esc(row.release.watermarkIcon)}" alt="" title="${esc(t("releaseWatermark"))}">` : ""}
           </div>
           <div class="badge-line">
             ${badges.map((badge) => `<span class="badge">${esc(badge)}</span>`).join("")}
@@ -875,32 +1592,98 @@ function renderDetail(row) {
         </div>
       </div>
 
-      <div class="detail-grid">
-        <section class="panel">
-          <h3>${esc(t("stats"))}</h3>
-          ${renderStats(row.stats)}
-        </section>
-        <section class="panel">
-          <h3>${esc(t("metadata"))}</h3>
-          ${renderKv([
-            [t("hash"), row.hash],
-            [t("category"), `${groupLabel(row.primaryGroup)} / ${row.sectionLabel || sectionLabel(row.primarySection)}`],
-            [t("type"), row.type],
-            [t("bucket"), row.bucket],
-            [t("rarity"), row.tier],
-            [t("class"), row.class],
-            [t("weaponSlot"), row.weaponSlot],
-            [t("ammo"), row.ammo],
-            [t("damage"), row.damageType],
-            [t("categories"), row.categories],
-            [t("plugSets"), plugSets || ""],
-          ])}
-        </section>
+      <div class="detail-workspace${plugBuilder ? "" : " detail-workspace--no-builder"}${ttkPanel ? "" : " detail-workspace--no-ttk"}">
+        <div class="detail-core">
+          <section class="panel">
+            <h3>${esc(t("stats"))}</h3>
+            ${renderStats(row.stats, statDeltas, isArmorRow(row))}
+          </section>
+          <section class="panel">
+            <h3>${esc(t("metadata"))}</h3>
+            ${renderKv([
+              [t("hash"), row.hash],
+              [t("category"), `${groupLabel(row.primaryGroup)} / ${row.sectionLabel || sectionLabel(row.primarySection)}`],
+              [t("type"), row.type],
+              [t("bucket"), row.bucket],
+              [t("rarity"), row.tier],
+              [t("class"), row.class],
+              [t("weaponSlot"), row.weaponSlot],
+              [t("weaponFrame"), row.weaponFrame],
+              [t("weaponArchetype"), row.weaponArchetype],
+              [t("ammo"), row.ammo],
+              [t("damage"), row.damageType],
+              [t("release"), release],
+              [t("categories"), row.categories],
+              [t("plugSets"), plugSets || ""],
+            ])}
+          </section>
+        </div>
+        ${plugBuilder ? `<div class="detail-builder">${plugBuilder}</div>` : ""}
+        ${ttkPanel ? `<aside class="detail-side">${ttkPanel}</aside>` : ""}
       </div>
-
-      ${renderTtk(row)}
     </div>
   `;
+
+  els.detail.querySelectorAll("[data-plug-button]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const socket = (row.plugSockets || []).find((entry) => String(entry.index) === String(button.dataset.socketIndex));
+      if (!socket) return;
+      const key = selectionKey(row, socket);
+      if (button.dataset.plugHash) {
+        state.selectedPlugs[key] = Number(button.dataset.plugHash);
+      } else {
+        delete state.selectedPlugs[key];
+      }
+      if (socket.kind === "armor_archetype") {
+        const tertiaryKey = armorTertiaryStateKey(row);
+        const tertiary = state.armorTertiary[tertiaryKey];
+        if (tertiary && !armorTertiaryOptions(row).includes(tertiary)) {
+          delete state.armorTertiary[tertiaryKey];
+        }
+        state.openPlugSockets[tertiarySelectionKey(row)] = Boolean(button.dataset.plugHash);
+        clearInvalidArmorTuningSelection(row);
+      }
+      delete state.openPlugSockets[key];
+      renderDetail(row);
+    });
+  });
+  els.detail.querySelectorAll("[data-plug-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const socket = (row.plugSockets || []).find((entry) => String(entry.index) === String(button.dataset.socketIndex));
+      if (!socket) return;
+      const key = selectionKey(row, socket);
+      state.openPlugSockets[key] = !state.openPlugSockets[key];
+      renderDetail(row);
+    });
+  });
+  els.detail.querySelectorAll("[data-armor-tertiary-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const key = tertiarySelectionKey(row);
+      state.openPlugSockets[key] = !state.openPlugSockets[key];
+      renderDetail(row);
+    });
+  });
+  els.detail.querySelectorAll("[data-armor-tertiary]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const key = button.dataset.armorTertiary;
+      if (!key) return;
+      state.armorTertiary[armorTertiaryStateKey(row)] = key;
+      delete state.openPlugSockets[tertiarySelectionKey(row)];
+      clearInvalidArmorTuningSelection(row);
+      renderDetail(row);
+    });
+  });
+  els.detail.querySelectorAll("[data-armor-stat]").forEach((input) => {
+    input.addEventListener("input", () => {
+      const key = input.dataset.armorStat;
+      if (!key) return;
+      if (!state.manualArmor[row.hash]) {
+        state.manualArmor[row.hash] = manualArmorValues(row);
+      }
+      state.manualArmor[row.hash][key] = Number(input.value || 0);
+      renderDetail(row);
+    });
+  });
 }
 
 async function refresh() {
