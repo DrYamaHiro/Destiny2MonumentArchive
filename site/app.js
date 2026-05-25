@@ -22,6 +22,16 @@ const taxonomy = [
   { id: "all", defaultSection: "all", sections: ["all"] },
 ];
 
+const weaponGenerationOrder = [
+  "year1_fixed",
+  "year2_random",
+  "craftable",
+  "enhanceable",
+  "new_tiered",
+  "fixed_exotic",
+  "fixed_legacy",
+];
+
 const text = {
   ja: {
     title: "データベース",
@@ -51,7 +61,7 @@ const text = {
     sortSlot: "スロット",
     sortDamage: "属性",
     sortFrame: "フレーム",
-    sortWeaponSystem: "新武器",
+    sortWeaponSystem: "世代",
     filterWeaponType: "武器種",
     filterAmmo: "弾薬",
     filterDamage: "属性",
@@ -95,8 +105,17 @@ const text = {
     weaponSlot: "武器スロット",
     weaponFrame: "フレーム",
     weaponArchetype: "アーキタイプ",
-    weaponSystemNew: "新武器 / Tier付き・エキゾチック",
-    weaponSystemLegacy: "旧武器 / 非Tierレジェンダリー",
+    weaponSystemLabels: {
+      year1_fixed: "1年目 / 固定パーク",
+      year2_random: "2年目以降 / ランダムパーク",
+      craftable: "クラフト武器",
+      enhanceable: "強化武器",
+      new_tiered: "新武器 / Tier付き",
+      fixed_exotic: "エキゾチック / 固定パーク",
+      fixed_legacy: "固定ロール / 儀式・レア等",
+      new: "新武器 / Tier付き",
+      legacy: "旧武器",
+    },
     release: "追加情報",
     releaseWatermark: "シーズン/拡張アイコン",
     releaseInline: "追加時期",
@@ -214,7 +233,7 @@ const text = {
     sortSlot: "Slot",
     sortDamage: "Damage",
     sortFrame: "Frame",
-    sortWeaponSystem: "New weapon",
+    sortWeaponSystem: "Generation",
     filterWeaponType: "Weapon type",
     filterAmmo: "Ammo",
     filterDamage: "Damage",
@@ -258,8 +277,17 @@ const text = {
     weaponSlot: "Weapon slot",
     weaponFrame: "Frame",
     weaponArchetype: "Archetype",
-    weaponSystemNew: "New / tiered Legendary or Exotic",
-    weaponSystemLegacy: "Legacy / non-tiered Legendary",
+    weaponSystemLabels: {
+      year1_fixed: "Year 1 / fixed roll",
+      year2_random: "Year 2+ / random roll",
+      craftable: "Craftable",
+      enhanceable: "Enhanceable",
+      new_tiered: "New / tiered",
+      fixed_exotic: "Exotic / fixed roll",
+      fixed_legacy: "Legacy fixed roll",
+      new: "New / tiered",
+      legacy: "Legacy",
+    },
     release: "Release info",
     releaseWatermark: "Season/expansion watermark",
     releaseInline: "Release",
@@ -678,13 +706,18 @@ function isWeaponRow(row) {
   return (row.sections || []).includes("weapons");
 }
 
-function isTieredWeapon(row) {
-  return isWeaponRow(row) && Boolean(row.isNewWeapon || row.weaponSystem === "new");
+function weaponGenerationId(row) {
+  if (!isWeaponRow(row)) return "";
+  if (row.weaponGeneration) return row.weaponGeneration;
+  if (row.weaponSystem === "new") return "new_tiered";
+  if (row.weaponSystem === "legacy") return "year2_random";
+  return row.weaponSystem || "";
 }
 
 function weaponSystemLabel(row) {
   if (!isWeaponRow(row)) return "";
-  return isTieredWeapon(row) ? t("weaponSystemNew") : t("weaponSystemLegacy");
+  const generation = weaponGenerationId(row);
+  return t("weaponSystemLabels")[generation] || generation;
 }
 
 function metadataRows(row, release, plugSets) {
@@ -844,7 +877,7 @@ function valueFor(row, key) {
 
 function distinct(rows, key) {
   if (key === "weaponSystem") {
-    const ordered = [t("weaponSystemNew"), t("weaponSystemLegacy")];
+    const ordered = weaponGenerationOrder.map((generation) => t("weaponSystemLabels")[generation]).filter(Boolean);
     return ordered.filter((value) => rows.some((row) => valueFor(row, key) === value));
   }
   return [...new Set(rows.map((row) => valueFor(row, key)).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
@@ -1137,7 +1170,8 @@ function damageRank(row) {
 
 function weaponSystemRank(row) {
   if (!isWeaponRow(row)) return 99;
-  return isTieredWeapon(row) ? 0 : 1;
+  const rank = weaponGenerationOrder.indexOf(weaponGenerationId(row));
+  return rank === -1 ? 98 : rank;
 }
 
 function sortRows(rows) {

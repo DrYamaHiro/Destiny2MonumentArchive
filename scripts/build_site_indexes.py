@@ -58,7 +58,31 @@ RELEASE_SEASON_BY_VERSION = {
     "v950": 29,
 }
 
-NEW_WEAPON_RELEASE_VERSION = 900
+YEAR1_RELEASE_VERSION_MAX = 320
+DEEPSIGHT_SOCKET_TYPE_HASH = 1085237186
+ENHANCEMENT_SOCKET_TYPE_HASH = 4251072212
+WEAPON_TIERING_SOCKET_TYPE_HASHES = {939327520, 1680508191, 2433793611}
+
+WEAPON_GENERATION_LABELS = {
+    "en": {
+        "year1_fixed": "Year 1 / fixed roll",
+        "year2_random": "Year 2+ / random roll",
+        "craftable": "Craftable",
+        "enhanceable": "Enhanceable",
+        "new_tiered": "New / tiered",
+        "fixed_exotic": "Exotic / fixed roll",
+        "fixed_legacy": "Legacy fixed roll",
+    },
+    "ja": {
+        "year1_fixed": "1年目 / 固定パーク",
+        "year2_random": "2年目以降 / ランダムパーク",
+        "craftable": "クラフト武器",
+        "enhanceable": "強化武器",
+        "new_tiered": "新武器 / Tier付き",
+        "fixed_exotic": "エキゾチック / 固定パーク",
+        "fixed_legacy": "固定ロール / 儀式・レア等",
+    },
+}
 
 STAT_HASH_ALIASES = {
     4043523819: "impact",
@@ -554,14 +578,6 @@ def is_legendary_item(row: dict[str, Any]) -> bool:
     return str(row.get("tierTypeName") or "").lower() == "legendary" or row.get("tierType") == 5
 
 
-def is_new_weapon(row: dict[str, Any], release: dict[str, Any]) -> bool:
-    if row.get("itemType") != 3:
-        return False
-    if is_exotic_item(row):
-        return True
-    return is_legendary_item(row) and release_version_number(release) >= NEW_WEAPON_RELEASE_VERSION
-
-
 def stat_map(row: dict[str, Any]) -> dict[str, int | float]:
     stats: dict[str, int | float] = {}
     for stat in row.get("statValues") or []:
@@ -734,6 +750,62 @@ def plug_search_text(plug: dict[str, Any]) -> str:
             plug.get("description") or "",
         ]
     ).lower()
+
+
+def has_random_weapon_roll(row: dict[str, Any]) -> bool:
+    return any(socket.get("randomizedPlugSetHash") for socket in row.get("socketEntries") or [])
+
+
+def socket_type_hashes(row: dict[str, Any]) -> set[int]:
+    hashes: set[int] = set()
+    for socket in row.get("socketEntries") or []:
+        try:
+            hashes.add(int(socket.get("socketTypeHash") or 0))
+        except (TypeError, ValueError):
+            continue
+    return hashes
+
+
+def weapon_generation_profile(
+    row: dict[str, Any],
+    release: dict[str, Any],
+) -> dict[str, Any]:
+    if row.get("itemType") != 3:
+        return {}
+
+    socket_types = socket_type_hashes(row)
+    has_tier = bool(socket_types.intersection(WEAPON_TIERING_SOCKET_TYPE_HASHES))
+    is_enhanceable = ENHANCEMENT_SOCKET_TYPE_HASH in socket_types
+    is_craftable = DEEPSIGHT_SOCKET_TYPE_HASH in socket_types
+    has_random_roll = has_random_weapon_roll(row)
+    release_version = release_version_number(release)
+
+    if has_tier:
+        generation = "new_tiered"
+    elif is_enhanceable:
+        generation = "enhanceable"
+    elif is_craftable:
+        generation = "craftable"
+    elif release_version and release_version <= YEAR1_RELEASE_VERSION_MAX:
+        generation = "year1_fixed"
+    elif is_exotic_item(row):
+        generation = "fixed_exotic"
+    elif has_random_roll:
+        generation = "year2_random"
+    else:
+        generation = "fixed_legacy"
+
+    return {
+        "generation": generation,
+        "hasWeaponTier": has_tier,
+        "isEnhanceable": is_enhanceable,
+        "isCraftable": is_craftable,
+        "hasRandomRoll": has_random_roll,
+    }
+
+
+def weapon_generation_label(lang: str, generation: str) -> str:
+    return WEAPON_GENERATION_LABELS.get(lang, WEAPON_GENERATION_LABELS["en"]).get(generation, generation)
 
 
 def is_excluded_plug(plug: dict[str, Any]) -> bool:
@@ -1503,7 +1575,7 @@ def compact_catalog_item(
     ttk_by_hash: dict[int, dict[str, Any]],
     ttk_by_archetype: dict[tuple[str, str], dict[str, Any]],
     plugs_by_hash: dict[int, dict[str, Any]],
-    plug_sets: dict[int, list[int]],
+    plug_sets: dict[int, list[dict[str, Any]]],
     release_lookup: dict[int, dict[str, Any]],
     used_plug_hashes: set[int],
 ) -> dict[str, Any]:
@@ -1533,31 +1605,39 @@ def compact_catalog_item(
     if classification["isWeapon"]:
         ttk, weapon_frame, weapon_archetype = ttk_for_weapon(row, ttk_by_hash, ttk_by_archetype, plugs_by_hash)
     release = release_info_for(row, release_lookup)
+    weapon_profile = (
+        weapon_generation_profile(row, release)
+        if classification["isWeapon"]
+        else {}
+    )
+    weapon_generation = weapon_profile.get("generation") or ""
+    weapon_generation_text = weapon_generation_label(lang, weapon_generation) if weapon_generation else ""
 
-    search = " ".join(
-        [
-            row.get("name") or "",
-            row.get("description") or "",
-            row.get("itemTypeDisplayName") or "",
-            row.get("bucketName") or "",
-            row.get("tierTypeName") or "",
-            class_label,
-            weapon_type,
-            weapon_slot,
-            damage_type,
-            AMMO_LABEL.get(ammo_type, AMMO_LABEL[0]).get(lang, ""),
-            armor_slot,
-            weapon_frame,
-            weapon_archetype,
-            release.get("sourceString") or "",
-            str(release.get("collectibleHash") or ""),
-            release.get("releaseVersion") or "",
-            str(release.get("seasonNumber") or ""),
-            release.get("seasonName") or "",
-            " ".join(row.get("categoryNames") or []),
-            " ".join(SECTION_LABELS[lang].get(section, section) for section in classification["sections"]),
-        ]
-    ).lower()
+    search_parts = [
+        row.get("name") or "",
+        row.get("description") or "",
+        row.get("itemTypeDisplayName") or "",
+        row.get("bucketName") or "",
+        row.get("tierTypeName") or "",
+        class_label,
+        weapon_type,
+        weapon_slot,
+        damage_type,
+        AMMO_LABEL.get(ammo_type, AMMO_LABEL[0]).get(lang, ""),
+        armor_slot,
+        weapon_frame,
+        weapon_archetype,
+        release.get("sourceString") or "",
+        str(release.get("collectibleHash") or ""),
+        release.get("releaseVersion") or "",
+        str(release.get("seasonNumber") or ""),
+        release.get("seasonName") or "",
+        " ".join(row.get("categoryNames") or []),
+        " ".join(SECTION_LABELS[lang].get(section, section) for section in classification["sections"]),
+    ]
+    if classification["isWeapon"]:
+        search_parts.extend([weapon_generation, weapon_generation_text])
+    search = " ".join(search_parts).lower()
 
     return {
         "hash": row.get("hash"),
@@ -1583,8 +1663,19 @@ def compact_catalog_item(
         "weaponFrame": weapon_frame if classification["isWeapon"] else "",
         "weaponArchetype": weapon_archetype if classification["isWeapon"] else "",
         "weaponSlot": weapon_slot if classification["isWeapon"] else "",
-        "weaponSystem": "new" if classification["isWeapon"] and is_new_weapon(row, release) else ("legacy" if classification["isWeapon"] else ""),
-        "isNewWeapon": bool(classification["isWeapon"] and is_new_weapon(row, release)),
+        "weaponSystem": weapon_generation if classification["isWeapon"] else "",
+        "isNewWeapon": bool(weapon_generation == "new_tiered"),
+        **(
+            {
+                "weaponGeneration": weapon_generation,
+                "isCraftable": bool(weapon_profile.get("isCraftable")),
+                "isEnhanceable": bool(weapon_profile.get("isEnhanceable")),
+                "hasWeaponTier": bool(weapon_profile.get("hasWeaponTier")),
+                "hasRandomRoll": bool(weapon_profile.get("hasRandomRoll")),
+            }
+            if classification["isWeapon"]
+            else {}
+        ),
         "ammoType": ammo_type,
         "ammo": AMMO_LABEL.get(ammo_type, AMMO_LABEL[0]).get(lang, ""),
         "damageTypes": damage_types,
