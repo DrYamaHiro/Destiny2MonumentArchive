@@ -10,7 +10,7 @@
   <header class="topbar">
     <div class="brand">
       <p class="brand-kicker">D2 Monument Archive</p>
-      <h1 id="pageTitle">静的DB</h1>
+      <h1 id="pageTitle">閲覧DB</h1>
       <p class="manifest" id="manifestMeta">Manifest</p>
     </div>
     <div class="header-actions">
@@ -21,11 +21,10 @@
     </div>
   </header>
 
-  <nav class="view-tabs" aria-label="Views">
-    <button class="tab is-active" data-view="weapons" type="button">武器</button>
-    <button class="tab" data-view="armor" type="button">エキゾ防具</button>
-    <button class="tab" data-view="ttk" type="button">TTK</button>
-  </nav>
+  <section class="taxonomy-shell" aria-label="Catalog navigation">
+    <nav class="group-nav" id="groupNav" aria-label="Major categories"></nav>
+    <div class="section-rail" id="sectionRail" aria-label="Subcategories"></div>
+  </section>
 
   <section class="summary-band" id="summaryBand" aria-label="Summary"></section>
 
@@ -47,6 +46,14 @@
         <label class="field">
           <span id="filterSecondaryLabel">弾薬</span>
           <select id="secondaryFilter"></select>
+        </label>
+        <label class="field">
+          <span id="filterTertiaryLabel">属性</span>
+          <select id="tertiaryFilter"></select>
+        </label>
+        <label class="field">
+          <span id="filterQuaternaryLabel">スロット</span>
+          <select id="quaternaryFilter"></select>
         </label>
         <label class="field">
           <span id="sortLabel">並び替え</span>

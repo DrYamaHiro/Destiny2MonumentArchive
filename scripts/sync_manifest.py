@@ -201,6 +201,16 @@ def class_name(item: dict[str, Any], class_defs: dict[str, Any]) -> str:
     return ""
 
 
+def damage_type_names(item: dict[str, Any], damage_defs: dict[str, Any]) -> list[str]:
+    names: list[str] = []
+    for damage_hash in item.get("damageTypeHashes") or []:
+        damage_def = damage_defs.get(str(damage_hash)) or {}
+        name = display(damage_def).get("name") or ""
+        if name:
+            names.append(name)
+    return names
+
+
 def compact_item_base(
     hash_key: str,
     item: dict[str, Any],
@@ -208,6 +218,7 @@ def compact_item_base(
     bucket_defs: dict[str, Any],
     stat_defs: dict[str, Any],
     class_defs: dict[str, Any],
+    damage_defs: dict[str, Any],
 ) -> dict[str, Any]:
     shown = display(item)
     inventory = item.get("inventory") or {}
@@ -240,9 +251,63 @@ def compact_item_base(
         "ammoType": equipping.get("ammoType"),
         "damageTypes": item.get("damageTypes") or [],
         "damageTypeHashes": item.get("damageTypeHashes") or [],
+        "damageTypeNames": damage_type_names(item, damage_defs),
         "statValues": stat_values(item, stat_defs),
         "plugSetHashes": sorted(set(plug_set_hashes)),
     }
+
+
+CATALOG_ITEM_TYPES = {
+    2,   # Armor
+    3,   # Weapons
+    8,   # Engrams
+    9,   # Consumables
+    12,  # Quest steps
+    14,  # Emblems
+    19,  # Mods, perks, cosmetics
+    20,  # Lore and records
+    21,  # Ships
+    22,  # Vehicles/Sparrows
+    24,  # Ghost shells
+    25,  # Packages
+    26,  # Bounties
+}
+
+CATALOG_CATEGORY_HASHES = {
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,  # weapons and weapon types
+    18, 19, 20, 21, 22, 23,  # currency, emblems, armor, classes
+    35, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 52, 53, 54, 55, 56, 58, 59,
+    153950757,    # Grenade Launchers
+    2489664120,   # Trace Rifles
+    3317538576,   # Bows
+    3871742104,   # Glaives
+    3954685534,   # Submachine Guns
+    1504945536,   # Linear Fusion Rifles
+    610365472,    # Weapon Mods
+    979,          # Armor Mods
+    1449602859,   # Ghost Mods
+    4176831154,   # Ghost Mod Perks
+    1404791674,   # Ghost Projections
+    177260082,    # Ship Mods
+    203,          # Transmat Effects
+    598,          # Weapon Mod Ornaments
+    3124752623,   # Weapon Mod Ornaments
+    1378222069,   # Seasonal Artifacts
+    1112488720,   # Finishers
+}
+
+
+def include_catalog_item(item: dict[str, Any]) -> bool:
+    shown = display(item)
+    if not shown["name"]:
+        return False
+
+    category_hashes = set(item.get("itemCategoryHashes") or [])
+    if item.get("equippingBlock") or item.get("plug"):
+        return True
+    if item.get("itemType") in CATALOG_ITEM_TYPES:
+        return True
+    return bool(category_hashes & CATALOG_CATEGORY_HASHES)
 
 
 def extract_textdb(version: str, language: str, components: dict[str, dict[str, Any]]) -> dict[str, int]:
@@ -251,9 +316,12 @@ def extract_textdb(version: str, language: str, components: dict[str, dict[str, 
     buckets = components.get("DestinyInventoryBucketDefinition") or {}
     stats = components.get("DestinyStatDefinition") or {}
     classes = components.get("DestinyClassDefinition") or {}
+    damage_types = components.get("DestinyDamageTypeDefinition") or {}
     sandbox_perks = components.get("DestinySandboxPerkDefinition") or {}
 
+    catalog_items: list[dict[str, Any]] = []
     weapons: list[dict[str, Any]] = []
+    armor: list[dict[str, Any]] = []
     exotic_armor: list[dict[str, Any]] = []
     plugs: list[dict[str, Any]] = []
 
@@ -264,10 +332,16 @@ def extract_textdb(version: str, language: str, components: dict[str, dict[str, 
 
         item_type = item.get("itemType")
         tier_type = (item.get("inventory") or {}).get("tierType")
-        base = compact_item_base(hash_key, item, categories, buckets, stats, classes)
+        base = compact_item_base(hash_key, item, categories, buckets, stats, classes, damage_types)
+
+        if include_catalog_item(item):
+            catalog_items.append(base)
 
         if item_type == 3 and item.get("equippingBlock"):
             weapons.append(base)
+
+        if item_type == 2 and item.get("equippingBlock"):
+            armor.append(base)
 
         if item_type == 2 and tier_type == 6 and item.get("equippingBlock"):
             exotic_armor.append(base)
@@ -304,16 +378,20 @@ def extract_textdb(version: str, language: str, components: dict[str, dict[str, 
             }
         )
 
-    for rows in (weapons, exotic_armor, plugs, sandbox_rows):
+    for rows in (catalog_items, weapons, armor, exotic_armor, plugs, sandbox_rows):
         rows.sort(key=lambda row: (row.get("name") or "", row.get("hash") or 0))
 
+    write_json(TEXTDB_DIR / f"catalog_items.{language}.json", catalog_items)
     write_json(TEXTDB_DIR / f"weapons.{language}.json", weapons)
+    write_json(TEXTDB_DIR / f"armor.{language}.json", armor)
     write_json(TEXTDB_DIR / f"exotic_armor.{language}.json", exotic_armor)
     write_json(TEXTDB_DIR / f"plugs.{language}.json", plugs)
     write_json(TEXTDB_DIR / f"sandbox_perks.{language}.json", sandbox_rows)
 
     return {
+        "catalogItems": len(catalog_items),
         "weapons": len(weapons),
+        "armor": len(armor),
         "exoticArmor": len(exotic_armor),
         "plugs": len(plugs),
         "sandboxPerks": len(sandbox_rows),
@@ -389,7 +467,9 @@ def main() -> int:
         **summary,
         "counts": counts,
         "outputs": {
+            "catalogItems": [f"catalog_items.{lang}.json" for lang in args.languages],
             "weapons": [f"weapons.{lang}.json" for lang in args.languages],
+            "armor": [f"armor.{lang}.json" for lang in args.languages],
             "exoticArmor": [f"exotic_armor.{lang}.json" for lang in args.languages],
             "plugs": [f"plugs.{lang}.json" for lang in args.languages],
             "sandboxPerks": [f"sandbox_perks.{lang}.json" for lang in args.languages],

@@ -2,106 +2,252 @@ const LIMIT = 250;
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
-  view: "weapons",
+  group: "equipment",
+  section: "weapons",
   sort: "name",
   data: {},
   selectedHash: null,
 };
 
+const taxonomy = [
+  { id: "character", defaultSection: "hunter", sections: ["all", "hunter", "warlock", "titan", "subclasses"] },
+  { id: "equipment", defaultSection: "weapons", sections: ["all", "weapons", "armor", "ghosts", "ships", "sparrows", "emblems", "artifacts", "clan_banners"] },
+  { id: "appearance", defaultSection: "emotes", sections: ["all", "emotes", "finishers", "shaders", "weapon_ornaments", "armor_ornaments", "ghost_projections", "transmat_effects"] },
+  { id: "inventory", defaultSection: "quests", sections: ["all", "quests", "bounties", "lore", "engrams", "packages", "consumables", "materials", "currencies"] },
+  { id: "mods", defaultSection: "weapon_mods", sections: ["all", "weapon_mods", "armor_mods", "ghost_mods", "perks", "traits", "intrinsics", "enhanced_traits"] },
+  { id: "all", defaultSection: "all", sections: ["all"] },
+];
+
 const text = {
   ja: {
-    title: "静的DB",
+    title: "閲覧DB",
     manifest: "Manifest",
     synced: "同期",
     loading: "読み込み中",
     search: "検索",
-    searchPlaceholder: "名前、タイプ、Hash",
-    type: "タイプ",
-    ammo: "弾薬",
-    class: "クラス",
-    slot: "部位",
-    sort: "並び替え",
+    searchPlaceholder: "名称、説明、カテゴリ、Hash",
     reset: "リセット",
     all: "すべて",
-    tabWeapons: "武器",
-    tabArmor: "エキゾ防具",
-    tabTtk: "TTK",
     results: "件",
     showing: "表示",
     noRows: "一致なし",
-    item: "項目",
     name: "名前",
-    range: "射程",
-    stat: "数値",
+    category: "分類",
+    type: "タイプ",
+    detail: "詳細",
+    sort: "並び替え",
+    sortName: "名前",
+    sortType: "タイプ",
+    sortSection: "分類",
+    sortRange: "射程",
+    sortImpact: "威力",
+    sortRpm: "RPM",
+    filterWeaponType: "武器種",
+    filterAmmo: "弾薬",
+    filterDamage: "属性",
+    filterWeaponSlot: "スロット",
+    filterClass: "クラス",
+    filterArmorSlot: "防具部位",
+    filterRarity: "レアリティ",
+    filterSection: "細分類",
+    filterBucket: "所持枠",
     stats: "主要ステータス",
     metadata: "メタデータ",
-    sourceStatus: "出典/状態",
+    ttk: "PvP TTK",
+    ttkPending: "未反映。Bungie更新情報、検証台帳、PvP体力+シールド基準を確認してから武器別に反映します。",
+    ttkNote: "TTKは武器ごとのPvPデータとして保持します。タブではなく、この武器詳細に紐づく値です。",
     hash: "Hash",
     bucket: "スロット",
     rarity: "レアリティ",
     categories: "カテゴリ",
     plugSets: "Plug sets",
-    weapons: "武器",
-    exoticArmor: "エキゾ防具",
-    topType: "最多タイプ",
-    topClass: "最多クラス",
-    textOnly: "テキストDB",
-    ttk: "TTK",
-    ttkBody: "TTKはBungie更新情報と検証台帳から順次反映します。Manifestだけでは確定しません。",
+    class: "クラス",
+    ammo: "弾薬",
+    damage: "属性",
+    weaponSlot: "武器スロット",
+    mode: "モード",
+    status: "状態",
+    sandboxVersion: "Sandbox",
+    resilienceTier: "耐久",
+    optimalTtk: "最適TTK",
+    bodyTtk: "胴撃ちTTK",
+    conditions: "条件",
+    source: "出典",
     notReady: "未反映",
-    sortName: "名前",
-    sortType: "タイプ",
-    sortRange: "射程",
-    sortImpact: "威力",
-    sortRpm: "RPM",
-    sortClass: "クラス",
+    catalog: "全カタログ",
+    weapons: "武器",
+    armor: "防具",
+    exoticArmor: "エキゾ防具",
+    currentScope: "現在の範囲",
+    groupLabels: {
+      character: "キャラクター",
+      equipment: "装備",
+      appearance: "外観/コレクション",
+      inventory: "所持品/進行",
+      mods: "改造/パーク",
+      all: "全データ",
+    },
+    groupSub: {
+      character: "ハンター、ウォーロック、タイタン",
+      equipment: "武器、防具、ゴースト、船など",
+      appearance: "感情表現、装飾、シェーダー",
+      inventory: "クエスト、伝承、素材、通貨",
+      mods: "武器/防具/ゴースト改造と特性",
+      all: "分類をまたいで検索",
+    },
+    sectionLabels: {
+      all: "すべて",
+      hunter: "ハンター",
+      warlock: "ウォーロック",
+      titan: "タイタン",
+      subclasses: "サブクラス",
+      weapons: "武器",
+      armor: "防具",
+      ghosts: "ゴースト",
+      ships: "船",
+      sparrows: "スパロー",
+      emblems: "エンブレム",
+      artifacts: "シーズンアーティファクト",
+      clan_banners: "クランバナー",
+      emotes: "感情表現",
+      finishers: "フィニッシャー",
+      shaders: "シェーダー",
+      weapon_ornaments: "武器装飾",
+      armor_ornaments: "防具装飾",
+      ghost_projections: "ゴーストのプロジェクション",
+      transmat_effects: "トランスマット効果",
+      quests: "クエスト",
+      bounties: "バウンティ",
+      lore: "伝承",
+      engrams: "エングラム",
+      packages: "パッケージ",
+      consumables: "消費アイテム",
+      materials: "材料",
+      currencies: "通貨",
+      weapon_mods: "武器改造パーツ",
+      armor_mods: "防具改造パーツ",
+      ghost_mods: "ゴースト改造パーツ",
+      perks: "パーク",
+      traits: "特性",
+      intrinsics: "内在効果",
+      enhanced_traits: "強化特性",
+      other: "その他",
+    },
   },
   en: {
-    title: "Static DB",
+    title: "Catalog DB",
     manifest: "Manifest",
     synced: "Synced",
     loading: "Loading",
     search: "Search",
-    searchPlaceholder: "Name, type, hash",
-    type: "Type",
-    ammo: "Ammo",
-    class: "Class",
-    slot: "Slot",
-    sort: "Sort",
+    searchPlaceholder: "Name, description, category, hash",
     reset: "Reset",
     all: "All",
-    tabWeapons: "Weapons",
-    tabArmor: "Exotic Armor",
-    tabTtk: "TTK",
     results: "results",
     showing: "Showing",
     noRows: "No matches",
-    item: "Item",
     name: "Name",
-    range: "Range",
-    stat: "Stat",
+    category: "Category",
+    type: "Type",
+    detail: "Detail",
+    sort: "Sort",
+    sortName: "Name",
+    sortType: "Type",
+    sortSection: "Category",
+    sortRange: "Range",
+    sortImpact: "Impact",
+    sortRpm: "RPM",
+    filterWeaponType: "Weapon type",
+    filterAmmo: "Ammo",
+    filterDamage: "Damage",
+    filterWeaponSlot: "Slot",
+    filterClass: "Class",
+    filterArmorSlot: "Armor slot",
+    filterRarity: "Rarity",
+    filterSection: "Subcategory",
+    filterBucket: "Bucket",
     stats: "Core Stats",
     metadata: "Metadata",
-    sourceStatus: "Source/Status",
+    ttk: "PvP TTK",
+    ttkPending: "Not applied. Fill per weapon after checking Bungie updates, verification tracking, and the PvP health+shield baseline.",
+    ttkNote: "TTK is stored as weapon-level PvP data. It belongs to this weapon detail, not a sibling tab.",
     hash: "Hash",
     bucket: "Slot",
     rarity: "Rarity",
     categories: "Categories",
     plugSets: "Plug sets",
-    weapons: "Weapons",
-    exoticArmor: "Exotic armor",
-    topType: "Top type",
-    topClass: "Top class",
-    textOnly: "Text DB",
-    ttk: "TTK",
-    ttkBody: "TTK will be filled from Bungie updates and verification tracking. It cannot be finalized from Manifest alone.",
+    class: "Class",
+    ammo: "Ammo",
+    damage: "Damage",
+    weaponSlot: "Weapon slot",
+    mode: "Mode",
+    status: "Status",
+    sandboxVersion: "Sandbox",
+    resilienceTier: "Resilience",
+    optimalTtk: "Optimal TTK",
+    bodyTtk: "Body TTK",
+    conditions: "Conditions",
+    source: "Source",
     notReady: "Not applied",
-    sortName: "Name",
-    sortType: "Type",
-    sortRange: "Range",
-    sortImpact: "Impact",
-    sortRpm: "RPM",
-    sortClass: "Class",
+    catalog: "Catalog",
+    weapons: "Weapons",
+    armor: "Armor",
+    exoticArmor: "Exotic armor",
+    currentScope: "Current scope",
+    groupLabels: {
+      character: "Character",
+      equipment: "Equipment",
+      appearance: "Appearance/Collections",
+      inventory: "Inventory/Progress",
+      mods: "Mods/Perks",
+      all: "All Data",
+    },
+    groupSub: {
+      character: "Hunter, Warlock, Titan",
+      equipment: "Weapons, armor, Ghosts, ships",
+      appearance: "Emotes, ornaments, shaders",
+      inventory: "Quests, lore, materials, currency",
+      mods: "Weapon, armor, Ghost mods and traits",
+      all: "Search across categories",
+    },
+    sectionLabels: {
+      all: "All",
+      hunter: "Hunter",
+      warlock: "Warlock",
+      titan: "Titan",
+      subclasses: "Subclasses",
+      weapons: "Weapons",
+      armor: "Armor",
+      ghosts: "Ghosts",
+      ships: "Ships",
+      sparrows: "Sparrows",
+      emblems: "Emblems",
+      artifacts: "Seasonal Artifacts",
+      clan_banners: "Clan Banners",
+      emotes: "Emotes",
+      finishers: "Finishers",
+      shaders: "Shaders",
+      weapon_ornaments: "Weapon Ornaments",
+      armor_ornaments: "Armor Ornaments",
+      ghost_projections: "Ghost Projections",
+      transmat_effects: "Transmat Effects",
+      quests: "Quests",
+      bounties: "Bounties",
+      lore: "Lore",
+      engrams: "Engrams",
+      packages: "Packages",
+      consumables: "Consumables",
+      materials: "Materials",
+      currencies: "Currencies",
+      weapon_mods: "Weapon Mods",
+      armor_mods: "Armor Mods",
+      ghost_mods: "Ghost Mods",
+      perks: "Perks",
+      traits: "Traits",
+      intrinsics: "Intrinsics",
+      enhanced_traits: "Enhanced Traits",
+      other: "Other",
+    },
   },
 };
 
@@ -153,16 +299,21 @@ const els = {
   manifestMeta: document.getElementById("manifestMeta"),
   langJa: document.getElementById("langJa"),
   langEn: document.getElementById("langEn"),
-  tabs: Array.from(document.querySelectorAll(".tab")),
+  groupNav: document.getElementById("groupNav"),
+  sectionRail: document.getElementById("sectionRail"),
   summaryBand: document.getElementById("summaryBand"),
   searchLabel: document.getElementById("searchLabel"),
   searchInput: document.getElementById("searchInput"),
   clearButton: document.getElementById("clearButton"),
   filterPrimaryLabel: document.getElementById("filterPrimaryLabel"),
   filterSecondaryLabel: document.getElementById("filterSecondaryLabel"),
+  filterTertiaryLabel: document.getElementById("filterTertiaryLabel"),
+  filterQuaternaryLabel: document.getElementById("filterQuaternaryLabel"),
   sortLabel: document.getElementById("sortLabel"),
   primaryFilter: document.getElementById("primaryFilter"),
   secondaryFilter: document.getElementById("secondaryFilter"),
+  tertiaryFilter: document.getElementById("tertiaryFilter"),
+  quaternaryFilter: document.getElementById("quaternaryFilter"),
   sortSelect: document.getElementById("sortSelect"),
   resultStatus: document.getElementById("resultStatus"),
   activeFilterLabel: document.getElementById("activeFilterLabel"),
@@ -171,8 +322,27 @@ const els = {
   detail: document.getElementById("detail"),
 };
 
+const filterControls = [
+  { label: els.filterPrimaryLabel, select: els.primaryFilter },
+  { label: els.filterSecondaryLabel, select: els.secondaryFilter },
+  { label: els.filterTertiaryLabel, select: els.tertiaryFilter },
+  { label: els.filterQuaternaryLabel, select: els.quaternaryFilter },
+];
+
 function t(key) {
   return text[state.lang][key] || text.en[key] || key;
+}
+
+function groupLabel(id) {
+  return t("groupLabels")[id] || id;
+}
+
+function groupSub(id) {
+  return t("groupSub")[id] || "";
+}
+
+function sectionLabel(id) {
+  return t("sectionLabels")[id] || id;
 }
 
 function esc(value) {
@@ -192,6 +362,10 @@ function shortVersion(value) {
   return String(value).split("-")[0];
 }
 
+function displayValue(value) {
+  return value === undefined || value === null || value === "" ? "-" : value;
+}
+
 async function loadJson(path) {
   const response = await fetch(path);
   if (!response.ok) throw new Error(`${response.status} ${path}`);
@@ -203,42 +377,86 @@ async function ensureData() {
     state.data.index = await loadJson("./data/index.json");
   }
   if (!state.data[state.lang]) {
-    const [weapons, armor, facets, summary] = await Promise.all([
-      loadJson(`./data/weapons.${state.lang}.json`),
-      loadJson(`./data/exotic_armor.${state.lang}.json`),
+    const [catalog, facets, summary] = await Promise.all([
+      loadJson(`./data/catalog.${state.lang}.json`),
       loadJson(`./data/facets.${state.lang}.json`),
       loadJson(`./data/summary.${state.lang}.json`),
     ]);
-    state.data[state.lang] = { weapons, armor, facets, summary };
+    state.data[state.lang] = { catalog, facets, summary };
   }
 }
 
-function currentRows() {
-  const langData = state.data[state.lang];
-  if (!langData) return [];
-  if (state.view === "armor") return langData.armor;
-  if (state.view === "ttk") return [];
-  return langData.weapons;
+function langData() {
+  return state.data[state.lang] || {};
 }
 
-function rowPrimary(row) {
-  return state.view === "armor" ? row.class : row.type;
+function currentTaxonomy() {
+  return taxonomy.find((item) => item.id === state.group) || taxonomy[1];
 }
 
-function rowSecondary(row) {
-  return state.view === "armor" ? row.type : row.ammo;
+function defaultSection(group = state.group) {
+  return (taxonomy.find((item) => item.id === group) || taxonomy[1]).defaultSection;
 }
 
-function defaultSort(view = state.view) {
-  return view === "armor" ? "class" : "name";
+function countFrom(list, id) {
+  return (list || []).find((row) => row.label === id)?.count || 0;
 }
 
-function displayValue(value) {
-  return value === undefined || value === null || value === "" ? "-" : value;
+function rowMatchesContext(row) {
+  if (state.group !== "all" && !(row.groups || []).includes(state.group)) return false;
+  if (state.section !== "all" && !(row.sections || []).includes(state.section)) return false;
+  return true;
 }
 
-function distinct(rows, getter) {
-  return [...new Set(rows.map(getter).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
+function contextRows() {
+  return (langData().catalog || []).filter(rowMatchesContext);
+}
+
+function valueFor(row, key) {
+  if (key === "section") return row.sectionLabel || sectionLabel(row.primarySection);
+  if (key === "group") return groupLabel(row.primaryGroup);
+  return row[key] || "";
+}
+
+function distinct(rows, key) {
+  return [...new Set(rows.map((row) => valueFor(row, key)).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
+}
+
+function filterDefinitions() {
+  if (state.section === "weapons") {
+    return [
+      ["weaponType", t("filterWeaponType")],
+      ["ammo", t("filterAmmo")],
+      ["damageType", t("filterDamage")],
+      ["weaponSlot", t("filterWeaponSlot")],
+    ];
+  }
+  if (state.section === "armor" || ["hunter", "warlock", "titan"].includes(state.section)) {
+    return [
+      ["class", t("filterClass")],
+      ["armorSlot", t("filterArmorSlot")],
+      ["tier", t("filterRarity")],
+      ["type", t("type")],
+    ];
+  }
+  return [
+    ["section", t("filterSection")],
+    ["type", t("type")],
+    ["bucket", t("filterBucket")],
+    ["tier", t("filterRarity")],
+  ];
+}
+
+function sortOptions() {
+  const base = [
+    ["name", t("sortName")],
+    ["section", t("sortSection")],
+    ["type", t("sortType")],
+  ];
+  if (state.section === "weapons") {
+    base.push(["range", t("sortRange")], ["impact", t("sortImpact")], ["rpm", t("sortRpm")]);
+  }
+  return base;
 }
 
 function setLanguage(lang) {
@@ -250,20 +468,29 @@ function setLanguage(lang) {
   refresh();
 }
 
-function setView(view) {
-  state.view = view;
+function setGroup(group) {
+  state.group = group;
+  state.section = defaultSection(group);
   state.selectedHash = null;
-  state.sort = defaultSort(view);
-  els.tabs.forEach((tab) => tab.classList.toggle("is-active", tab.dataset.view === view));
+  state.sort = "name";
+  clearFilters(false);
+  refresh();
+}
+
+function setSection(section) {
+  state.section = section;
+  state.selectedHash = null;
+  state.sort = "name";
   clearFilters(false);
   refresh();
 }
 
 function clearFilters(render = true) {
   els.searchInput.value = "";
-  els.primaryFilter.value = "";
-  els.secondaryFilter.value = "";
-  state.sort = defaultSort();
+  filterControls.forEach(({ select }) => {
+    select.value = "";
+  });
+  state.sort = "name";
   if (els.sortSelect) els.sortSelect.value = state.sort;
   if (render) renderList();
 }
@@ -276,57 +503,72 @@ function populateSelect(select, values, labelAll) {
   if (values.includes(selected)) select.value = selected;
 }
 
-function sortOptions() {
-  if (state.view === "armor") {
-    return [
-      ["class", t("sortClass")],
-      ["name", t("sortName")],
-      ["type", t("sortType")],
-    ];
-  }
-  return [
-    ["name", t("sortName")],
-    ["type", t("sortType")],
-    ["range", t("sortRange")],
-    ["impact", t("sortImpact")],
-    ["rpm", t("sortRpm")],
-  ];
-}
-
 function updateLabels() {
   els.pageTitle.textContent = t("title");
   els.searchLabel.textContent = t("search");
   els.searchInput.placeholder = t("searchPlaceholder");
   els.clearButton.textContent = t("reset");
-  els.filterPrimaryLabel.textContent = state.view === "armor" ? t("class") : t("type");
-  els.filterSecondaryLabel.textContent = state.view === "armor" ? t("slot") : t("ammo");
   els.sortLabel.textContent = t("sort");
-  els.tabs.forEach((tab) => {
-    if (tab.dataset.view === "weapons") tab.textContent = t("tabWeapons");
-    if (tab.dataset.view === "armor") tab.textContent = t("tabArmor");
-    if (tab.dataset.view === "ttk") tab.textContent = t("tabTtk");
-  });
-
   if (state.data.index) {
     els.manifestMeta.textContent = `${t("manifest")} ${shortVersion(state.data.index.manifestVersion)} / ${t("synced")} ${state.data.index.sourceSyncedAt}`;
   }
 }
 
+function renderGroupNav() {
+  const summary = langData().summary || {};
+  els.groupNav.innerHTML = taxonomy
+    .map((group) => {
+      const count = group.id === "all" ? summary.catalogCount : countFrom(summary.groupCounts, group.id);
+      const active = group.id === state.group ? " is-active" : "";
+      return `
+        <button class="group-tab${active}" type="button" data-group="${esc(group.id)}">
+          <span class="group-name">${esc(groupLabel(group.id))}</span>
+          <span class="group-sub">${esc(groupSub(group.id))}</span>
+          <span class="group-count">${esc(number(count))}</span>
+        </button>
+      `;
+    })
+    .join("");
+  els.groupNav.querySelectorAll(".group-tab").forEach((button) => {
+    button.addEventListener("click", () => setGroup(button.dataset.group));
+  });
+}
+
+function renderSectionRail() {
+  const summary = langData().summary || {};
+  const sections = currentTaxonomy().sections;
+  const rowsInGroup = state.group === "all" ? summary.catalogCount : countFrom(summary.groupCounts, state.group);
+  els.sectionRail.innerHTML = sections
+    .map((section) => {
+      const count = section === "all" ? rowsInGroup : countFrom(summary.sectionCounts, section);
+      const active = section === state.section ? " is-active" : "";
+      return `
+        <button class="section-chip${active}" type="button" data-section="${esc(section)}">
+          <span>${esc(sectionLabel(section))}</span>
+          <strong>${esc(number(count))}</strong>
+        </button>
+      `;
+    })
+    .join("");
+  els.sectionRail.querySelectorAll(".section-chip").forEach((button) => {
+    button.addEventListener("click", () => setSection(button.dataset.section));
+  });
+}
+
 function updateSummary() {
-  const langData = state.data[state.lang];
-  if (!langData) {
+  const summary = langData().summary;
+  if (!summary) {
     els.summaryBand.innerHTML = "";
     return;
   }
-  const summary = langData.summary;
-  const topType = summary.weaponTypes?.[0];
-  const topClass = summary.armorClasses?.[0];
-  const topAmmo = summary.ammo?.[0];
+  const topWeapon = summary.weaponTypes?.[0];
+  const topSection = summary.sectionCounts?.[0];
+  const scopeCount = contextRows().length;
   const metrics = [
-    [t("weapons"), number(summary.weaponCount), topType ? `${topType.label} ${number(topType.count)}` : ""],
-    [t("exoticArmor"), number(summary.exoticArmorCount), topClass ? `${topClass.label} ${number(topClass.count)}` : ""],
-    [state.view === "armor" ? t("topClass") : t("topType"), state.view === "armor" ? (topClass?.label || "") : (topType?.label || ""), state.view === "armor" ? `${number(topClass?.count)} ${t("results")}` : `${number(topType?.count)} ${t("results")}`],
-    [t("textOnly"), "JSON / CSV", topAmmo ? `${topAmmo.label} ${number(topAmmo.count)}` : shortVersion(summary.manifestVersion)],
+    [t("currentScope"), number(scopeCount), `${groupLabel(state.group)} / ${sectionLabel(state.section)}`],
+    [t("catalog"), number(summary.catalogCount), topSection ? `${sectionLabel(topSection.label)} ${number(topSection.count)}` : ""],
+    [t("weapons"), number(summary.weaponCount), topWeapon ? `${topWeapon.label} ${number(topWeapon.count)}` : ""],
+    [t("armor"), number(summary.armorCount), `${t("exoticArmor")} ${number(summary.exoticArmorCount)}`],
   ];
 
   els.summaryBand.innerHTML = metrics
@@ -341,41 +583,54 @@ function updateSummary() {
 }
 
 function updateControls() {
-  const rows = currentRows();
-  const isTtk = state.view === "ttk";
-  els.searchInput.disabled = isTtk;
-  els.primaryFilter.disabled = isTtk;
-  els.secondaryFilter.disabled = isTtk;
-  els.sortSelect.disabled = isTtk;
-  els.clearButton.disabled = isTtk;
-
-  populateSelect(els.primaryFilter, isTtk ? [] : distinct(rows, rowPrimary), t("all"));
-  populateSelect(els.secondaryFilter, isTtk ? [] : distinct(rows, rowSecondary), t("all"));
+  const rows = contextRows();
+  const defs = filterDefinitions();
+  filterControls.forEach((control, index) => {
+    const def = defs[index];
+    const field = control.label.closest(".field");
+    if (!def) {
+      field.classList.add("is-hidden");
+      control.select.innerHTML = "";
+      control.select.dataset.key = "";
+      return;
+    }
+    const [key, label] = def;
+    field.classList.remove("is-hidden");
+    control.label.textContent = label;
+    control.select.dataset.key = key;
+    populateSelect(control.select, distinct(rows, key), t("all"));
+  });
 
   const options = sortOptions();
   els.sortSelect.innerHTML = options.map(([value, label]) => `<option value="${esc(value)}">${esc(label)}</option>`).join("");
-  if (options.some(([value]) => value === state.sort)) els.sortSelect.value = state.sort;
+  if (options.some(([value]) => value === state.sort)) {
+    els.sortSelect.value = state.sort;
+  } else {
+    state.sort = "name";
+    els.sortSelect.value = state.sort;
+  }
 }
 
 function applyFilters(rows) {
   const query = els.searchInput.value.trim().toLowerCase();
-  const primary = els.primaryFilter.value;
-  const secondary = els.secondaryFilter.value;
   return rows
     .filter((row) => !query || row.search.includes(query) || String(row.hash).includes(query))
-    .filter((row) => !primary || rowPrimary(row) === primary)
-    .filter((row) => !secondary || rowSecondary(row) === secondary);
+    .filter((row) => filterControls.every(({ select }) => {
+      const key = select.dataset.key;
+      if (!key || !select.value) return true;
+      return valueFor(row, key) === select.value;
+    }));
 }
 
 function sortRows(rows) {
   const sorted = [...rows];
   const sort = state.sort;
   sorted.sort((a, b) => {
-    if (sort === "range" || sort === "impact" || sort === "rpm") {
+    if (["range", "impact", "rpm"].includes(sort)) {
       return Number(b.stats?.[sort] || b[sort] || 0) - Number(a.stats?.[sort] || a[sort] || 0) || String(a.name).localeCompare(String(b.name));
     }
-    if (sort === "class") {
-      return String(a.class || "").localeCompare(String(b.class || "")) || String(a.type || "").localeCompare(String(b.type || "")) || String(a.name).localeCompare(String(b.name));
+    if (sort === "section") {
+      return String(a.sectionLabel || "").localeCompare(String(b.sectionLabel || "")) || String(a.name).localeCompare(String(b.name));
     }
     if (sort === "type") {
       return String(a.type || "").localeCompare(String(b.type || "")) || String(a.name).localeCompare(String(b.name));
@@ -386,17 +641,11 @@ function sortRows(rows) {
 }
 
 function listRows() {
-  return sortRows(applyFilters(currentRows()));
+  return sortRows(applyFilters(contextRows()));
 }
 
 function renderColumnHead() {
-  if (state.view === "ttk") {
-    els.columnHead.innerHTML = "";
-    return;
-  }
-  const cells = state.view === "armor"
-    ? ["", t("name"), t("class"), t("slot"), t("stat")]
-    : ["", t("name"), t("type"), t("ammo"), t("range")];
+  const cells = ["", t("name"), t("category"), t("type"), t("detail")];
   els.columnHead.innerHTML = cells.map((cell) => `<span>${esc(cell)}</span>`).join("");
 }
 
@@ -410,16 +659,17 @@ function statPercent(row, key) {
   return Math.max(0, Math.min(100, (value / max) * 100));
 }
 
-function renderList() {
-  if (state.view === "ttk") {
-    els.resultStatus.textContent = t("notReady");
-    els.activeFilterLabel.textContent = "";
-    els.results.innerHTML = "";
-    renderColumnHead();
-    renderTtkDetail();
-    return;
+function detailSummary(row) {
+  if ((row.sections || []).includes("weapons")) {
+    return [row.ammo, row.damageType, row.weaponSlot].filter(Boolean).join(" / ");
   }
+  if ((row.sections || []).includes("armor")) {
+    return [row.class, row.armorSlot, row.tier].filter(Boolean).join(" / ");
+  }
+  return [row.bucket, row.tier].filter(Boolean).join(" / ");
+}
 
+function renderList() {
   const all = listRows();
   const visible = all.slice(0, LIMIT);
   els.resultStatus.textContent = `${number(all.length)} ${t("results")}`;
@@ -447,30 +697,26 @@ function renderList() {
   renderDetail(visible.find((row) => row.hash === state.selectedHash));
 }
 
+function renderIcon(row, className) {
+  if (!row.icon) return `<span class="${className} placeholder-icon"></span>`;
+  return `<img class="${className}" src="${esc(row.icon)}" alt="">`;
+}
+
 function renderResultRow(row) {
   const selected = row.hash === state.selectedHash ? " is-selected" : "";
-  const mainSub = state.view === "armor"
-    ? [row.class, row.type, row.bucket].filter(Boolean).join(" / ")
-    : [row.bucket, row.tier].filter(Boolean).join(" / ");
-  const third = state.view === "armor" ? row.class : row.type;
-  const fourth = state.view === "armor" ? row.type : row.ammo;
-  const statKey = state.view === "armor" ? "health" : "range";
-  const stat = statValue(row, statKey);
-  const pct = statPercent(row, statKey);
-
+  const type = row.weaponType || row.armorSlot || row.type || row.sectionLabel;
+  const detail = detailSummary(row);
+  const sub = [row.bucket, row.tier].filter(Boolean).join(" / ");
   return `
     <button class="result-row${selected}" type="button" data-hash="${esc(row.hash)}">
-      <img class="item-icon" src="${esc(row.icon)}" alt="">
+      ${renderIcon(row, "item-icon")}
       <span>
         <span class="row-name">${esc(row.name)}</span>
-        <span class="row-sub">${esc(mainSub)}</span>
+        <span class="row-sub">${esc(sub)}</span>
       </span>
-      <span class="row-cell">${esc(third)}</span>
-      <span class="row-cell mobile-hide">${esc(fourth)}</span>
-      <span class="row-stat mobile-hide">
-        <span>${esc(displayValue(stat))}</span>
-        <span class="mini-bar"><span style="width:${pct}%"></span></span>
-      </span>
+      <span class="row-cell">${esc(row.sectionLabel || sectionLabel(row.primarySection))}</span>
+      <span class="row-cell mobile-hide">${esc(type)}</span>
+      <span class="row-cell mobile-hide">${esc(detail || "-")}</span>
     </button>
   `;
 }
@@ -478,40 +724,7 @@ function renderResultRow(row) {
 function renderEmpty() {
   els.detail.innerHTML = `
     <div class="empty-state">
-      <h2>${esc(t("item"))}</h2>
-    </div>
-  `;
-}
-
-function renderTtkDetail() {
-  els.detail.innerHTML = `
-    <div class="detail-shell">
-      <div class="detail-hero">
-        <div class="detail-icon"></div>
-        <div>
-          <div class="detail-title-row">
-            <h2>${esc(t("ttk"))}</h2>
-            <span class="hash-chip">${esc(t("notReady"))}</span>
-          </div>
-          <div class="badge-line">
-            <span class="badge">source_patch_notes.csv</span>
-            <span class="badge">damage_extraction.csv</span>
-            <span class="badge">ttk_candidates.csv</span>
-          </div>
-          <p class="description">${esc(t("ttkBody"))}</p>
-        </div>
-      </div>
-      <div class="detail-grid wide-grid">
-        <section class="panel">
-          <h3>${esc(t("sourceStatus"))}</h3>
-          <ul class="source-list">
-            <li>data/static/ttk/source_patch_notes.csv</li>
-            <li>data/static/ttk/damage_extraction.csv</li>
-            <li>data/static/ttk/ttk_candidates.csv</li>
-            <li>docs/D2_Monument_Archive_Damage_Update_Tracker.xlsx</li>
-          </ul>
-        </section>
-      </div>
+      <h2>${esc(t("noRows"))}</h2>
     </div>
   `;
 }
@@ -558,18 +771,60 @@ function renderStats(stats) {
   `;
 }
 
+function renderKv(rows) {
+  return `
+    <table class="kv">
+      ${rows
+        .filter(([, value]) => value !== undefined && value !== null && value !== "" && (!Array.isArray(value) || value.length))
+        .map(([label, value]) => `<tr><th>${esc(label)}</th><td>${esc(Array.isArray(value) ? value.join(", ") : value)}</td></tr>`)
+        .join("")}
+    </table>
+  `;
+}
+
+function renderTtk(row) {
+  if (!(row.sections || []).includes("weapons")) return "";
+  const ttk = row.ttk || {};
+  const hasValue = ttk.optimalTtkMs || ttk.bodyTtkMs;
+  return `
+    <div class="detail-grid wide-grid">
+      <section class="panel">
+        <h3>${esc(t("ttk"))}</h3>
+        <div class="notice">${esc(hasValue ? t("ttkNote") : t("ttkPending"))}</div>
+        ${renderKv([
+          [t("status"), ttk.status || t("notReady")],
+          [t("mode"), ttk.mode || "PvP"],
+          [t("sandboxVersion"), ttk.sandboxVersion],
+          [t("resilienceTier"), ttk.resilienceTier],
+          [t("optimalTtk"), ttk.optimalTtkMs ? `${ttk.optimalTtkMs} ms` : ""],
+          [t("bodyTtk"), ttk.bodyTtkMs ? `${ttk.bodyTtkMs} ms` : ""],
+          [t("conditions"), ttk.conditions],
+          [t("source"), ttk.sourceExtractionId || "data/static/ttk/ttk_candidates.csv"],
+        ])}
+      </section>
+    </div>
+  `;
+}
+
 function renderDetail(row) {
   if (!row) {
     renderEmpty();
     return;
   }
-  const badges = [row.tier, row.type, row.ammo || row.class, row.bucket].filter(Boolean);
+  const badges = [
+    row.sectionLabel,
+    row.weaponType || row.armorSlot || row.type,
+    row.ammo,
+    row.damageType,
+    row.class,
+    row.tier,
+  ].filter(Boolean);
   const plugSets = row.plugSetHashes ? row.plugSetHashes.length : 0;
 
   els.detail.innerHTML = `
     <div class="detail-shell">
       <div class="detail-hero">
-        <img class="detail-icon" src="${esc(row.icon)}" alt="">
+        ${renderIcon(row, "detail-icon")}
         <div>
           <div class="detail-title-row">
             <h2>${esc(row.name)}</h2>
@@ -589,23 +844,23 @@ function renderDetail(row) {
         </section>
         <section class="panel">
           <h3>${esc(t("metadata"))}</h3>
-          <table class="kv">
-            <tr><th>${esc(t("hash"))}</th><td>${esc(row.hash)}</td></tr>
-            <tr><th>${esc(t("type"))}</th><td>${esc(row.type)}</td></tr>
-            <tr><th>${esc(t("bucket"))}</th><td>${esc(row.bucket)}</td></tr>
-            <tr><th>${esc(t("rarity"))}</th><td>${esc(row.tier)}</td></tr>
-            <tr><th>${esc(t("categories"))}</th><td>${esc((row.categories || []).join(", "))}</td></tr>
-            ${state.view === "weapons" ? `<tr><th>${esc(t("plugSets"))}</th><td>${esc(plugSets)}</td></tr>` : ""}
-          </table>
+          ${renderKv([
+            [t("hash"), row.hash],
+            [t("category"), `${groupLabel(row.primaryGroup)} / ${row.sectionLabel || sectionLabel(row.primarySection)}`],
+            [t("type"), row.type],
+            [t("bucket"), row.bucket],
+            [t("rarity"), row.tier],
+            [t("class"), row.class],
+            [t("weaponSlot"), row.weaponSlot],
+            [t("ammo"), row.ammo],
+            [t("damage"), row.damageType],
+            [t("categories"), row.categories],
+            [t("plugSets"), plugSets || ""],
+          ])}
         </section>
       </div>
 
-      <div class="detail-grid wide-grid">
-        <section class="panel">
-          <h3>${esc(t("ttk"))}</h3>
-          <div class="notice">${esc(t("ttkBody"))}</div>
-        </section>
-      </div>
+      ${renderTtk(row)}
     </div>
   `;
 }
@@ -617,6 +872,8 @@ async function refresh() {
   try {
     await ensureData();
     updateLabels();
+    renderGroupNav();
+    renderSectionRail();
     updateSummary();
     updateControls();
     renderList();
@@ -628,10 +885,8 @@ async function refresh() {
 
 els.langJa.addEventListener("click", () => setLanguage("ja"));
 els.langEn.addEventListener("click", () => setLanguage("en"));
-els.tabs.forEach((tab) => tab.addEventListener("click", () => setView(tab.dataset.view)));
 els.searchInput.addEventListener("input", renderList);
-els.primaryFilter.addEventListener("change", renderList);
-els.secondaryFilter.addEventListener("change", renderList);
+filterControls.forEach(({ select }) => select.addEventListener("change", renderList));
 els.sortSelect.addEventListener("change", () => {
   state.sort = els.sortSelect.value;
   renderList();

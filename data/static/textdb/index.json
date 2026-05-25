@@ -13,12 +13,16 @@
   ],
   "counts": {
     "en": {
+      "armor": 5474,
+      "catalogItems": 26819,
       "exoticArmor": 348,
       "plugs": 12120,
       "sandboxPerks": 3681,
       "weapons": 1837
     },
     "ja": {
+      "armor": 5474,
+      "catalogItems": 26811,
       "exoticArmor": 348,
       "plugs": 12120,
       "sandboxPerks": 3681,
@@ -37,6 +41,14 @@
     "TTK tables are not derived from manifest data and must be maintained separately."
   ],
   "outputs": {
+    "armor": [
+      "armor.en.json",
+      "armor.ja.json"
+    ],
+    "catalogItems": [
+      "catalog_items.en.json",
+      "catalog_items.ja.json"
+    ],
     "exoticArmor": [
       "exotic_armor.en.json",
       "exotic_armor.ja.json"
@@ -54,5 +66,5 @@
       "weapons.ja.json"
     ]
   },
-  "syncedAt": "2026-05-24T18:54:35+00:00"
+  "syncedAt": "2026-05-25T01:50:55+00:00"
 }
