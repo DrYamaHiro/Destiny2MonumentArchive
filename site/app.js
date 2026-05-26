@@ -2,6 +2,7 @@ const LIMIT = 250;
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
+  theme: localStorage.getItem("d2ma-theme") || "white",
   group: "equipment",
   section: "weapons",
   sort: "weaponType",
@@ -37,6 +38,8 @@ const text = {
     title: "データベース",
     manifest: "Manifest",
     synced: "同期",
+    themeWhite: "ホワイト",
+    themeBlack: "ブラック",
     loading: "読み込み中",
     search: "検索",
     searchPlaceholder: "名称、説明、カテゴリ、入手元",
@@ -209,6 +212,8 @@ const text = {
     title: "DATABASE",
     manifest: "Manifest",
     synced: "Synced",
+    themeWhite: "WHITE",
+    themeBlack: "BLACK",
     loading: "Loading",
     search: "Search",
     searchPlaceholder: "Name, description, category, source",
@@ -489,6 +494,8 @@ const els = {
   manifestMeta: document.getElementById("manifestMeta"),
   langJa: document.getElementById("langJa"),
   langEn: document.getElementById("langEn"),
+  themeWhite: document.getElementById("themeWhite"),
+  themeBlack: document.getElementById("themeBlack"),
   groupNav: document.getElementById("groupNav"),
   sectionRail: document.getElementById("sectionRail"),
   summaryBand: document.getElementById("summaryBand"),
@@ -958,6 +965,15 @@ function setLanguage(lang) {
   refresh();
 }
 
+function setTheme(theme) {
+  const nextTheme = theme === "black" ? "black" : "white";
+  state.theme = nextTheme;
+  localStorage.setItem("d2ma-theme", nextTheme);
+  document.documentElement.dataset.theme = nextTheme;
+  els.themeWhite.setAttribute("aria-pressed", String(nextTheme === "white"));
+  els.themeBlack.setAttribute("aria-pressed", String(nextTheme === "black"));
+}
+
 function setGroup(group) {
   state.group = group;
   state.section = defaultSection(group);
@@ -998,6 +1014,8 @@ function updateLabels() {
   els.searchLabel.textContent = t("search");
   els.searchInput.placeholder = t("searchPlaceholder");
   els.clearButton.textContent = t("reset");
+  els.themeWhite.textContent = t("themeWhite");
+  els.themeBlack.textContent = t("themeBlack");
   els.sortLabel.textContent = t("sort");
   if (state.data.index) {
     els.manifestMeta.textContent = `${t("manifest")} ${shortVersion(state.data.index.manifestVersion)} / ${t("synced")} ${state.data.index.sourceSyncedAt}`;
@@ -2128,6 +2146,8 @@ async function refresh() {
 
 els.langJa.addEventListener("click", () => setLanguage("ja"));
 els.langEn.addEventListener("click", () => setLanguage("en"));
+els.themeWhite.addEventListener("click", () => setTheme("white"));
+els.themeBlack.addEventListener("click", () => setTheme("black"));
 els.searchInput.addEventListener("input", renderList);
 filterControls.forEach(({ select }) => select.addEventListener("change", renderList));
 els.sortSelect.addEventListener("change", () => {
@@ -2136,4 +2156,5 @@ els.sortSelect.addEventListener("change", () => {
 });
 els.clearButton.addEventListener("click", () => clearFilters(true));
 
+setTheme(state.theme);
 setLanguage(state.lang);
