@@ -224,18 +224,29 @@ WEAPON_MASTERWORK_EXTRA_STATS = {
     "sword": {"impact"},
 }
 
-DR_TTK_FAMILY_BY_WEAPON_TYPE = {
-    "auto_rifle": "Auto Rifles",
-    "hand_cannon": "Hand Cannons",
-    "pulse_rifle": "Pulse Rifles",
-    "scout_rifle": "Scout Rifles",
-    "fusion_rifle": "Fusion Rifles",
-    "shotgun": "Shotguns",
-    "sidearm": "Sidearms",
-    "submachine_gun": "SMGs",
+TTK_FAMILY_BY_WEAPON_TYPE = {
+    "auto_rifle": "Auto",
+    "bow": "Bow",
+    "fusion_rifle": "Fusion",
+    "glaive": "Glaive",
+    "grenade_launcher": "Grenade Launcher",
+    "hand_cannon": "Hand Cannon",
+    "linear_fusion_rifle": "Linear Fusion",
+    "machine_gun": "Machine Gun",
+    "pulse_rifle": "Pulse",
+    "rocket_launcher": "Rocket",
+    "scout_rifle": "Scout",
+    "shotgun": "Shotgun",
+    "sidearm": "Sidearm",
+    "sniper_rifle": "Sniper",
+    "submachine_gun": "SMG",
+    "sword": "Sword",
+    "trace_rifle": "Trace",
 }
 
 FRAME_ARCHETYPE_TOKENS = (
+    ("high-impact longbow", "High-Impact Longbow"),
+    ("high impact longbow", "High-Impact Longbow"),
     ("rapid-fire slug", "Rapid Fire Slug"),
     ("rapid fire slug", "Rapid Fire Slug"),
     ("速射スラグ", "Rapid Fire Slug"),
@@ -251,9 +262,22 @@ FRAME_ARCHETYPE_TOKENS = (
     ("spread shot", "Spread Shot"),
     ("散弾", "Spread Shot"),
     ("shot package", "Shot Package"),
+    ("micro-missile", "Micro-Missile"),
+    ("micro missile", "Micro-Missile"),
+    ("マイクロミサイル", "Micro-Missile"),
+    ("wave-frame", "Wave-Frame"),
+    ("wave frame", "Wave-Frame"),
+    ("波動", "Wave-Frame"),
+    ("area denial", "Area Denial"),
+    ("エリア拒否", "Area Denial"),
+    ("balanced heat", "Balanced Heat"),
+    ("dynamic heat", "Dynamic Heat"),
+    ("support", "Support"),
+    ("サポート", "Support"),
+    ("disruption weapon", "Disruption Weapon"),
     ("mida synergy", "MIDA Synergy"),
     ("midaシナジー", "MIDA Synergy"),
-    ("legacy pr-55", "Legacy PR-55"),
+    ("legacy pr-55", "Legacy PR-55 Frame"),
     ("rapid-fire", "Rapid Fire"),
     ("rapid fire", "Rapid Fire"),
     ("速射", "Rapid Fire"),
@@ -1446,23 +1470,30 @@ def reference_ttk_record(row: dict[str, Any]) -> dict[str, Any]:
         "body_damage": csv_value(row, "body_damage"),
         "crit_required": csv_value(row, "crit_shots"),
         "body_required": csv_value(row, "body_shots"),
+        "body_forgiveness_count": csv_value(row, "body_forgiveness_count"),
+        "body_forgiveness_pct": csv_value(row, "body_forgiveness_pct"),
     }
     body_forgiveness_count, body_forgiveness_pct = calculate_body_forgiveness(candidate)
-    source_id = f"DrYamaHiro:{csv_value(row, 'source_sheet')}:{csv_value(row, 'source_row')}"
+    source_sheet = csv_value(row, "source_sheet") or csv_value(row, "source_workbook")
+    source_id = f"WeaponStat:{source_sheet}:{csv_value(row, 'source_row')}" if csv_value(row, "source_url") else f"DrYamaHiro:{source_sheet}:{csv_value(row, 'source_row')}"
     archetype_label = f"{csv_value(row, 'weapon_family')} / {csv_value(row, 'archetype')}"
     edge_notes: list[str] = []
     if csv_value(row, "optimal_ttk_ms") == "0" or csv_value(row, "body_ttk_ms") == "0":
         edge_notes.append("0ms means same-trigger/one-shot potential; do not read it as sustained-fire cadence.")
-    if csv_value(row, "weapon_family") in {"Shotguns", "Fusion Rifles"}:
+    if csv_value(row, "weapon_family") in {"Shotgun", "Shotguns", "Fusion", "Fusion Rifles"}:
         edge_notes.append("Burst, bolt, or pellet behavior needs primary-source or in-game confirmation.")
-    conditions = f"{archetype_label}; HP {DEFAULT_PVP_TARGET_HP}; WP {DEFAULT_WEAPON_PARAMETER}; secondary reference, verify burst/pellet edge cases."
+    source_label = "WeaponStat community reference" if csv_value(row, "source_url") else "DrYamaHiro secondary reference"
+    note = csv_value(row, "note")
+    conditions = f"{archetype_label}; HP {DEFAULT_PVP_TARGET_HP}; WP {DEFAULT_WEAPON_PARAMETER}; {source_label}."
+    if note:
+        conditions = f"{conditions} {note}"
     if edge_notes:
         conditions = f"{conditions} {' '.join(edge_notes)}"
     return {
         "sourceScope": "frame_baseline",
         "status": "reference_edge_case" if edge_notes else "reference_needs_verification",
         "mode": "PvP",
-        "sandboxVersion": "DrYamaHiro WP reference v1.02",
+        "sandboxVersion": csv_value(row, "sandbox_version") or "DrYamaHiro WP reference v1.02",
         "resilienceTier": "",
         "targetHp": str(DEFAULT_PVP_TARGET_HP),
         "weaponParameter": str(DEFAULT_WEAPON_PARAMETER),
@@ -1483,14 +1514,16 @@ def reference_ttk_record(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def reference_ttk_by_archetype() -> dict[tuple[str, str], dict[str, Any]]:
-    path = TTK_DIR / "dr_yamahiro_wp_reference.csv"
+def reference_ttk_by_archetype() -> dict[tuple[str, str, str], dict[str, Any]]:
+    path = TTK_DIR / "weaponstat_community_reference.csv"
+    if not path.exists():
+        path = TTK_DIR / "dr_yamahiro_wp_reference.csv"
     if not path.exists():
         return {}
-    output: dict[tuple[str, str], dict[str, Any]] = {}
+    output: dict[tuple[str, str, str], dict[str, Any]] = {}
     with path.open("r", encoding="utf-8-sig", newline="") as handle:
         for row in csv.DictReader(handle):
-            if csv_value(row, "source_sheet") not in {"PrimaryWeapons", "SpecialWeapons"}:
+            if path.name == "dr_yamahiro_wp_reference.csv" and csv_value(row, "source_sheet") not in {"PrimaryWeapons", "SpecialWeapons"}:
                 continue
             family = csv_value(row, "weapon_family")
             archetype = csv_value(row, "archetype")
@@ -1498,7 +1531,10 @@ def reference_ttk_by_archetype() -> dict[tuple[str, str], dict[str, Any]]:
                 continue
             if not csv_value(row, "crit_damage") and not csv_value(row, "body_damage"):
                 continue
-            output[(family, archetype)] = reference_ttk_record(row)
+            ammo_code = csv_value(row, "ammo_code")
+            record = reference_ttk_record(row)
+            output[(family, archetype, ammo_code)] = record
+            output.setdefault((family, archetype, ""), record)
     return output
 
 
@@ -1544,7 +1580,7 @@ def canonical_archetype_from_frame(frame_name: str) -> str:
 def ttk_for_weapon(
     row: dict[str, Any],
     ttk_by_hash: dict[int, dict[str, Any]],
-    ttk_by_archetype: dict[tuple[str, str], dict[str, Any]],
+    ttk_by_archetype: dict[tuple[str, str, str], dict[str, Any]],
     plugs_by_hash: dict[int, dict[str, Any]],
 ) -> tuple[dict[str, Any] | None, str, str]:
     exact = ttk_by_hash.get(int(row.get("hash") or 0))
@@ -1555,9 +1591,10 @@ def ttk_for_weapon(
         weapon_record = dict(exact)
         weapon_record.setdefault("sourceScope", "weapon_override")
         return weapon_record, frame_name, archetype
-    family = DR_TTK_FAMILY_BY_WEAPON_TYPE.get(weapon_type_id_for(row), "")
+    family = TTK_FAMILY_BY_WEAPON_TYPE.get(weapon_type_id_for(row), "")
     if family and archetype:
-        record = ttk_by_archetype.get((family, archetype))
+        ammo_code = {1: "p", 2: "s", 3: "h"}.get(int(row.get("ammoType") or 0), "")
+        record = ttk_by_archetype.get((family, archetype, ammo_code)) or ttk_by_archetype.get((family, archetype, ""))
         if record:
             frame_record = dict(record)
             frame_record["sourceScope"] = "frame_baseline"
@@ -1573,7 +1610,7 @@ def compact_catalog_item(
     row: dict[str, Any],
     lang: str,
     ttk_by_hash: dict[int, dict[str, Any]],
-    ttk_by_archetype: dict[tuple[str, str], dict[str, Any]],
+    ttk_by_archetype: dict[tuple[str, str, str], dict[str, Any]],
     plugs_by_hash: dict[int, dict[str, Any]],
     plug_sets: dict[int, list[dict[str, Any]]],
     release_lookup: dict[int, dict[str, Any]],

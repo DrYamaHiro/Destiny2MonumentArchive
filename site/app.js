@@ -1,4 +1,5 @@
 const LIMIT = 250;
+const DATA_VERSION = "20260526-weaponstat-source";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
@@ -624,6 +625,7 @@ function ttkScopeLabel(scope) {
 function formatTtkSource(source) {
   const value = String(source || "").trim();
   if (!value) return state.lang === "ja" ? "PvP Potential台帳" : "PvP Potential table";
+  if (/^WeaponStat:/i.test(value)) return state.lang === "ja" ? "WeaponStat共有表" : "WeaponStat shared sheet";
   if (/^DrYamaHiro:/i.test(value)) return state.lang === "ja" ? "DrYamaHiro検証台帳" : "DrYamaHiro reference sheet";
   if (/data\/static\/ttk|ttk_candidates/i.test(value)) return state.lang === "ja" ? "PvP Potential台帳" : "PvP Potential table";
   return value;
@@ -762,7 +764,8 @@ function renderMetadataHover(rows) {
 }
 
 async function loadJson(path) {
-  const response = await fetch(path);
+  const separator = path.includes("?") ? "&" : "?";
+  const response = await fetch(`${path}${separator}v=${DATA_VERSION}`);
   if (!response.ok) throw new Error(`${response.status} ${path}`);
   return response.json();
 }
