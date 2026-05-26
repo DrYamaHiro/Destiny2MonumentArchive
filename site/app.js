@@ -80,7 +80,6 @@ const text = {
     metadataHint: "メタデータを見る",
     ttk: "PvP POTENTIAL",
     ttkPending: "未反映。Bungie更新情報、検証台帳、PvP体力+シールド基準を確認してから、フレーム基準でダメージ/TTK/BS許容を反映します。",
-    ttkNote: "PvP POTENTIALはフレーム基準値を各武器へ継承し、武器固有の例外だけ個別値で上書きします。",
     serverRequiredTitle: "ローカルサーバーで開いてください",
     serverRequiredBody: "このデータベースはJSONデータを読み込むため、HTMLファイルを直接開く file:// 表示では動きません。",
     serverRequiredCommand: "powershell -ExecutionPolicy Bypass -File scripts\\serve_site.ps1",
@@ -254,7 +253,6 @@ const text = {
     metadataHint: "View metadata",
     ttk: "PvP POTENTIAL",
     ttkPending: "Not applied. Fill frame-baseline damage, TTK, and body-shot forgiveness after checking Bungie updates, verification tracking, and the PvP health+shield baseline.",
-    ttkNote: "PvP Potential inherits frame-baseline values into each weapon, with weapon-specific exceptions applied as overrides.",
     serverRequiredTitle: "Open through the local server",
     serverRequiredBody: "This catalog loads JSON data, so it cannot run from a direct file:// HTML page.",
     serverRequiredCommand: "powershell -ExecutionPolicy Bypass -File scripts\\serve_site.ps1",
@@ -1983,7 +1981,7 @@ function renderTtk(row) {
   return `
     <section class="panel pvp-panel">
       <h3>${esc(t("ttk"))}</h3>
-      <div class="notice compact-notice">${esc(hasValue ? t("ttkNote") : t("ttkPending"))}</div>
+      ${hasValue ? "" : `<div class="notice compact-notice">${esc(t("ttkPending"))}</div>`}
       ${renderMetricCards([
         [t("basePrecisionDamage"), displayValue(ttk.basePrecisionDamage)],
         [t("baseBodyDamage"), displayValue(ttk.baseBodyDamage)],
