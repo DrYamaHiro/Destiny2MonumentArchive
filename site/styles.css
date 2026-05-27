@@ -1359,6 +1359,166 @@ h1 {
   font-variant-numeric: tabular-nums;
 }
 
+.armor-set-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.36fr);
+  gap: 14px;
+  align-items: start;
+  margin-top: 14px;
+}
+
+.armor-set-main,
+.armor-set-side {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.armor-set-side {
+  position: sticky;
+  top: 14px;
+}
+
+.armor-total-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 16px;
+}
+
+.armor-total-row {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.armor-piece-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.armor-piece-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--panel-alt);
+}
+
+.armor-piece-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.armor-piece-head h4 {
+  margin: 0;
+  color: var(--strong);
+  font-size: 14px;
+}
+
+.armor-piece-head span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.armor-piece-controls,
+.armor-config-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.armor-config-grid--two {
+  grid-template-columns: 1fr;
+}
+
+.armor-piece-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.armor-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 8px;
+  color: var(--muted);
+  background: var(--panel);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.armor-stat-pill strong {
+  color: var(--strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.armor-mode-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.armor-mode[aria-pressed="true"],
+.armor-mode.is-active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #ffffff;
+}
+
+.armor-bonus-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-height: 28px;
+  margin-top: 12px;
+}
+
+.selected-exotic {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--panel-alt);
+}
+
+.selected-exotic strong,
+.selected-exotic span {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.selected-exotic > div > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.exotic-perk-list {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.exotic-perk-list p {
+  margin: 0;
+  color: var(--body);
+  font-size: 12px;
+}
+
 .source-list {
   display: grid;
   gap: 7px;
@@ -1424,11 +1584,14 @@ h1 {
   .detail-workspace,
   .detail-workspace--no-ttk,
   .plug-grid,
-  .manual-armor-grid {
+  .manual-armor-grid,
+  .armor-set-layout,
+  .armor-total-grid {
     grid-template-columns: 1fr;
   }
 
-  .detail-side {
+  .detail-side,
+  .armor-set-side {
     position: static;
   }
 }
@@ -1573,6 +1736,11 @@ h1 {
   }
 
   .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .armor-piece-controls,
+  .armor-config-grid {
     grid-template-columns: 1fr;
   }
 }
