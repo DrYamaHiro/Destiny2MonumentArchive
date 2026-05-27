@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260528-armor-set-builder";
+const DATA_VERSION = "20260528-armor-set-effects";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
@@ -122,6 +122,17 @@ const text = {
     armorSetBonusPrimary: "セットA",
     armorSetBonusSecondary: "セットB",
     armorSetBonusFour: "4部位セット",
+    armorSetBonusEffect: "セット効果",
+    armorSetBonusTwoPiece: "2部位",
+    armorSetBonusFourPiece: "4部位",
+    armorSetPieces: "構成部位",
+    armorViewItem: "装備詳細を見る",
+    armorSetPieceVariants: "同部位候補",
+    armorLegacySet: "旧防具セット",
+    armorLegacyNoBuild: "旧仕様またはセットボーナスなしの防具セットです。装備詳細の閲覧のみ行い、Tier5パラメータビルドは無効です。",
+    armorLegacyNoBuildShort: "詳細閲覧のみ",
+    armorSetEffectUnknown: "効果未登録。Manifest上ではセット選択ソケットのみ確認済みです。",
+    armorSetSelectorNote: "セット変換Mod",
     armorTotalNote: "固有パラメータ、一般Mod、特化Mod、エキゾ枠、セットボーナス構成のみを比較します。",
     manualArmorTuning: "旧防具ステータス調整",
     manualArmorNote: "旧仕様防具は実値を0-42で手動調整します。",
@@ -315,6 +326,17 @@ const text = {
     armorSetBonusPrimary: "Set A",
     armorSetBonusSecondary: "Set B",
     armorSetBonusFour: "4-piece set",
+    armorSetBonusEffect: "Set Effect",
+    armorSetBonusTwoPiece: "2-piece",
+    armorSetBonusFourPiece: "4-piece",
+    armorSetPieces: "Set pieces",
+    armorViewItem: "View item details",
+    armorSetPieceVariants: "Slot variants",
+    armorLegacySet: "Legacy armor set",
+    armorLegacyNoBuild: "Legacy or no-set-bonus armor set. Item details remain available, but Tier 5 stat build tools are disabled.",
+    armorLegacyNoBuildShort: "Details only",
+    armorSetEffectUnknown: "Effect not registered. The Manifest currently exposes only the set selector socket.",
+    armorSetSelectorNote: "Set conversion mod",
     armorTotalNote: "Compare only tertiary stats, general mods, focus mods, the Exotic slot, and set bonus layout.",
     manualArmorTuning: "Legacy Armor Stat Tuning",
     manualArmorNote: "Legacy armor stats can be adjusted manually from 0-42.",
@@ -544,6 +566,199 @@ const armorStatAbbrevLabels = {
 
 const enhancedBadgeCache = new Map();
 
+const armorSetBonusEffectData = {
+  139044974: {
+    en: {
+      two: { name: "Paroli", description: "Primary ammo weapons gain a bonus to flinch resistance after sliding." },
+      four: { name: "Martingale", description: "Your weapons gain a temporary increase to handling and aim-down-sights speed when an ally is defeated or you revive an ally." },
+    },
+    ja: {
+      two: { name: "Paroli", description: "スライディング後、メインウェポンのひるみ耐性が上昇する。" },
+      four: { name: "Martingale", description: "味方が倒される、または味方を蘇生すると、短時間、武器のハンドリングと照準速度が上昇する。" },
+    },
+  },
+  139044987: {
+    en: {
+      two: { name: "Balestra", description: "Damaging a target with a Sword, Glaive, or melee attack exhausts them. Exhausted targets deal reduced outgoing damage." },
+      four: { name: "Stresso Tempo", description: "Blocking attacks with a Sword or Glaive grants a short period of combatant damage resistance when you next drop your guard." },
+    },
+    ja: {
+      two: { name: "Balestra", description: "剣、グレイブ、または近接攻撃で標的にダメージを与えると疲労状態にする。疲労状態の標的は与ダメージが低下する。" },
+      four: { name: "Stresso Tempo", description: "剣またはグレイブで攻撃をガードすると、次にガードを解除した時に短時間、戦闘員からのダメージ耐性を得る。" },
+    },
+  },
+  721111598: {
+    en: {
+      two: { name: "Wrecker", description: "You deal significantly increased Kinetic damage to combatant shields, overshields, vehicles, and constructs." },
+      four: { name: "Concussive Rounds", description: "Defeating powerful combatants or breaking a combatant shield with Kinetic damage releases a disorienting Kinetic shockwave." },
+    },
+    ja: {
+      two: { name: "破壊者", description: "戦闘員のシールド、2つ目のシールド、ビークル、建造物に対するキネティックダメージが大幅に上昇する。" },
+      four: { name: "震とう弾", description: "強力な戦闘員を倒すか、キネティックダメージで戦闘員のシールドを破壊すると、混乱を適用するキネティック衝撃波を発生させる。" },
+    },
+  },
+  721111611: {
+    en: {
+      two: { name: "Terminal Velocity", description: "Final blows with Primary ammo weapons grant your Primary ammo weapons temporarily increased reload speed." },
+      four: { name: "Power Loader", description: "Picking up an Orb of Power grants Special ammo progress." },
+    },
+    ja: {
+      two: { name: "終端速度", description: "メインウェポンでトドメを刺すと、一時的にメインウェポンのリロード速度が上昇する。" },
+      four: { name: "パワーローダー", description: "力のオーブを拾うと特殊ウェポン弾の進行を獲得できる。" },
+    },
+  },
+  1012508294: {
+    en: {
+      two: { name: "Fanfare", description: "Gain increased reload speed for the bottom half of your equipped weapon's magazine." },
+      four: { name: "Suros Harmony", description: "Reloading a weapon grants bonus handling and reduced incoming flinch for a short time. Weapons with SUROS Synergy gain increased range instead." },
+    },
+    ja: {
+      two: { name: "Fanfare", description: "装備中の武器のマガジンが半分以下の間、リロード速度が上昇する。" },
+      four: { name: "Suros Harmony", description: "武器をリロードすると短時間ハンドリングが上昇し、受けるひるみが減少する。SUROSシナジーの起源特性を持つ武器は代わりに射程が上昇する。" },
+    },
+  },
+  1012508307: {
+    en: {
+      two: { name: "Rapid Repair", description: "When your shields begin to regenerate, gain flinch resistance and damage resistance for a short time." },
+      four: { name: "Built From Scratch", description: "While reserves are low, combatant weapon final blows provide additional ammo progress based on ammo type." },
+    },
+    ja: {
+      two: { name: "Rapid Repair", description: "シールドの回復が始まると、短時間ひるみ耐性とダメージ耐性を得る。" },
+      four: { name: "Built From Scratch", description: "予備弾薬が少ない間、武器で戦闘員にトドメを刺すと弾薬タイプに応じた追加の弾薬進行を得る。" },
+    },
+  },
+  1220635053: {
+    en: {
+      two: { name: "Crook and Flail", description: "Picking up an ammo brick heals you." },
+      four: { name: "Gift of Sight", description: "Final blows with Primary ammo weapons grant you briefly increased radar resolution." },
+    },
+    ja: {
+      two: { name: "クルックとフレイル", description: "弾薬箱を拾うと体力が回復する。" },
+      four: { name: "賜りし視覚", description: "メインウェポンでトドメを刺すと、一時的にレーダーの解像度が上がる。" },
+    },
+  },
+  1220635064: {
+    en: {
+      two: { name: "Iaido", description: "Final blows with freshly drawn or reloaded weapons heal you." },
+      four: { name: "Unfaltering Focus", description: "Bow, Shotgun, or Sword final blows temporarily reduce incoming damage. Damaging targets with those weapons extends the effect." },
+    },
+    ja: {
+      two: { name: "居合道", description: "リロードしたばかりの武器または構えたばかりの武器でトドメを刺すと、体力が回復する。" },
+      four: { name: "揺るぎない集中", description: "弓、ショットガン、または剣でトドメを刺すと、一時的に被ダメージが減少する。これらの武器で標的にダメージを与えると、効果が延長される。" },
+    },
+  },
+  1404854454: {
+    en: {
+      two: { name: "Force Converter", description: "After a final blow with a Rocket Launcher, Grenade Launcher, or micro-missile, sprint for a short time to gain Speed Booster." },
+      four: { name: "Reactive Booster", description: "Once per Force Converter activation, sprinting at critical health, being suspended, or being slowed by Stasis immediately grants Speed Booster for a short time." },
+    },
+    ja: {
+      two: { name: "動力変換器", description: "ロケットランチャー、グレネードランチャー、またはマイクロミサイルでトドメを刺した後に短い時間ダッシュすると、スピードブースターを獲得する。" },
+      four: { name: "反応性ブースター", description: "動力変換器の発動につき1回のみ、瀕死状態でのダッシュ、または停止・遅延状態になると、即座に短時間スピードブースターを獲得する。" },
+    },
+  },
+  1530138662: {
+    en: {
+      two: { name: "Special Relativity", description: "Picking up ammo reloads stowed Special weapons from reserves." },
+      four: { name: "Superluminal Motion", description: "After dealing damage with your Super, health and shields regenerate over time while you are in motion. Additional Super damage refreshes this effect." },
+    },
+    ja: {
+      two: { name: "Special Relativity", description: "弾薬を拾うと、しまっている特殊ウェポンが予備弾薬からリロードされる。" },
+      four: { name: "Superluminal Motion", description: "スーパースキルでダメージを与えた後、移動中に体力とシールドが徐々に回復する。追加のスーパーダメージでこの効果が更新される。" },
+    },
+  },
+  1841728090: {
+    en: {
+      two: { name: "Combat Meditation", description: "Sword hits return grenade and class energy. Bonus energy is granted if Blade Focus is active." },
+      four: { name: "Blade Focus", description: "Briefly guard with a Sword to ready Blade Focus. While readied, Sword hits increase Sword damage and lunge distance for a moderate duration." },
+    },
+    ja: {
+      two: { name: "Combat Meditation", description: "剣で攻撃を当てるとグレネードエネルギーとクラススキルエネルギーが戻る。Blade Focusが有効な場合は追加エネルギーを得る。" },
+      four: { name: "Blade Focus", description: "剣で短くガードするとBlade Focusを準備する。準備中に剣を当てると、一定時間、剣ダメージと突進距離が上昇する。" },
+    },
+  },
+  2824493179: {
+    en: {
+      two: { name: "Accretion", description: "Picking up an ammo brick gives you a stacking bonus to weapon swap and stow speeds until you die." },
+      four: { name: "Doppler Effect", description: "Suspend, unravel, and sever effects applied to targets, and radiant and restoration effects applied to you have increased duration." },
+    },
+    ja: {
+      two: { name: "降着", description: "弾薬箱を拾うと、死ぬまで武器の切り替えと収納速度にスタック可能なボーナスが適用される。" },
+      four: { name: "ドップラー効果", description: "標的に適用された停止、分解、切断効果と、自分に付与された発光と回復効果の持続時間が延長される。" },
+    },
+  },
+  2872740129: {
+    en: {
+      two: { name: "Opening Act", description: "Grenade final blows grant Heat weapons stability and vent speed, and Primary ammo weapons bonus stability and reload speed." },
+      four: { name: "Room Clearing", description: "Multiple final blows with Heat or Primary ammo weapons grant bonuses to weapon and grenade stats and increased ammo generation." },
+    },
+    ja: {
+      two: { name: "Opening Act", description: "グレネードでトドメを刺すと、ヒート武器には安定性と放熱速度、メインウェポンには安定性とリロード速度のボーナスが付与される。" },
+      four: { name: "Room Clearing", description: "ヒート武器またはメインウェポンで複数のトドメを刺すと、武器とグレネードのステータスが上昇し、弾薬生成量が増加する。" },
+    },
+  },
+  3573256294: {
+    en: {
+      two: { name: "Pleas Heard", description: "Reloading an Auto Rifle, Scout Rifle, or Sidearm after a final blow slowly restores health until you reenter combat." },
+      four: { name: "Magnificent Duty", description: "At critical health, or when healing an ally at critical health, Auto Rifles, Scout Rifles, and Sidearms gain increased range, stability, and reload speed." },
+    },
+    ja: {
+      two: { name: "Pleas Heard", description: "オートライフル、スカウトライフル、またはピストルでトドメを刺した後にリロードすると、再び戦闘に入るまで体力が徐々に回復する。" },
+      four: { name: "Magnificent Duty", description: "瀕死状態になる、または瀕死の味方を回復すると、オートライフル、スカウトライフル、ピストルの射程、安定性、リロード速度が上昇する。" },
+    },
+  },
+  3573256307: {
+    en: {
+      two: { name: "Ride Together, Die Together", description: "Picking up an Orb of Power grants a brief period of rapidly decaying damage reduction." },
+      four: { name: "Too Old For This", description: "Defeating a powerful combatant with a finisher grants Special ammo progress and replenishes a small amount of health." },
+    },
+    ja: {
+      two: { name: "Ride Together, Die Together", description: "力のオーブを拾うと、急速に減衰する短時間のダメージ耐性を得る。" },
+      four: { name: "Too Old For This", description: "強力な戦闘員をフィニッシャーで倒すと、特殊ウェポン弾の進行を獲得し、少量の体力を回復する。" },
+    },
+  },
+  3782433407: {
+    en: {
+      two: { name: "Photogalvanic", description: "Receiving healing temporarily grants your Solar weapons increased flinch resistance, handling, and reload speed." },
+      four: { name: "Cauterize", description: "Rapid Solar final blows heal you." },
+    },
+    ja: {
+      two: { name: "感光起電", description: "回復を受けると、一時的にソーラー武器のひるみ耐性、ハンドリング、リロード速度が向上する。" },
+      four: { name: "焼灼", description: "ソーラーで素早くトドメを刺すと回復する。" },
+    },
+  },
+  3834187337: {
+    en: {
+      two: { name: "Vigilant Watch", description: "As your health gets lower, your weapons gain increased stability and handling. Weapon final blows while shields are depleted heal you." },
+      four: { name: "Iron Conviction", description: "When your shields break, gain increased ammo generation, flinch resistance, and combatant damage resistance for a short time. Final blows extend the effect." },
+    },
+    ja: {
+      two: { name: "Vigilant Watch", description: "体力が低くなるほど武器の安定性とハンドリングが上昇する。シールドがない間の武器でのトドメは体力を回復する。" },
+      four: { name: "Iron Conviction", description: "シールドが破壊されると、短時間、弾薬生成、ひるみ耐性、戦闘員からのダメージ耐性が上昇する。トドメを刺すと効果が延長される。" },
+    },
+  },
+  3874641219: {
+    en: {
+      two: { name: "Reflex Action", description: "Swapping to a Heat weapon, Submachine Gun, or Hand Cannon grants increased handling and accuracy for a short time. Damaging with that weapon extends the effect." },
+      four: { name: "Hotshot", description: "Final blows while Reflex Action is active increase weapon stat, stability, reload, and aim assist for Heat weapons, Submachine Guns, and Hand Cannons." },
+    },
+    ja: {
+      two: { name: "Reflex Action", description: "ヒート武器、サブマシンガン、またはハンドキャノンに持ち替えると、短時間ハンドリングと命中精度が上昇する。その武器でダメージを与えると効果が延長される。" },
+      four: { name: "Hotshot", description: "Reflex Actionの発動中にトドメを刺すと、ヒート武器、サブマシンガン、ハンドキャノンの武器ステータス、安定性、リロード、照準補佐が上昇する。" },
+    },
+  },
+  4119627352: {
+    en: {
+      two: { name: "Force Absorption", description: "Final blows with a Rocket Launcher, Grenade Launcher, or micro-missile temporarily decrease incoming area-of-effect damage." },
+      four: { name: "Reactive Shock", description: "When Force Absorption is active, taking melee damage causes you to emit a disorienting burst once." },
+    },
+    ja: {
+      two: { name: "動力吸収", description: "ロケットランチャー、グレネードランチャー、またはマイクロミサイルでトドメを刺すと、一時的に範囲攻撃から受けるダメージを軽減する。" },
+      four: { name: "反応性ショック", description: "動力吸収の発動中に近接ダメージを受けると、1回だけ混乱の衝撃波を発生させる。" },
+    },
+  },
+};
+
 const els = {
   pageTitle: document.getElementById("pageTitle"),
   manifestMeta: document.getElementById("manifestMeta"),
@@ -749,6 +964,96 @@ function renderReleaseInline(row) {
       <span>${esc(label || t("releaseInline"))}</span>
     </span>
   `;
+}
+
+function releaseLabel(release = {}) {
+  const row = { release };
+  return [releaseSeasonLabel(row), releaseSourceLabel(row), release.releaseVersion]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function stableNegativeHash(value) {
+  let hash = 2166136261;
+  String(value || "").split("").forEach((char) => {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  });
+  return -Math.max(1, hash >>> 0);
+}
+
+function stripArmorSlotSuffix(coreName) {
+  const slotSuffixes = [
+    "Chest Armor",
+    "Class Item",
+    "Leg Armor",
+    "Gauntlets",
+    "Gloves",
+    "Grasps",
+    "Greaves",
+    "Helmet",
+    "Sleeves",
+    "Strides",
+    "Vestment",
+    "Boots",
+    "Casque",
+    "Cloak",
+    "Cover",
+    "Cowl",
+    "Grips",
+    "Helm",
+    "Hood",
+    "Mark",
+    "Mask",
+    "Plate",
+    "Robes",
+    "Robe",
+    "Vest",
+    "Bond",
+    "Cuirass",
+    "ヘッドアーマー",
+    "チェストアーマー",
+    "クラスアイテム",
+    "レッグアーマー",
+    "ガントレット",
+    "グローブ",
+    "グラスプ",
+    "グリーブ",
+    "ストライド",
+    "スリーブ",
+    "ヘルメット",
+    "キュイラス",
+    "プレート",
+    "クローク",
+    "カスク",
+    "カバー",
+    "フード",
+    "ブーツ",
+    "グリップ",
+    "ヘルム",
+    "マスク",
+    "ローブ",
+    "ベスト",
+    "バンド",
+    "紋章",
+    "ボンド",
+    "マント",
+  ];
+  return slotSuffixes.reduce((name, suffix) => {
+    const englishPattern = new RegExp(`\\s+${suffix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
+    const japanesePattern = new RegExp(`(?:の)?${suffix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "u");
+    return name.replace(englishPattern, "").replace(japanesePattern, "").trim();
+  }, coreName).trim();
+}
+
+function armorSetName(row) {
+  const raw = String(row.name || "").trim();
+  if (!raw) return "";
+  const variantMatch = raw.match(/\s*(\([^)]*\)|（[^）]*）)$/u);
+  const variant = variantMatch ? variantMatch[1] : "";
+  const core = variant ? raw.slice(0, -variant.length).trim() : raw;
+  const stripped = stripArmorSlotSuffix(core);
+  return [stripped || core, variant].filter(Boolean).join(" ").trim();
 }
 
 function compactMetaLabel(value) {
@@ -957,36 +1262,81 @@ function classLabelForId(id, rows = armorCatalogRows()) {
 }
 
 function armorSetRows(rows = armorCatalogRows()) {
-  return armorClassOrder.map((id) => {
-    const classRows = rows.filter((row) => classIdForRow(row) === id);
-    const classItem = classRows.find((row) => armorSlotId(row) === "class") || classRows[0] || {};
-    const classLabel = classLabelForId(id, rows);
-    const name = `${classLabel} ${t("armorSetBuilder")}`;
-    return {
-      hash: armorSetHashes[id],
-      isArmorSet: true,
-      armorSetClassId: id,
-      name,
-      description: t("armorTotalNote"),
-      icon: classItem.icon || "",
-      type: t("armorSetBuilder"),
-      bucket: t("armorSetBaseline"),
-      tier: "Tier 5",
-      itemType: "armor_set",
-      groups: ["equipment"],
-      sections: ["armor"],
-      primaryGroup: "equipment",
-      primarySection: "armor",
-      sectionLabel: sectionLabel("armor"),
-      class: classLabel,
-      classIds: [id],
-      categories: [classLabel, t("armor"), t("armorSetBuilder")],
-      armorSlot: state.lang === "ja" ? "5部位" : "5 pieces",
-      stats: armorSetTotals(id),
-      release: {},
-      search: `${name} ${classLabel} ${t("armorSetBaseline")} ${t("armorExotic")} ${t("armorSetBonus")} ${t("armorGeneralMod")} ${t("armorFocusMod")}`.toLowerCase(),
-    };
-  });
+  const groups = new Map();
+  rows
+    .filter((row) => row.tier !== "Exotic" && row.tier !== "エキゾチック")
+    .forEach((row) => {
+      const classId = classIdForRow(row);
+      const slotId = armorSlotId(row);
+      if (!classId || !slotId) return;
+      const setName = armorSetName(row);
+      if (!setName) return;
+      const release = row.release || {};
+      const groupKey = [
+        classId,
+        setName,
+        release.releaseVersion || "",
+        release.seasonNumber || "",
+        release.sourceHash || "",
+        row.tier || "",
+      ].join("|");
+      if (!groups.has(groupKey)) {
+        groups.set(groupKey, {
+          classId,
+          setName,
+          release,
+          tier: row.tier || "",
+          items: [],
+        });
+      }
+      groups.get(groupKey).items.push(row);
+    });
+
+  return [...groups.entries()]
+    .map(([groupKey, group]) => {
+      const classLabel = classLabelForId(group.classId, rows);
+      const slots = new Set(group.items.map(armorSlotId).filter(Boolean));
+      const classItem = group.items.find((row) => armorSlotId(row) === "class") || group.items[0] || {};
+      const hasBuild = group.items.some(hasNewArmorSystem);
+      const setBonusPlug = armorSetBonusOptionForName(group.setName);
+      const hasSetBonus = Boolean(setBonusPlug) || group.items.some((row) => (row.plugSockets || []).some((socket) => socket.kind === "set_bonus"));
+      const name = `${group.setName} - ${classLabel}`;
+      const slotCount = slots.size;
+      const armorSlot = state.lang === "ja" ? `${slotCount}/5部位` : `${slotCount}/5 pieces`;
+      const hash = stableNegativeHash(groupKey);
+      return {
+        hash,
+        isArmorSet: true,
+        armorSetKey: groupKey,
+        armorSetName: group.setName,
+        armorSetClassId: group.classId,
+        armorSetItems: group.items,
+        armorSetBonusHash: setBonusPlug?.hash || "",
+        armorSetCanBuild: hasBuild,
+        armorSetHasSetBonus: hasSetBonus,
+        armorSetSlotCount: slotCount,
+        name,
+        description: hasBuild ? t("armorTotalNote") : t("armorLegacyNoBuild"),
+        icon: classItem.icon || "",
+        type: hasBuild ? t("armorSetBuilder") : t("armorLegacySet"),
+        bucket: hasBuild ? t("armorSetBaseline") : t("armorLegacyNoBuildShort"),
+        tier: group.tier || "Tier",
+        itemType: "armor_set",
+        groups: ["equipment"],
+        sections: ["armor"],
+        primaryGroup: "equipment",
+        primarySection: "armor",
+        sectionLabel: sectionLabel("armor"),
+        class: classLabel,
+        classIds: [group.classId],
+        categories: [classLabel, t("armor"), group.setName],
+        armorSlot,
+        stats: hasBuild ? armorSetTotals(groupKey) : {},
+        release: group.release,
+        search: `${name} ${group.setName} ${classLabel} ${group.tier || ""} ${armorSlot} ${releaseLabel(group.release)} ${hasBuild ? t("armorSetBaseline") : t("armorLegacyNoBuild")} ${hasSetBonus ? t("armorSetBonus") : ""}`.toLowerCase(),
+      };
+    })
+    .sort((a, b) => armorClassOrder.indexOf(a.armorSetClassId) - armorClassOrder.indexOf(b.armorSetClassId) || compareText(a.armorSetName, b.armorSetName) || compareNumberAsc(a.release?.seasonNumber, b.release?.seasonNumber));
 }
 
 function contextRows() {
@@ -1845,6 +2195,64 @@ function cleanSetBonusName(value) {
     .trim();
 }
 
+function normalizedSetBonusName(value) {
+  return cleanSetBonusName(value)
+    .replace(/\s*\([^)]*\)$/u, "")
+    .replace(/\s*（[^）]*）$/u, "")
+    .replace(/\s+set$/i, "")
+    .replace(/のセット$/u, "")
+    .replace(/[^\p{L}\p{N}]+/gu, "")
+    .toLowerCase();
+}
+
+function armorSetBonusAliasName(value) {
+  const key = normalizedSetBonusName(value);
+  const aliases = {
+    collectivepsyche: "Accretion",
+    集団精神: "降着",
+  };
+  return aliases[key] || value;
+}
+
+function armorSetBonusOptionForName(value) {
+  const target = normalizedSetBonusName(armorSetBonusAliasName(value));
+  if (!target) return null;
+  return armorSetBonusOptions().find((plug) => normalizedSetBonusName(plug.name) === target) || null;
+}
+
+function armorSetBonusEffectsForPlug(plug) {
+  if (!plug?.hash) return null;
+  return armorSetBonusEffectData[String(plug.hash)]?.[state.lang] || armorSetBonusEffectData[String(plug.hash)]?.en || null;
+}
+
+function renderSetBonusEffectCard(plug, tier) {
+  if (!plug) return "";
+  const effects = armorSetBonusEffectsForPlug(plug);
+  const effect = effects?.[tier];
+  const tierLabel = tier === "four" ? t("armorSetBonusFourPiece") : t("armorSetBonusTwoPiece");
+  const name = effect?.name || cleanSetBonusName(plug.name);
+  const description = effect?.description || t("armorSetEffectUnknown");
+  return `
+    <article class="set-bonus-effect-card${effect ? "" : " is-unknown"}">
+      <div class="set-bonus-effect-head">
+        <span>${esc(tierLabel)}</span>
+        <strong>${esc(name)}</strong>
+      </div>
+      <p>${esc(description)}</p>
+    </article>
+  `;
+}
+
+function renderSetBonusEffects(plug, tiers = ["two", "four"]) {
+  if (!plug) return "";
+  return `
+    <div class="set-bonus-effects">
+      ${tiers.map((tier) => renderSetBonusEffectCard(plug, tier)).join("")}
+      ${plug.description ? `<p class="set-bonus-note">${esc(t("armorSetSelectorNote"))}: ${esc(plug.description)}</p>` : ""}
+    </div>
+  `;
+}
+
 function armorExoticOptions(classId, slotId) {
   const seen = new Set();
   return armorCatalogRows()
@@ -1859,8 +2267,8 @@ function armorExoticOptions(classId, slotId) {
     .sort((a, b) => compareText(a.name, b.name));
 }
 
-function selectedArmorExotic(classId) {
-  const exotic = armorSetExoticState(classId);
+function selectedArmorExotic(setKey, classId) {
+  const exotic = armorSetExoticState(setKey);
   return armorExoticOptions(classId, exotic.slot).find((row) => Number(row.hash) === Number(exotic.hash)) || null;
 }
 
@@ -2333,8 +2741,8 @@ function renderArmorSetStats(totals) {
   `;
 }
 
-function renderArmorPieceCard(classId, slot) {
-  const piece = normalizeArmorPieceState(armorSetPieceState(classId, slot.id));
+function renderArmorPieceCard(setKey, slot) {
+  const piece = normalizeArmorPieceState(armorSetPieceState(setKey, slot.id));
   const archetype = armorPlugOption(piece.archetypeHash);
   const pieceStats = armorPieceStats(piece);
   const tertiaryOptions = armorTertiaryOptionsForArchetype(piece.archetypeHash);
@@ -2381,13 +2789,13 @@ function renderArmorPieceCard(classId, slot) {
   `;
 }
 
-function renderArmorExoticPanel(classId) {
-  const exotic = armorSetExoticState(classId);
+function renderArmorExoticPanel(setKey, classId) {
+  const exotic = armorSetExoticState(setKey);
   const options = armorExoticOptions(classId, exotic.slot);
   if (exotic.hash && !options.some((row) => Number(row.hash) === Number(exotic.hash))) {
     exotic.hash = "";
   }
-  const selected = selectedArmorExotic(classId);
+  const selected = selectedArmorExotic(setKey, classId);
   const perkCards = selected
     ? (selected.plugSockets || [])
         .filter((socket) => socket.kind === "intrinsic")
@@ -2427,8 +2835,30 @@ function renderArmorExoticPanel(classId) {
   `;
 }
 
-function renderArmorSetBonusPanel(classId) {
-  const bonus = armorSetBonusState(classId);
+function renderSelectedSetBonusEffects(primary, secondary, mode) {
+  if (mode === "none") return "";
+  const blocks = [];
+  if (primary) {
+    blocks.push(`
+      <div class="set-bonus-selection">
+        <h4>${esc(cleanSetBonusName(primary.name))}</h4>
+        ${renderSetBonusEffects(primary, mode === "2+4" ? ["two", "four"] : ["two"])}
+      </div>
+    `);
+  }
+  if (mode === "2+2" && secondary) {
+    blocks.push(`
+      <div class="set-bonus-selection">
+        <h4>${esc(cleanSetBonusName(secondary.name))}</h4>
+        ${renderSetBonusEffects(secondary, ["two"])}
+      </div>
+    `);
+  }
+  return blocks.join("");
+}
+
+function renderArmorSetBonusPanel(setKey) {
+  const bonus = armorSetBonusState(setKey);
   const options = armorSetBonusOptions();
   const primary = options.find((plug) => Number(plug.hash) === Number(bonus.primaryHash));
   const secondary = options.find((plug) => Number(plug.hash) === Number(bonus.secondaryHash));
@@ -2470,18 +2900,73 @@ function renderArmorSetBonusPanel(classId) {
         ${primary ? `<span class="badge">${esc(cleanSetBonusName(primary.name))}${bonus.mode === "2+4" ? " 2/4" : " 2"}</span>` : ""}
         ${bonus.mode === "2+2" && secondary ? `<span class="badge">${esc(cleanSetBonusName(secondary.name))} 2</span>` : ""}
       </div>
+      ${renderSelectedSetBonusEffects(primary, secondary, bonus.mode)}
+    </section>
+  `;
+}
+
+function renderArmorSetPiecesPanel(row) {
+  const items = row.armorSetItems || [];
+  const cards = armorPieceSlots
+    .map((slot) => {
+      const slotItems = items.filter((item) => armorSlotId(item) === slot.id);
+      if (!slotItems.length) return "";
+      const primary = slotItems[0];
+      const variant = slotItems.length > 1 ? `<span>${esc(t("armorSetPieceVariants"))}: ${esc(slotItems.length)}</span>` : "";
+      return `
+        <button class="armor-set-piece-card" type="button" data-armor-item-hash="${esc(primary.hash)}" title="${esc(t("armorViewItem"))}">
+          ${renderIcon(primary, "item-icon")}
+          <span>
+            <strong>${esc(armorSlotLabel(slot.id))}</strong>
+            <span>${esc(primary.name)}</span>
+            ${variant}
+          </span>
+        </button>
+      `;
+    })
+    .filter(Boolean)
+    .join("");
+  if (!cards) return "";
+  return `
+    <section class="panel armor-set-pieces-panel">
+      <h3>${esc(t("armorSetPieces"))}</h3>
+      <div class="armor-set-piece-list">
+        ${cards}
+      </div>
+    </section>
+  `;
+}
+
+function renderArmorSetIntrinsicBonus(row) {
+  const plug = armorSetBonusOptionForName(row.armorSetName || row.name);
+  if (!plug && !row.armorSetHasSetBonus) return "";
+  return `
+    <section class="panel armor-set-intrinsic-bonus">
+      <h3>${esc(t("armorSetBonusEffect"))}</h3>
+      ${
+        plug
+          ? `<div class="set-bonus-selection">
+              <h4>${esc(cleanSetBonusName(plug.name))}</h4>
+              ${renderSetBonusEffects(plug)}
+            </div>`
+          : `<div class="set-bonus-effects">${renderSetBonusEffectCard({ name: row.armorSetName || row.name }, "two")}</div>`
+      }
     </section>
   `;
 }
 
 function renderArmorSetDetail(row) {
   const classId = row.armorSetClassId || armorSetHashClasses[String(row.hash)] || "hunter";
-  const totals = armorSetTotals(classId);
+  const setKey = row.armorSetKey || classId;
+  const canBuild = row.armorSetCanBuild !== false;
+  const totals = canBuild ? armorSetTotals(setKey) : {};
+  const bonusState = armorSetBonusState(setKey);
   const metadata = [
     [t("class"), row.class],
-    [t("armorTier5"), t("armorSetBaseline")],
-    [t("armorExotic"), selectedArmorExotic(classId)?.name || t("armorNoExotic")],
-    [t("armorSetBonus"), armorSetBonusState(classId).mode],
+    [t("armorTier5"), canBuild ? t("armorSetBaseline") : ""],
+    [t("armorExotic"), canBuild ? selectedArmorExotic(setKey, classId)?.name || t("armorNoExotic") : ""],
+    [t("armorSetBonus"), canBuild ? bonusState.mode : row.armorSetHasSetBonus ? t("armorSetBonusEffect") : ""],
+    [t("release"), releaseSummary(row, false)],
   ];
   els.detail.innerHTML = `
     <div class="detail-shell armor-set-shell">
@@ -2494,41 +2979,58 @@ function renderArmorSetDetail(row) {
           </div>
           <div class="badge-line">
             <span class="badge">${esc(row.class)}</span>
-            <span class="badge">${esc(t("armorSetBaseline"))}</span>
-            <span class="badge">${esc(t("armorPieceConfig"))}</span>
+            <span class="badge">${esc(row.armorSlot || "")}</span>
+            <span class="badge">${esc(canBuild ? t("armorSetBaseline") : t("armorLegacyNoBuildShort"))}</span>
+            ${row.armorSetHasSetBonus ? `<span class="badge">${esc(t("armorSetBonus"))}</span>` : ""}
           </div>
-          <p class="description">${esc(t("armorTotalNote"))}</p>
+          <p class="description">${esc(canBuild ? t("armorTotalNote") : t("armorLegacyNoBuild"))}</p>
         </div>
       </div>
 
-      <div class="armor-set-layout">
+      <div class="armor-set-layout${canBuild ? "" : " armor-set-layout--single"}">
         <div class="armor-set-main">
-          <section class="panel">
-            <h3>${esc(t("armorSetTotals"))}</h3>
-            ${renderArmorSetStats(totals)}
-          </section>
-          <section class="panel armor-pieces-panel">
-            <h3>${esc(t("armorPieceConfig"))}</h3>
-            <div class="armor-piece-grid">
-              ${armorPieceSlots.map((slot) => renderArmorPieceCard(classId, slot)).join("")}
-            </div>
-          </section>
+          ${renderArmorSetPiecesPanel(row)}
+          ${renderArmorSetIntrinsicBonus(row)}
+          ${
+            canBuild
+              ? `<section class="panel">
+                  <h3>${esc(t("armorSetTotals"))}</h3>
+                  ${renderArmorSetStats(totals)}
+                </section>
+                <section class="panel armor-pieces-panel">
+                  <h3>${esc(t("armorPieceConfig"))}</h3>
+                  <div class="armor-piece-grid">
+                    ${armorPieceSlots.map((slot) => renderArmorPieceCard(setKey, slot)).join("")}
+                  </div>
+                </section>`
+              : ""
+          }
         </div>
-        <aside class="armor-set-side">
-          ${renderArmorExoticPanel(classId)}
-          ${renderArmorSetBonusPanel(classId)}
-        </aside>
+        ${
+          canBuild
+            ? `<aside class="armor-set-side">
+                ${renderArmorExoticPanel(setKey, classId)}
+                ${renderArmorSetBonusPanel(setKey)}
+              </aside>`
+            : ""
+        }
       </div>
     </div>
   `;
-  bindArmorSetControls(row, classId);
+  bindArmorSetControls(row, setKey, classId);
 }
 
-function bindArmorSetControls(row, classId) {
+function bindArmorSetControls(row, setKey, classId) {
+  els.detail.querySelectorAll("[data-armor-item-hash]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const item = (row.armorSetItems || []).find((candidate) => Number(candidate.hash) === Number(button.dataset.armorItemHash));
+      if (item) renderDetail(item);
+    });
+  });
   els.detail.querySelectorAll("[data-armor-piece-archetype]").forEach((select) => {
     select.addEventListener("change", () => {
       const slotId = select.dataset.armorPieceArchetype;
-      const piece = armorSetPieceState(classId, slotId);
+      const piece = armorSetPieceState(setKey, slotId);
       piece.archetypeHash = Number(select.value || defaultArmorArchetypeHash);
       normalizeArmorPieceState(piece);
       renderDetail(row);
@@ -2536,45 +3038,45 @@ function bindArmorSetControls(row, classId) {
   });
   els.detail.querySelectorAll("[data-armor-piece-tertiary]").forEach((select) => {
     select.addEventListener("change", () => {
-      armorSetPieceState(classId, select.dataset.armorPieceTertiary).tertiary = select.value;
+      armorSetPieceState(setKey, select.dataset.armorPieceTertiary).tertiary = select.value;
       renderDetail(row);
     });
   });
   els.detail.querySelectorAll("[data-armor-piece-general]").forEach((select) => {
     select.addEventListener("change", () => {
-      armorSetPieceState(classId, select.dataset.armorPieceGeneral).generalModHash = select.value;
+      armorSetPieceState(setKey, select.dataset.armorPieceGeneral).generalModHash = select.value;
       renderDetail(row);
     });
   });
   els.detail.querySelectorAll("[data-armor-piece-focus]").forEach((select) => {
     select.addEventListener("change", () => {
-      armorSetPieceState(classId, select.dataset.armorPieceFocus).focusModHash = select.value;
+      armorSetPieceState(setKey, select.dataset.armorPieceFocus).focusModHash = select.value;
       renderDetail(row);
     });
   });
   els.detail.querySelector("[data-armor-exotic-slot]")?.addEventListener("change", (event) => {
-    const exotic = armorSetExoticState(classId);
+    const exotic = armorSetExoticState(setKey);
     exotic.slot = event.target.value;
     exotic.hash = "";
     renderDetail(row);
   });
   els.detail.querySelector("[data-armor-exotic]")?.addEventListener("change", (event) => {
-    armorSetExoticState(classId).hash = event.target.value;
+    armorSetExoticState(setKey).hash = event.target.value;
     renderDetail(row);
   });
   els.detail.querySelectorAll("[data-armor-bonus-mode]").forEach((button) => {
     button.addEventListener("click", () => {
-      const bonus = armorSetBonusState(classId);
+      const bonus = armorSetBonusState(setKey);
       bonus.mode = button.dataset.armorBonusMode || "none";
       renderDetail(row);
     });
   });
   els.detail.querySelector("[data-armor-bonus-primary]")?.addEventListener("change", (event) => {
-    armorSetBonusState(classId).primaryHash = event.target.value;
+    armorSetBonusState(setKey).primaryHash = event.target.value;
     renderDetail(row);
   });
   els.detail.querySelector("[data-armor-bonus-secondary]")?.addEventListener("change", (event) => {
-    armorSetBonusState(classId).secondaryHash = event.target.value;
+    armorSetBonusState(setKey).secondaryHash = event.target.value;
     renderDetail(row);
   });
 }

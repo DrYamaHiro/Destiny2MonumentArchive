@@ -1367,6 +1367,10 @@ h1 {
   margin-top: 14px;
 }
 
+.armor-set-layout--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .armor-set-main,
 .armor-set-side {
   display: grid;
@@ -1441,6 +1445,122 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.armor-set-piece-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.armor-set-piece-card {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--panel-alt);
+  color: var(--body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.armor-set-piece-card:hover,
+.armor-set-piece-card:focus-visible {
+  border-color: var(--blue);
+  outline: none;
+}
+
+.armor-set-piece-card > span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.armor-set-piece-card strong,
+.armor-set-piece-card span span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.armor-set-piece-card strong {
+  color: var(--strong);
+  font-size: 12px;
+}
+
+.armor-set-piece-card span span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.set-bonus-selection {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.set-bonus-selection + .set-bonus-selection {
+  margin-top: 12px;
+}
+
+.set-bonus-selection h4 {
+  margin: 0;
+  color: var(--strong);
+  font-size: 13px;
+}
+
+.set-bonus-effects {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.set-bonus-effect-card {
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--panel-alt);
+}
+
+.set-bonus-effect-card.is-unknown {
+  border-style: dashed;
+}
+
+.set-bonus-effect-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  align-items: baseline;
+}
+
+.set-bonus-effect-head span {
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 1000;
+}
+
+.set-bonus-effect-head strong {
+  color: var(--strong);
+  font-size: 13px;
+}
+
+.set-bonus-effect-card p,
+.set-bonus-note {
+  margin: 0;
+  color: var(--body);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.set-bonus-note {
+  color: var(--muted);
+  font-weight: 800;
 }
 
 .armor-stat-pill {
