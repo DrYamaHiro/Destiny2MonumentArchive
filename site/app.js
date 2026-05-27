@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260528-armor-set-effects";
+const DATA_VERSION = "20260528-class-build-sim";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
@@ -16,10 +16,11 @@ const state = {
   armorSetPieces: {},
   armorSetExotics: {},
   armorSetBonuses: {},
+  classBuildWeapons: {},
 };
 
 const taxonomy = [
-  { id: "character", defaultSection: "subclasses", sections: ["all", "subclasses", "hunter", "warlock", "titan"] },
+  { id: "character", defaultSection: "build_simulator", sections: ["all", "build_simulator", "subclasses", "abilities", "hunter", "warlock", "titan"] },
   { id: "equipment", defaultSection: "weapons", sections: ["all", "weapons", "armor", "ghosts", "ships", "sparrows", "emblems", "artifacts", "clan_banners"] },
   { id: "appearance", defaultSection: "emotes", sections: ["all", "emotes", "finishers", "shaders", "weapon_ornaments", "armor_ornaments", "ghost_projections", "transmat_effects"] },
   { id: "inventory", defaultSection: "quests", sections: ["all", "quests", "bounties", "lore", "engrams", "packages", "consumables", "materials", "currencies"] },
@@ -126,6 +127,7 @@ const text = {
     armorSetBonusTwoPiece: "2部位",
     armorSetBonusFourPiece: "4部位",
     armorSetPieces: "構成部位",
+    armorSetDetailNote: "防具セットの構成とセット効果を確認できます。ビルド調整はキャラクターのビルドシミュレーターで行います。",
     armorViewItem: "装備詳細を見る",
     armorSetPieceVariants: "同部位候補",
     armorLegacySet: "旧防具セット",
@@ -136,6 +138,26 @@ const text = {
     armorTotalNote: "固有パラメータ、一般Mod、特化Mod、エキゾ枠、セットボーナス構成のみを比較します。",
     manualArmorTuning: "旧防具ステータス調整",
     manualArmorNote: "旧仕様防具は実値を0-42で手動調整します。",
+    buildSimulator: "ビルドシミュレーター",
+    buildSimulatorSub: "クラス別の武器・防具調整",
+    buildSimulatorDescription: "クラスごとに武器3枠とTier5防具パラメータ、エキゾチック防具、セットボーナスを横並びで確認します。",
+    buildSimulatorNoLegendary: "レジェンダリー防具選択なし",
+    abilityIndex: "アビリティ一覧",
+    abilityIndexSub: "サブクラス・特性・かけら・スキル",
+    abilityIndexDescription: "Manifestから取得できるサブクラス関連のアビリティ、特性、かけら、スーパースキル、近接、グレネード、クラススキル、移動スキルを一覧化します。",
+    armorSet: "防具セット",
+    armorSetReadOnly: "セット閲覧",
+    weaponSimulation: "武器シミュレーション",
+    armorSimulation: "防具シミュレーション",
+    weaponLoadout: "武器構成",
+    armorLoadout: "防具構成",
+    kineticSlot: "キネティック枠",
+    energySlot: "エネルギー枠",
+    powerSlot: "パワー枠",
+    selectWeapon: "武器を選択",
+    noWeaponSelected: "未選択",
+    weaponDetails: "武器詳細",
+    classEmblem: "代表エンブレム",
     class: "クラス",
     ammo: "弾薬",
     damage: "属性",
@@ -209,6 +231,8 @@ const text = {
       warlock: "ウォーロック",
       titan: "タイタン",
       subclasses: "サブクラス",
+      build_simulator: "ビルドシミュレーター",
+      abilities: "アビリティ",
       weapons: "武器",
       armor: "防具",
       ghosts: "ゴースト",
@@ -330,6 +354,7 @@ const text = {
     armorSetBonusTwoPiece: "2-piece",
     armorSetBonusFourPiece: "4-piece",
     armorSetPieces: "Set pieces",
+    armorSetDetailNote: "Review set pieces and set effects here. Build tuning lives in the Character build simulator.",
     armorViewItem: "View item details",
     armorSetPieceVariants: "Slot variants",
     armorLegacySet: "Legacy armor set",
@@ -340,6 +365,26 @@ const text = {
     armorTotalNote: "Compare only tertiary stats, general mods, focus mods, the Exotic slot, and set bonus layout.",
     manualArmorTuning: "Legacy Armor Stat Tuning",
     manualArmorNote: "Legacy armor stats can be adjusted manually from 0-42.",
+    buildSimulator: "Build Simulator",
+    buildSimulatorSub: "Class weapon and armor tuning",
+    buildSimulatorDescription: "Compare three weapon slots with Tier 5 armor stats, Exotic armor, and set bonus layout for each class.",
+    buildSimulatorNoLegendary: "No Legendary armor selection",
+    abilityIndex: "Ability Index",
+    abilityIndexSub: "Subclasses, aspects, fragments, and abilities",
+    abilityIndexDescription: "Lists subclass-related abilities, aspects, fragments, Supers, melees, grenades, class abilities, and movement abilities available from the manifest.",
+    armorSet: "Armor Set",
+    armorSetReadOnly: "Set Browser",
+    weaponSimulation: "Weapon Simulation",
+    armorSimulation: "Armor Simulation",
+    weaponLoadout: "Weapon Loadout",
+    armorLoadout: "Armor Loadout",
+    kineticSlot: "Kinetic Slot",
+    energySlot: "Energy Slot",
+    powerSlot: "Power Slot",
+    selectWeapon: "Select weapon",
+    noWeaponSelected: "Not selected",
+    weaponDetails: "Weapon Details",
+    classEmblem: "Representative Emblem",
     class: "Class",
     ammo: "Ammo",
     damage: "Damage",
@@ -413,6 +458,8 @@ const text = {
       warlock: "Warlock",
       titan: "Titan",
       subclasses: "Subclasses",
+      build_simulator: "Build Simulator",
+      abilities: "Abilities",
       weapons: "Weapons",
       armor: "Armor",
       ghosts: "Ghosts",
@@ -536,6 +583,19 @@ const armorArchetypeStats = {
 const armorClassOrder = ["hunter", "warlock", "titan"];
 const armorSetHashes = { hunter: -9101, warlock: -9102, titan: -9103 };
 const armorSetHashClasses = Object.fromEntries(Object.entries(armorSetHashes).map(([key, value]) => [String(value), key]));
+const buildSimulatorClassOrder = ["titan", "hunter", "warlock"];
+const classBuildHashes = { titan: -9201, hunter: -9202, warlock: -9203 };
+const classBuildEmblemHashes = { titan: 1907674139, hunter: 1907674138, warlock: 1907674137 };
+const classBuildEmblemFallbacks = {
+  titan: "https://www.bungie.net/common/destiny2_content/icons/93844c8b76ea80683a880479e3506980.jpg",
+  hunter: "https://www.bungie.net/common/destiny2_content/icons/d914fab82fe3f1d6f751627e04338f51.jpg",
+  warlock: "https://www.bungie.net/common/destiny2_content/icons/24e9133c9cc157853762de5a2c3853aa.jpg",
+};
+const buildWeaponSlots = [
+  { id: "kinetic", labelKey: "kineticSlot" },
+  { id: "energy", labelKey: "energySlot" },
+  { id: "power", labelKey: "powerSlot" },
+];
 const armorPieceSlots = [
   { id: "head", ja: "ヘルメット", en: "Helmet" },
   { id: "arms", ja: "ガントレット", en: "Arms" },
@@ -987,6 +1047,7 @@ function stripArmorSlotSuffix(coreName) {
     "Chest Armor",
     "Class Item",
     "Leg Armor",
+    "Legs",
     "Gauntlets",
     "Gloves",
     "Grasps",
@@ -994,6 +1055,9 @@ function stripArmorSlotSuffix(coreName) {
     "Helmet",
     "Sleeves",
     "Strides",
+    "Steps",
+    "Chaps",
+    "Cloaked Stetson",
     "Vestment",
     "Boots",
     "Casque",
@@ -1015,6 +1079,7 @@ function stripArmorSlotSuffix(coreName) {
     "チェストアーマー",
     "クラスアイテム",
     "レッグアーマー",
+    "レッグ",
     "ガントレット",
     "グローブ",
     "グラスプ",
@@ -1025,15 +1090,20 @@ function stripArmorSlotSuffix(coreName) {
     "キュイラス",
     "プレート",
     "クローク",
+    "クローク付きステットソン",
     "カスク",
     "カバー",
     "フード",
     "ブーツ",
     "グリップ",
+    "ジャケット",
+    "チャップス",
+    "ステップ",
     "ヘルム",
     "マスク",
     "ローブ",
     "ベスト",
+    "心",
     "バンド",
     "紋章",
     "ボンド",
@@ -1144,6 +1214,7 @@ async function ensureData() {
     state.data[state.lang] = { catalog: [], catalogContexts: {}, catalogShards: {}, facets, summary, plugOptions };
   }
   await ensureCatalogForContext();
+  await ensureCharacterSupportCatalogs();
 }
 
 function langData() {
@@ -1211,6 +1282,41 @@ async function ensureCatalogForContext() {
   data.catalog = data.catalogContexts[key];
 }
 
+function needsBuildSupport(group = state.group, section = state.section) {
+  return group === "character" && ["all", "build_simulator"].includes(section);
+}
+
+function needsAbilitySupport(group = state.group, section = state.section) {
+  return group === "character";
+}
+
+async function ensureSupportCatalog(group, section) {
+  const data = langData();
+  const key = catalogContextKey(group, section);
+  if (data.catalogContexts[key]) return data.catalogContexts[key];
+  const paths = catalogShardPathsForContext(group, section);
+  const shardRows = await Promise.all(paths.map(loadCatalogShard));
+  data.catalogContexts[key] = mergeCatalogRows(shardRows);
+  return data.catalogContexts[key];
+}
+
+async function ensureCharacterSupportCatalogs() {
+  const requests = [];
+  if (needsBuildSupport()) {
+    requests.push(ensureSupportCatalog("equipment", "weapons"));
+    requests.push(ensureSupportCatalog("equipment", "armor"));
+    requests.push(ensureSupportCatalog("equipment", "emblems"));
+  }
+  if (needsAbilitySupport()) {
+    requests.push(ensureSupportCatalog("mods", "perks"));
+  }
+  await Promise.all(requests);
+}
+
+function supportRows(group, section) {
+  return langData().catalogContexts?.[catalogContextKey(group, section)] || [];
+}
+
 function currentTaxonomy() {
   return taxonomy.find((item) => item.id === state.group) || taxonomy[1];
 }
@@ -1242,7 +1348,25 @@ function isArmorSetContext() {
 }
 
 function armorCatalogRows() {
-  return (langData().catalog || []).filter((row) => (row.sections || []).includes("armor") && !row.isArmorSet);
+  const catalog = langData().catalog || [];
+  const rows = catalog.some((row) => (row.sections || []).includes("armor")) ? catalog : supportRows("equipment", "armor");
+  return rows.filter((row) => (row.sections || []).includes("armor") && !row.isArmorSet);
+}
+
+function weaponCatalogRows() {
+  const catalog = langData().catalog || [];
+  const rows = supportRows("equipment", "weapons").length
+    ? supportRows("equipment", "weapons")
+    : catalog;
+  return rows.filter((row) => (row.sections || []).includes("weapons") && !row.isBuildSimulator);
+}
+
+function emblemCatalogRows() {
+  const catalog = langData().catalog || [];
+  const rows = supportRows("equipment", "emblems").length
+    ? supportRows("equipment", "emblems")
+    : catalog;
+  return rows.filter((row) => (row.sections || []).includes("emblems"));
 }
 
 function classIdForRow(row) {
@@ -1261,6 +1385,27 @@ function classLabelForId(id, rows = armorCatalogRows()) {
   return { hunter: state.lang === "ja" ? "ハンター" : "Hunter", warlock: state.lang === "ja" ? "ウォーロック" : "Warlock", titan: state.lang === "ja" ? "タイタン" : "Titan" }[id] || id;
 }
 
+function armorSetItemsSorted(items) {
+  const seen = new Set();
+  return [...items]
+    .filter((row) => {
+      const key = String(row.hash || "");
+      if (!key) return false;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => {
+      const slotDiff = armorPieceSlots.findIndex((slot) => slot.id === armorSlotId(a)) - armorPieceSlots.findIndex((slot) => slot.id === armorSlotId(b));
+      return slotDiff || compareNumberDesc(a.release?.seasonNumber, b.release?.seasonNumber) || compareText(a.name, b.name) || Number(a.hash || 0) - Number(b.hash || 0);
+    });
+}
+
+function armorSetBestRelease(items) {
+  return [...items]
+    .sort((a, b) => compareNumberDesc(a.release?.seasonNumber, b.release?.seasonNumber) || compareText(b.release?.releaseVersion, a.release?.releaseVersion) || compareText(a.name, b.name))[0]?.release || {};
+}
+
 function armorSetRows(rows = armorCatalogRows()) {
   const groups = new Map();
   rows
@@ -1271,20 +1416,15 @@ function armorSetRows(rows = armorCatalogRows()) {
       if (!classId || !slotId) return;
       const setName = armorSetName(row);
       if (!setName) return;
-      const release = row.release || {};
       const groupKey = [
         classId,
         setName,
-        release.releaseVersion || "",
-        release.seasonNumber || "",
-        release.sourceHash || "",
         row.tier || "",
       ].join("|");
       if (!groups.has(groupKey)) {
         groups.set(groupKey, {
           classId,
           setName,
-          release,
           tier: row.tier || "",
           items: [],
         });
@@ -1295,31 +1435,34 @@ function armorSetRows(rows = armorCatalogRows()) {
   return [...groups.entries()]
     .map(([groupKey, group]) => {
       const classLabel = classLabelForId(group.classId, rows);
-      const slots = new Set(group.items.map(armorSlotId).filter(Boolean));
-      const classItem = group.items.find((row) => armorSlotId(row) === "class") || group.items[0] || {};
-      const hasBuild = group.items.some(hasNewArmorSystem);
+      const items = armorSetItemsSorted(group.items);
+      const release = armorSetBestRelease(items);
+      const slots = new Set(items.map(armorSlotId).filter(Boolean));
+      const classItem = items.find((row) => armorSlotId(row) === "class") || items[0] || {};
       const setBonusPlug = armorSetBonusOptionForName(group.setName);
-      const hasSetBonus = Boolean(setBonusPlug) || group.items.some((row) => (row.plugSockets || []).some((socket) => socket.kind === "set_bonus"));
+      const hasSetBonus = Boolean(setBonusPlug) || items.some((row) => (row.plugSockets || []).some((socket) => socket.kind === "set_bonus"));
       const name = `${group.setName} - ${classLabel}`;
       const slotCount = slots.size;
       const armorSlot = state.lang === "ja" ? `${slotCount}/5部位` : `${slotCount}/5 pieces`;
       const hash = stableNegativeHash(groupKey);
+      const variantCount = items.length;
       return {
         hash,
         isArmorSet: true,
         armorSetKey: groupKey,
         armorSetName: group.setName,
         armorSetClassId: group.classId,
-        armorSetItems: group.items,
+        armorSetItems: items,
         armorSetBonusHash: setBonusPlug?.hash || "",
-        armorSetCanBuild: hasBuild,
+        armorSetCanBuild: false,
         armorSetHasSetBonus: hasSetBonus,
         armorSetSlotCount: slotCount,
+        armorSetVariantCount: variantCount,
         name,
-        description: hasBuild ? t("armorTotalNote") : t("armorLegacyNoBuild"),
+        description: hasSetBonus ? t("armorSetDetailNote") : t("armorLegacyNoBuild"),
         icon: classItem.icon || "",
-        type: hasBuild ? t("armorSetBuilder") : t("armorLegacySet"),
-        bucket: hasBuild ? t("armorSetBaseline") : t("armorLegacyNoBuildShort"),
+        type: t("armorSet"),
+        bucket: hasSetBonus ? t("armorSetReadOnly") : t("armorLegacyNoBuildShort"),
         tier: group.tier || "Tier",
         itemType: "armor_set",
         groups: ["equipment"],
@@ -1331,16 +1474,109 @@ function armorSetRows(rows = armorCatalogRows()) {
         classIds: [group.classId],
         categories: [classLabel, t("armor"), group.setName],
         armorSlot,
-        stats: hasBuild ? armorSetTotals(groupKey) : {},
-        release: group.release,
-        search: `${name} ${group.setName} ${classLabel} ${group.tier || ""} ${armorSlot} ${releaseLabel(group.release)} ${hasBuild ? t("armorSetBaseline") : t("armorLegacyNoBuild")} ${hasSetBonus ? t("armorSetBonus") : ""}`.toLowerCase(),
+        stats: {},
+        release,
+        search: `${name} ${group.setName} ${classLabel} ${group.tier || ""} ${armorSlot} ${variantCount} ${releaseLabel(release)} ${hasSetBonus ? t("armorSetBonus") : t("armorLegacyNoBuild")}`.toLowerCase(),
       };
     })
     .sort((a, b) => armorClassOrder.indexOf(a.armorSetClassId) - armorClassOrder.indexOf(b.armorSetClassId) || compareText(a.armorSetName, b.armorSetName) || compareNumberAsc(a.release?.seasonNumber, b.release?.seasonNumber));
 }
 
+function isBuildSimulatorRow(row) {
+  return Boolean(row?.isBuildSimulator);
+}
+
+function isAbilityRow(row) {
+  return state.group === "character" && (row?.sections || []).includes("abilities");
+}
+
+function classBuildEmblem(classId) {
+  const hash = classBuildEmblemHashes[classId];
+  const row = emblemCatalogRows().find((candidate) => Number(candidate.hash) === Number(hash));
+  if (row) return row;
+  return {
+    hash,
+    name: classLabelForId(classId),
+    icon: classBuildEmblemFallbacks[classId] || "",
+  };
+}
+
+function buildSimulatorRows() {
+  return buildSimulatorClassOrder.map((classId) => {
+    const classLabel = classLabelForId(classId);
+    const emblem = classBuildEmblem(classId);
+    const name = `${classLabel} ${t("buildSimulator")}`;
+    return {
+      hash: classBuildHashes[classId],
+      isBuildSimulator: true,
+      buildClassId: classId,
+      name,
+      description: t("buildSimulatorDescription"),
+      icon: emblem.icon || "",
+      type: t("buildSimulator"),
+      bucket: t("buildSimulatorNoLegendary"),
+      tier: t("armorTier5"),
+      itemType: "build_simulator",
+      groups: ["character"],
+      sections: ["build_simulator"],
+      primaryGroup: "character",
+      primarySection: "build_simulator",
+      sectionLabel: sectionLabel("build_simulator"),
+      class: classLabel,
+      classIds: [classId],
+      categories: [t("buildSimulator"), classLabel, t("weaponLoadout"), t("armorLoadout")],
+      stats: {},
+      release: {},
+      search: `${name} ${classLabel} ${emblem.name || ""} ${t("buildSimulator")} ${t("weaponLoadout")} ${t("armorLoadout")}`.toLowerCase(),
+    };
+  });
+}
+
+function abilityBaseType(type) {
+  return String(type || "")
+    .replace(/\s*\|\s*.*Ability$/i, "")
+    .replace(/\s*\|\s*.+スキル$/u, "")
+    .trim();
+}
+
+function isCharacterAbilityType(row) {
+  if ((row.sections || []).includes("weapons") || row.weaponType) return false;
+  const type = String(row.type || "").trim();
+  const base = abilityBaseType(type);
+  const english = /^(Arc|Solar|Void|Stasis|Strand) (Aspect|Fragment|Grenade|Melee|Super)$|^Prismatic Fragment$|^Class Ability$|^Movement Ability$|^Super Ability$|^Utility Ability$|^Melee$/i;
+  const japanese = /^(アーク|ソーラー|ボイド|ステイシス|ストランド)(のかけら|グレネード|近接|近接攻撃|スーパースキル|アスペクト)$|^プリズムのかけら$|^クラススキル$|^移動スキル$|^スーパースキル$|^近接攻撃$/u;
+  return english.test(base) || japanese.test(base);
+}
+
+function characterAbilityRows() {
+  const seen = new Set();
+  return supportRows("mods", "perks")
+    .filter(isCharacterAbilityType)
+    .filter((row) => {
+      const key = `${String(row.name || "").toLowerCase()}|${abilityBaseType(row.type).toLowerCase()}|${String(row.class || "").toLowerCase()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .map((row) => ({
+      ...row,
+      type: abilityBaseType(row.type) || row.type,
+      groups: ["character"],
+      sections: ["abilities"],
+      primaryGroup: "character",
+      primarySection: "abilities",
+      sectionLabel: sectionLabel("abilities"),
+      categories: [t("abilityIndex"), row.type, row.class].filter(Boolean),
+      search: `${row.search || ""} ${t("abilityIndex")} ${abilityBaseType(row.type)} ${row.class || ""}`.toLowerCase(),
+    }))
+    .sort((a, b) => compareText(a.type, b.type) || compareText(a.class, b.class) || compareText(a.name, b.name));
+}
+
 function contextRows() {
   const rows = rawContextRows();
+  if (state.group === "character" && state.section === "build_simulator") return buildSimulatorRows();
+  if (state.group === "character" && state.section === "abilities") return characterAbilityRows();
+  if (state.group === "character" && state.section === "all") return [...buildSimulatorRows(), ...rows, ...characterAbilityRows()];
   return isArmorSetContext() ? armorSetRows(rows) : rows;
 }
 
@@ -1491,11 +1727,19 @@ function updateLabels() {
   }
 }
 
+function characterVirtualCount(section = "all") {
+  if (section === "build_simulator") return buildSimulatorRows().length;
+  if (section === "abilities") return characterAbilityRows().length;
+  if (section === "all") return buildSimulatorRows().length + characterAbilityRows().length;
+  return 0;
+}
+
 function renderGroupNav() {
   const summary = langData().summary || {};
   els.groupNav.innerHTML = taxonomy
     .map((group) => {
-      const count = group.id === "all" ? summary.catalogCount : countFrom(summary.groupCounts, group.id);
+      const baseCount = group.id === "all" ? summary.catalogCount : countFrom(summary.groupCounts, group.id);
+      const count = baseCount + (group.id === "character" ? characterVirtualCount() : 0);
       const active = group.id === state.group ? " is-active" : "";
       return `
         <button class="group-tab${active}" type="button" data-group="${esc(group.id)}">
@@ -1514,10 +1758,14 @@ function renderGroupNav() {
 function renderSectionRail() {
   const summary = langData().summary || {};
   const sections = currentTaxonomy().sections;
-  const rowsInGroup = state.group === "all" ? summary.catalogCount : countFrom(summary.groupCounts, state.group);
+  const rowsInGroup = (state.group === "all" ? summary.catalogCount : countFrom(summary.groupCounts, state.group)) + (state.group === "character" ? characterVirtualCount() : 0);
   els.sectionRail.innerHTML = sections
     .map((section) => {
-      const count = section === "all" ? rowsInGroup : countFrom(summary.sectionCounts, section);
+      const count = section === "all"
+        ? rowsInGroup
+        : state.group === "character" && ["build_simulator", "abilities"].includes(section)
+          ? characterVirtualCount(section)
+          : countFrom(summary.sectionCounts, section);
       const active = section === state.section ? " is-active" : "";
       return `
         <button class="section-chip${active}" type="button" data-section="${esc(section)}">
@@ -1666,6 +1914,9 @@ function sortRows(rows) {
   const sort = state.sort;
   sorted.sort((a, b) => {
     const fallback = compareText(a.name, b.name) || Number(a.hash || 0) - Number(b.hash || 0);
+    if (isBuildSimulatorRow(a) && isBuildSimulatorRow(b)) {
+      return buildSimulatorClassOrder.indexOf(a.buildClassId) - buildSimulatorClassOrder.indexOf(b.buildClassId) || fallback;
+    }
     if (isArmorSetRow(a) && isArmorSetRow(b)) {
       return armorClassOrder.indexOf(a.armorSetClassId) - armorClassOrder.indexOf(b.armorSetClassId) || fallback;
     }
@@ -2303,12 +2554,12 @@ function plugOptionLabel(row, plug) {
   return deltaText ? `${plug.name} (${deltaText})` : plug.name;
 }
 
-function renderPlugBuilder(row) {
+function renderPlugBuilder(row, embedded = false) {
   const sockets = row.plugSockets || [];
   const manualArmor = renderManualArmorTuning(row);
   if (!sockets.length && !manualArmor) return "";
   return `
-    <section class="panel plug-builder">
+    <section class="${embedded ? "plug-builder plug-builder--embedded" : "panel plug-builder"}">
       <h3>${esc(t("perksMods"))}</h3>
       ${sockets.length ? renderSocketSelectors(row, sockets) : ""}
       ${manualArmor}
@@ -2442,6 +2693,9 @@ function renderManualArmorTuning(row) {
 }
 
 function detailSummary(row) {
+  if (isBuildSimulatorRow(row)) {
+    return [row.class, t("weaponLoadout"), t("armorLoadout")].filter(Boolean).join(" / ");
+  }
   if (isArmorSetRow(row)) {
     return [row.class, row.armorSlot, row.tier].filter(Boolean).map(compactMetaLabel).join(" / ");
   }
@@ -2955,17 +3209,284 @@ function renderArmorSetIntrinsicBonus(row) {
   `;
 }
 
+function classBuildArmorKey(classId) {
+  return `class-build:${classId}`;
+}
+
+function classBuildWeaponKey(classId, slotId) {
+  return `${classId}:${slotId}`;
+}
+
+function classBuildWeaponState(classId, slotId) {
+  const key = classBuildWeaponKey(classId, slotId);
+  return state.classBuildWeapons[key] || "";
+}
+
+function weaponBuildSlotId(row) {
+  const rank = slotRank(row);
+  if (rank === 0) return "kinetic";
+  if (rank === 1) return "energy";
+  if (rank === 2) return "power";
+  return "";
+}
+
+function weaponOptionsForBuildSlot(slotId) {
+  return weaponCatalogRows()
+    .filter((row) => weaponBuildSlotId(row) === slotId)
+    .sort((a, b) => ammoRank(a) - ammoRank(b) || compareText(a.weaponType, b.weaponType) || compareText(a.name, b.name));
+}
+
+function selectedBuildWeapon(classId, slotId) {
+  const hash = classBuildWeaponState(classId, slotId);
+  if (!hash) return null;
+  return weaponCatalogRows().find((row) => Number(row.hash) === Number(hash)) || null;
+}
+
+function selectedBuildWeaponByHash(hash) {
+  if (!hash) return null;
+  return weaponCatalogRows().find((row) => Number(row.hash) === Number(hash)) || null;
+}
+
+function buildWeaponOptionLabel(row) {
+  return [row.name, row.weaponType, compactMetaLabel(row.ammo), releaseListLabel(row)].filter(Boolean).join(" / ");
+}
+
+function renderBuildWeaponSelector(classId, slot) {
+  const options = weaponOptionsForBuildSlot(slot.id);
+  const selected = classBuildWeaponState(classId, slot.id);
+  return `
+    <label class="field build-weapon-select">
+      <span>${esc(t(slot.labelKey))}</span>
+      <select data-build-weapon-slot="${esc(slot.id)}">
+        ${selectOptions(options, selected, t("selectWeapon"), "hash", buildWeaponOptionLabel)}
+      </select>
+    </label>
+  `;
+}
+
+function renderWeaponPvpCompact(row) {
+  const ttk = row.ttk || {};
+  const hasValue = [ttk.precisionDamage, ttk.bodyDamage, ttk.optimalTtkMs, ttk.bodyTtkMs, ttk.critShots, ttk.bodyShots, ttk.bodyForgivenessShots, ttk.bodyForgivenessPct].some(hasDisplayValue);
+  return `
+    <div class="build-weapon-pvp">
+      <h4>${esc(t("ttk"))}</h4>
+      ${hasValue ? "" : `<div class="notice compact-notice">${esc(t("ttkPending"))}</div>`}
+      ${renderMetricCards([
+        [t("precisionDamage"), displayValue(ttk.precisionDamage)],
+        [t("bodyDamage"), displayValue(ttk.bodyDamage)],
+        [t("optimalTtk"), formatMs(ttk.optimalTtkMs)],
+        [t("bodyTtk"), formatMs(ttk.bodyTtkMs)],
+        [t("critShots"), displayValue(ttk.critShots)],
+        [t("bodyShots"), displayValue(ttk.bodyShots)],
+        [t("bodyForgiveness"), formatBodyForgiveness(ttk)],
+      ], "pvp-metric-grid")}
+    </div>
+  `;
+}
+
+function renderBuildWeaponCard(classId, slot) {
+  const row = selectedBuildWeapon(classId, slot.id);
+  if (!row) {
+    return `
+      <section class="build-weapon-card is-empty" data-build-slot="${esc(slot.id)}">
+        <div class="build-weapon-head">
+          <h4>${esc(t(slot.labelKey))}</h4>
+          <span>${esc(t("noWeaponSelected"))}</span>
+        </div>
+        <div class="notice compact-notice">${esc(t("selectWeapon"))}</div>
+      </section>
+    `;
+  }
+  const deltas = statDeltasFor(row);
+  const plugBuilder = renderPlugBuilder(row, true);
+  return `
+    <section class="build-weapon-card" data-build-slot="${esc(slot.id)}" data-build-weapon-card data-build-weapon-hash="${esc(row.hash)}">
+      <div class="build-weapon-head">
+        ${renderIcon(row, "item-icon")}
+        <div>
+          <h4>${esc(row.name)}</h4>
+          <span>${esc([row.weaponType, compactMetaLabel(row.ammo), compactMetaLabel(row.damageType)].filter(Boolean).join(" / "))}</span>
+        </div>
+      </div>
+      ${renderFrameSummary(row)}
+      <div class="build-weapon-stats">
+        ${renderStats(row.stats, deltas, false)}
+      </div>
+      ${plugBuilder ? `<div class="build-weapon-builder">${plugBuilder}</div>` : ""}
+      ${renderWeaponPvpCompact(row)}
+    </section>
+  `;
+}
+
+function renderBuildWeaponsPanel(row) {
+  const classId = row.buildClassId;
+  return `
+    <section class="panel build-sim-panel build-sim-weapons">
+      <h3>${esc(t("weaponSimulation"))}</h3>
+      <div class="build-weapon-controls">
+        ${buildWeaponSlots.map((slot) => renderBuildWeaponSelector(classId, slot)).join("")}
+      </div>
+      <div class="build-weapon-stack">
+        ${buildWeaponSlots.map((slot) => renderBuildWeaponCard(classId, slot)).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderBuildArmorPanel(row) {
+  const classId = row.buildClassId;
+  const setKey = classBuildArmorKey(classId);
+  const totals = armorSetTotals(setKey);
+  return `
+    <div class="build-sim-armor">
+      <section class="panel build-sim-panel">
+        <h3>${esc(t("armorSimulation"))}</h3>
+        <div class="notice compact-notice">${esc(t("buildSimulatorNoLegendary"))}</div>
+        <h4>${esc(t("armorSetTotals"))}</h4>
+        ${renderArmorSetStats(totals)}
+      </section>
+      <section class="panel build-sim-panel armor-pieces-panel">
+        <h3>${esc(t("armorPieceConfig"))}</h3>
+        <div class="armor-piece-grid">
+          ${armorPieceSlots.map((slot) => renderArmorPieceCard(setKey, slot)).join("")}
+        </div>
+      </section>
+      ${renderArmorExoticPanel(setKey, classId)}
+      ${renderArmorSetBonusPanel(setKey)}
+    </div>
+  `;
+}
+
+function renderBuildSimulatorDetail(row) {
+  const classId = row.buildClassId;
+  const emblem = classBuildEmblem(classId);
+  const metadata = [
+    [t("class"), row.class],
+    [t("classEmblem"), emblem.name],
+    [t("weaponLoadout"), buildWeaponSlots.map((slot) => selectedBuildWeapon(classId, slot.id)?.name || t("noWeaponSelected")).join(" / ")],
+    [t("armorLoadout"), t("armorTier5")],
+  ];
+  els.detail.innerHTML = `
+    <div class="detail-shell build-sim-shell">
+      <div class="detail-hero">
+        ${renderIcon(row, "detail-icon")}
+        <div>
+          <div class="detail-title-row">
+            <h2>${esc(row.name)}</h2>
+            ${renderMetadataHover(metadata)}
+          </div>
+          <div class="badge-line">
+            <span class="badge">${esc(row.class)}</span>
+            <span class="badge">${esc(t("weaponLoadout"))}</span>
+            <span class="badge">${esc(t("armorLoadout"))}</span>
+            <span class="badge">${esc(t("armorTier5"))}</span>
+          </div>
+          <p class="description">${esc(t("buildSimulatorDescription"))}</p>
+        </div>
+      </div>
+
+      <div class="build-sim-layout">
+        <div class="build-sim-column build-sim-column--weapons">
+          ${renderBuildWeaponsPanel(row)}
+        </div>
+        <div class="build-sim-column build-sim-column--armor">
+          ${renderBuildArmorPanel(row)}
+        </div>
+      </div>
+    </div>
+  `;
+  bindBuildSimulatorControls(row);
+}
+
+function bindBuildWeaponPlugControls(buildRow) {
+  els.detail.querySelectorAll("[data-build-weapon-card] [data-plug-button]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const card = button.closest("[data-build-weapon-card]");
+      const weapon = selectedBuildWeaponByHash(card?.dataset.buildWeaponHash);
+      const socket = (weapon?.plugSockets || []).find((entry) => String(entry.index) === String(button.dataset.socketIndex));
+      if (!weapon || !socket) return;
+      const key = selectionKey(weapon, socket);
+      if (button.dataset.plugHash) {
+        state.selectedPlugs[key] = Number(button.dataset.plugHash);
+      } else {
+        delete state.selectedPlugs[key];
+      }
+      delete state.openPlugSockets[key];
+      renderDetail(buildRow);
+    });
+  });
+  els.detail.querySelectorAll("[data-build-weapon-card] [data-plug-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const card = button.closest("[data-build-weapon-card]");
+      const weapon = selectedBuildWeaponByHash(card?.dataset.buildWeaponHash);
+      const socket = (weapon?.plugSockets || []).find((entry) => String(entry.index) === String(button.dataset.socketIndex));
+      if (!weapon || !socket) return;
+      const key = selectionKey(weapon, socket);
+      state.openPlugSockets[key] = !state.openPlugSockets[key];
+      renderDetail(buildRow);
+    });
+  });
+}
+
+function bindBuildSimulatorControls(row) {
+  const classId = row.buildClassId;
+  els.detail.querySelectorAll("[data-build-weapon-slot]").forEach((select) => {
+    select.addEventListener("change", () => {
+      const key = classBuildWeaponKey(classId, select.dataset.buildWeaponSlot);
+      state.classBuildWeapons[key] = select.value ? Number(select.value) : "";
+      renderDetail(row);
+    });
+  });
+  bindBuildWeaponPlugControls(row);
+  bindArmorSetControls(row, classBuildArmorKey(classId), classId);
+}
+
+function renderAbilityDetail(row) {
+  const badges = [row.type, row.class, row.tier].filter(Boolean);
+  const metadata = [
+    [t("hash"), row.hash],
+    [t("category"), `${groupLabel(row.primaryGroup)} / ${row.sectionLabel || sectionLabel(row.primarySection)}`],
+    [t("type"), row.type],
+    [t("class"), row.class],
+    [t("bucket"), row.bucket],
+    [t("rarity"), row.tier],
+  ];
+  els.detail.innerHTML = `
+    <div class="detail-shell ability-shell">
+      <div class="detail-hero">
+        ${renderIcon(row, "detail-icon")}
+        <div>
+          <div class="detail-title-row">
+            <h2>${esc(row.name)}</h2>
+            ${renderMetadataHover(metadata)}
+          </div>
+          <div class="badge-line">
+            ${badges.map((badge) => `<span class="badge">${esc(badge)}</span>`).join("")}
+          </div>
+          ${row.description ? `<p class="description">${esc(row.description)}</p>` : `<p class="description">${esc(t("abilityIndexDescription"))}</p>`}
+        </div>
+      </div>
+      <section class="panel ability-detail-panel">
+        <h3>${esc(t("abilityIndex"))}</h3>
+        ${renderKv([
+          [t("type"), row.type],
+          [t("class"), row.class],
+          [t("category"), row.categories],
+        ])}
+      </section>
+    </div>
+  `;
+}
+
 function renderArmorSetDetail(row) {
   const classId = row.armorSetClassId || armorSetHashClasses[String(row.hash)] || "hunter";
   const setKey = row.armorSetKey || classId;
-  const canBuild = row.armorSetCanBuild !== false;
-  const totals = canBuild ? armorSetTotals(setKey) : {};
-  const bonusState = armorSetBonusState(setKey);
+  const description = row.armorSetHasSetBonus ? t("armorSetDetailNote") : t("armorLegacyNoBuild");
   const metadata = [
     [t("class"), row.class],
-    [t("armorTier5"), canBuild ? t("armorSetBaseline") : ""],
-    [t("armorExotic"), canBuild ? selectedArmorExotic(setKey, classId)?.name || t("armorNoExotic") : ""],
-    [t("armorSetBonus"), canBuild ? bonusState.mode : row.armorSetHasSetBonus ? t("armorSetBonusEffect") : ""],
+    [t("type"), row.type],
+    [t("armorSetBonus"), row.armorSetHasSetBonus ? t("armorSetBonusEffect") : ""],
+    [t("armorSetPieces"), row.armorSetVariantCount],
     [t("release"), releaseSummary(row, false)],
   ];
   els.detail.innerHTML = `
@@ -2980,40 +3501,18 @@ function renderArmorSetDetail(row) {
           <div class="badge-line">
             <span class="badge">${esc(row.class)}</span>
             <span class="badge">${esc(row.armorSlot || "")}</span>
-            <span class="badge">${esc(canBuild ? t("armorSetBaseline") : t("armorLegacyNoBuildShort"))}</span>
+            <span class="badge">${esc(t("armorSetReadOnly"))}</span>
             ${row.armorSetHasSetBonus ? `<span class="badge">${esc(t("armorSetBonus"))}</span>` : ""}
           </div>
-          <p class="description">${esc(canBuild ? t("armorTotalNote") : t("armorLegacyNoBuild"))}</p>
+          <p class="description">${esc(description)}</p>
         </div>
       </div>
 
-      <div class="armor-set-layout${canBuild ? "" : " armor-set-layout--single"}">
+      <div class="armor-set-layout armor-set-layout--single">
         <div class="armor-set-main">
           ${renderArmorSetPiecesPanel(row)}
           ${renderArmorSetIntrinsicBonus(row)}
-          ${
-            canBuild
-              ? `<section class="panel">
-                  <h3>${esc(t("armorSetTotals"))}</h3>
-                  ${renderArmorSetStats(totals)}
-                </section>
-                <section class="panel armor-pieces-panel">
-                  <h3>${esc(t("armorPieceConfig"))}</h3>
-                  <div class="armor-piece-grid">
-                    ${armorPieceSlots.map((slot) => renderArmorPieceCard(setKey, slot)).join("")}
-                  </div>
-                </section>`
-              : ""
-          }
         </div>
-        ${
-          canBuild
-            ? `<aside class="armor-set-side">
-                ${renderArmorExoticPanel(setKey, classId)}
-                ${renderArmorSetBonusPanel(setKey)}
-              </aside>`
-            : ""
-        }
       </div>
     </div>
   `;
@@ -3086,8 +3585,16 @@ function renderDetail(row) {
     renderEmpty();
     return;
   }
+  if (isBuildSimulatorRow(row)) {
+    renderBuildSimulatorDetail(row);
+    return;
+  }
   if (isArmorSetRow(row)) {
     renderArmorSetDetail(row);
+    return;
+  }
+  if (isAbilityRow(row)) {
+    renderAbilityDetail(row);
     return;
   }
   const badges = [

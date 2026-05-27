@@ -972,6 +972,17 @@ h1 {
   gap: 14px;
 }
 
+.plug-builder--embedded {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--panel-alt);
+}
+
+.plug-builder--embedded h3 {
+  font-size: 14px;
+}
+
 .plug-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -1639,6 +1650,98 @@ h1 {
   font-size: 12px;
 }
 
+.build-sim-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+  gap: 14px;
+  align-items: start;
+  margin-top: 14px;
+}
+
+.build-sim-column,
+.build-sim-armor,
+.build-weapon-stack {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.build-sim-panel {
+  min-width: 0;
+}
+
+.build-sim-panel h4,
+.build-weapon-pvp h4 {
+  margin: 0 0 10px;
+  color: var(--strong);
+  font-size: 14px;
+}
+
+.build-weapon-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.build-weapon-card {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--panel-alt);
+}
+
+.build-weapon-card.is-empty {
+  background: var(--panel);
+}
+
+.build-weapon-head {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.build-weapon-head h4,
+.build-weapon-head span {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.build-weapon-head h4 {
+  color: var(--strong);
+  font-size: 15px;
+}
+
+.build-weapon-head span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.build-weapon-card .frame-summary {
+  margin-bottom: 0;
+}
+
+.build-weapon-stats .stat-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.build-weapon-pvp {
+  min-width: 0;
+}
+
+.ability-detail-panel {
+  margin-top: 14px;
+}
+
 .source-list {
   display: grid;
   gap: 7px;
@@ -1706,6 +1809,7 @@ h1 {
   .plug-grid,
   .manual-armor-grid,
   .armor-set-layout,
+  .build-sim-layout,
   .armor-total-grid {
     grid-template-columns: 1fr;
   }
@@ -1860,7 +1964,9 @@ h1 {
   }
 
   .armor-piece-controls,
-  .armor-config-grid {
+  .armor-config-grid,
+  .build-weapon-controls,
+  .build-weapon-stats .stat-grid {
     grid-template-columns: 1fr;
   }
 }
