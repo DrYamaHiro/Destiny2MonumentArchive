@@ -424,9 +424,9 @@ h1 {
   font-weight: 900;
 }
 
-.column-head--armor-set,
-.result-row--armor-set {
-  grid-template-columns: minmax(148px, 0.75fr) minmax(180px, 1.12fr) minmax(80px, 0.45fr) minmax(92px, 0.55fr) minmax(116px, 0.75fr);
+.column-head.column-head--armor-set,
+.result-row.result-row--armor-set {
+  grid-template-columns: max-content minmax(0, 1fr) minmax(72px, auto);
 }
 
 .results {
@@ -473,13 +473,14 @@ h1 {
   display: flex;
   align-items: center;
   gap: 4px;
-  min-width: 0;
+  min-width: max-content;
+  flex-wrap: nowrap;
 }
 
 .armor-set-mini-icon {
   display: grid;
   place-items: center;
-  flex: 0 0 auto;
+  flex: 0 0 27px;
   width: 27px;
   height: 27px;
   border: 1px solid var(--line);
@@ -2046,12 +2047,13 @@ h1 {
     grid-template-columns: 48px minmax(0, 1fr) 72px;
   }
 
-  .column-head--armor-set,
-  .result-row--armor-set {
-    grid-template-columns: minmax(128px, 0.72fr) minmax(0, 1fr) 72px;
+  .column-head.column-head--armor-set,
+  .result-row.result-row--armor-set {
+    grid-template-columns: max-content minmax(0, 1fr) minmax(58px, auto);
   }
 
   .armor-set-mini-icon {
+    flex-basis: 23px;
     width: 23px;
     height: 23px;
     font-size: 9px;

@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260603-armor-set-icons-sim-ux";
+const DATA_VERSION = "20260603-armor-set-group-overlap";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
@@ -128,6 +128,7 @@ const text = {
     armorSetBonusTwoPiece: "2部位",
     armorSetBonusFourPiece: "4部位",
     armorSetPieces: "構成部位",
+    allClasses: "全クラス",
     armorSetDetailNote: "防具セットの構成とセット効果を確認できます。ビルド調整はキャラクターのビルドシミュレーターで行います。",
     armorViewItem: "装備詳細を見る",
     armorSetPieceVariants: "同部位候補",
@@ -361,6 +362,7 @@ const text = {
     armorSetBonusTwoPiece: "2-piece",
     armorSetBonusFourPiece: "4-piece",
     armorSetPieces: "Set pieces",
+    allClasses: "All classes",
     armorSetDetailNote: "Review set pieces and set effects here. Build tuning lives in the Character build simulator.",
     armorViewItem: "View item details",
     armorSetPieceVariants: "Slot variants",
@@ -1062,13 +1064,23 @@ function stableNegativeHash(value) {
   return -Math.max(1, hash >>> 0);
 }
 
+function escapeRegExp(value) {
+  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function stripArmorSlotSuffix(coreName) {
-  const prefixPattern = /^(Helmet|Helm|Hood|Mask|Cowl|Casque|Gauntlets|Gloves|Grips|Grasps|Sleeves|Chest Armor|Plate|Vest|Robes|Robe|Cuirass|Leg Armor|Legs|Boots|Greaves|Strides|Steps|Cloak|Mark|Bond)\s+of\s+/i;
+  const prefixPattern = /^(Helmet|Helm|Hood|Mask|Cowl|Casque|Headpiece|Gauntlets|Gloves|Grips|Grasps|Sleeves|Vambraces|Chest Armor|Chestplate|Plate|Vest|Tunic|Robes|Robe|Cuirass|Leg Armor|Legguards|Legplates|Legs|Pants|Boots|Greaves|Strides|Steps|Cloak|Mark|Bond)\s+of\s+/i;
   const slotSuffixes = [
     "Chest Armor",
+    "Chestplate",
     "Class Item",
     "Leg Armor",
+    "Headpiece",
+    "Legguards",
+    "Legplates",
     "Legs",
+    "Pants",
+    "Vambraces",
     "Gauntlets",
     "Gloves",
     "Grasps",
@@ -1080,6 +1092,7 @@ function stripArmorSlotSuffix(coreName) {
     "Chaps",
     "Cloaked Stetson",
     "Vestment",
+    "Tunic",
     "Boots",
     "Casque",
     "Cloak",
@@ -1098,8 +1111,12 @@ function stripArmorSlotSuffix(coreName) {
     "Cuirass",
     "ヘッドアーマー",
     "チェストアーマー",
+    "チェストプレート",
     "クラスアイテム",
     "レッグアーマー",
+    "レッグプレート",
+    "レッグガード",
+    "ヘッドピース",
     "レッグ",
     "ガントレット",
     "グローブ",
@@ -1120,6 +1137,9 @@ function stripArmorSlotSuffix(coreName) {
     "ジャケット",
     "チャップス",
     "ステップ",
+    "チュニック",
+    "パンツ",
+    "腕甲",
     "ヘルム",
     "マスク",
     "ローブ",
@@ -1131,9 +1151,10 @@ function stripArmorSlotSuffix(coreName) {
     "マント",
   ];
   const prefixed = coreName.replace(prefixPattern, "");
-  return slotSuffixes.reduce((name, suffix) => {
-    const englishPattern = new RegExp(`\\s+${suffix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
-    const japanesePattern = new RegExp(`(?:の)?${suffix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "u");
+  return [...slotSuffixes].sort((a, b) => b.length - a.length).reduce((name, suffix) => {
+    const escaped = escapeRegExp(suffix);
+    const englishPattern = new RegExp(`\\s+${escaped}$`, "i");
+    const japanesePattern = new RegExp(`(?:の)?${escaped}$`, "u");
     return name.replace(englishPattern, "").replace(japanesePattern, "").trim();
   }, prefixed).replace(/[・\s-]+$/u, "").trim();
 }
@@ -1146,6 +1167,13 @@ function armorSetName(row) {
   const core = variant ? raw.slice(0, -variant.length).trim() : raw;
   const stripped = stripArmorSlotSuffix(core);
   return [stripped || core, variant].filter(Boolean).join(" ").trim();
+}
+
+function armorSetNameKey(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .replace(/[\s'’"“”・\-_:：/／]+/gu, "")
+    .toLowerCase();
 }
 
 function compactMetaLabel(value) {
@@ -1407,6 +1435,12 @@ function classLabelForId(id, rows = armorCatalogRows()) {
   return { hunter: state.lang === "ja" ? "ハンター" : "Hunter", warlock: state.lang === "ja" ? "ウォーロック" : "Warlock", titan: state.lang === "ja" ? "タイタン" : "Titan" }[id] || id;
 }
 
+function classLabelsForIds(ids, rows = armorCatalogRows()) {
+  const ordered = armorClassOrder.filter((id) => ids.includes(id));
+  if (ordered.length === armorClassOrder.length) return t("allClasses");
+  return ordered.map((id) => classLabelForId(id, rows)).filter(Boolean).join(" / ");
+}
+
 function armorSetItemsSorted(items) {
   const seen = new Set();
   return [...items]
@@ -1486,34 +1520,35 @@ function armorSetRows(rows = armorCatalogRows()) {
       if (!classId || !slotId) return;
       const setName = armorSetName(row);
       if (!setName) return;
-      const groupKey = [
-        classId,
-        setName,
-        row.tier || "",
-      ].join("|");
+      const groupKey = armorSetNameKey(setName) || setName;
       if (!groups.has(groupKey)) {
         groups.set(groupKey, {
-          classId,
           setName,
-          tier: row.tier || "",
+          classIds: new Set(),
+          tiers: new Set(),
           items: [],
         });
       }
+      groups.get(groupKey).classIds.add(classId);
+      if (row.tier) groups.get(groupKey).tiers.add(row.tier);
       groups.get(groupKey).items.push(row);
     });
 
   return [...groups.entries()]
     .map(([groupKey, group]) => {
-      const classLabel = classLabelForId(group.classId, rows);
       const items = armorSetItemsSorted(group.items);
       const release = armorSetBestRelease(items);
       const slots = new Set(items.map(armorSlotId).filter(Boolean));
       const classItem = items.find((row) => armorSlotId(row) === "class") || items[0] || {};
+      const classIds = armorClassOrder.filter((id) => group.classIds.has(id));
+      const classFilterLabels = classIds.map((id) => classLabelForId(id, rows)).filter(Boolean);
+      const classLabel = classLabelsForIds(classIds, rows);
       const setBonusPlug = armorSetBonusOptionForName(group.setName);
       const hasSetBonus = Boolean(setBonusPlug) || items.some((row) => (row.plugSockets || []).some((socket) => socket.kind === "set_bonus"));
-      const name = `${group.setName} - ${classLabel}`;
+      const name = group.setName;
       const slotCount = slots.size;
       const armorSlot = state.lang === "ja" ? "5/5部位" : "5/5 pieces";
+      const tier = [...group.tiers][0] || "Tier";
       const hash = stableNegativeHash(groupKey);
       const variantCount = items.length;
       return {
@@ -1521,7 +1556,8 @@ function armorSetRows(rows = armorCatalogRows()) {
         isArmorSet: true,
         armorSetKey: groupKey,
         armorSetName: group.setName,
-        armorSetClassId: group.classId,
+        armorSetClassId: classIds[0] || "",
+        armorSetClassIds: classIds,
         armorSetItems: items,
         armorSetBonusHash: setBonusPlug?.hash || "",
         armorSetCanBuild: false,
@@ -1534,7 +1570,7 @@ function armorSetRows(rows = armorCatalogRows()) {
         icon: classItem.icon || "",
         type: t("armorSet"),
         bucket: hasSetBonus ? t("armorSetReadOnly") : t("armorLegacyNoBuildShort"),
-        tier: group.tier || "Tier",
+        tier,
         itemType: "armor_set",
         groups: ["equipment"],
         sections: ["armor"],
@@ -1542,15 +1578,16 @@ function armorSetRows(rows = armorCatalogRows()) {
         primarySection: "armor",
         sectionLabel: sectionLabel("armor"),
         class: classLabel,
-        classIds: [group.classId],
+        classIds,
+        classFilterLabels,
         categories: [classLabel, t("armor"), group.setName],
         armorSlot,
         stats: {},
         release,
-        search: `${name} ${group.setName} ${classLabel} ${group.tier || ""} ${armorSlot} ${slotCount} ${variantCount} ${releaseLabel(release)} ${hasSetBonus ? t("armorSetBonus") : t("armorLegacyNoBuild")}`.toLowerCase(),
+        search: `${name} ${group.setName} ${classLabel} ${classFilterLabels.join(" ")} ${tier} ${armorSlot} ${slotCount} ${variantCount} ${releaseLabel(release)} ${hasSetBonus ? t("armorSetBonus") : t("armorLegacyNoBuild")}`.toLowerCase(),
       };
     })
-    .sort((a, b) => armorClassOrder.indexOf(a.armorSetClassId) - armorClassOrder.indexOf(b.armorSetClassId) || compareText(a.armorSetName, b.armorSetName) || compareNumberAsc(a.release?.seasonNumber, b.release?.seasonNumber));
+    .sort((a, b) => compareText(a.armorSetName, b.armorSetName) || armorClassOrder.indexOf(a.armorSetClassId) - armorClassOrder.indexOf(b.armorSetClassId) || compareNumberAsc(a.release?.seasonNumber, b.release?.seasonNumber));
 }
 
 function isBuildSimulatorRow(row) {
@@ -1658,12 +1695,18 @@ function valueFor(row, key) {
   return row[key] || "";
 }
 
+function filterValuesFor(row, key) {
+  if (key === "class" && row.classFilterLabels?.length) return row.classFilterLabels;
+  const value = valueFor(row, key);
+  return value ? [value] : [];
+}
+
 function distinct(rows, key) {
   if (key === "weaponSystem") {
     const ordered = weaponGenerationOrder.map((generation) => t("weaponSystemLabels")[generation]).filter(Boolean);
     return ordered.filter((value) => rows.some((row) => valueFor(row, key) === value));
   }
-  return [...new Set(rows.map((row) => valueFor(row, key)).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
+  return [...new Set(rows.flatMap((row) => filterValuesFor(row, key)).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
 }
 
 function filterDefinitions() {
@@ -1914,7 +1957,7 @@ function applyFilters(rows) {
     .filter((row) => filterControls.every(({ select }) => {
       const key = select.dataset.key;
       if (!key || !select.value) return true;
-      return valueFor(row, key) === select.value;
+      return filterValuesFor(row, key).includes(select.value);
     }));
 }
 
@@ -2026,7 +2069,7 @@ function listRows() {
 
 function renderColumnHead() {
   const armorSetList = isArmorSetContext();
-  const cells = armorSetList ? [t("armorSetPieces"), t("name"), t("class"), t("type"), t("detail")] : ["", t("name"), t("category"), t("type"), t("detail")];
+  const cells = armorSetList ? [t("armorSetPieces"), t("name"), t("class")] : ["", t("name"), t("category"), t("type"), t("detail")];
   els.columnHead.classList.toggle("column-head--armor-set", armorSetList);
   els.columnHead.innerHTML = cells.map((cell) => `<span>${esc(cell)}</span>`).join("");
 }
@@ -2854,8 +2897,6 @@ function renderResultRow(row) {
           <span class="row-sub"><span class="row-sub-base">${esc(sub)}</span>${release}</span>
         </span>
         <span class="row-cell">${esc(row.class || "-")}</span>
-        <span class="row-cell mobile-hide">${esc(type)}</span>
-        <span class="row-cell mobile-hide">${esc(detail || t("armorSetAssumedComplete"))}</span>
       </button>
     `;
   }
