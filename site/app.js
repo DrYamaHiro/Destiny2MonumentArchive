@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260603-armor-set-group-overlap";
+const DATA_VERSION = "20260603-armor-set-completeness-v2";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
@@ -1069,7 +1069,7 @@ function escapeRegExp(value) {
 }
 
 function stripArmorSlotSuffix(coreName) {
-  const prefixPattern = /^(Helmet|Helm|Hood|Mask|Cowl|Casque|Headpiece|Gauntlets|Gloves|Grips|Grasps|Sleeves|Vambraces|Chest Armor|Chestplate|Plate|Vest|Tunic|Robes|Robe|Cuirass|Leg Armor|Legguards|Legplates|Legs|Pants|Boots|Greaves|Strides|Steps|Cloak|Mark|Bond)\s+of\s+/i;
+  const prefixPattern = /^(Helmet|Helm|Hood|Mask|Cowl|Casque|Headpiece|Gauntlets|Gloves|Grips|Grasps|Sleeves|Vambraces|Chest Armor|Chestplate|Plate|Vest|Jacket|Tunic|Robes|Robe|Cuirass|Leg Armor|Legguards|Legplates|Legs|Pants|Boots|Greaves|Strides|Steps|Cloak|Mark|Bond|Visor|Coat|Duster|Hat|Crown|Wrap|Wraps|Mantle|Facade|Treads|Chassis|Overcoat|Chest Rig|Harness|Rig|Cage|Fists|Guard|Armor)\s+of\s+/i;
   const slotSuffixes = [
     "Chest Armor",
     "Chestplate",
@@ -1107,6 +1107,7 @@ function stripArmorSlotSuffix(coreName) {
     "Robes",
     "Robe",
     "Vest",
+    "Jacket",
     "Bond",
     "Cuirass",
     "ヘッドアーマー",
@@ -1150,13 +1151,72 @@ function stripArmorSlotSuffix(coreName) {
     "ボンド",
     "マント",
   ];
+  const namedPieceSuffixes = [
+    "Visor",
+    "Coat",
+    "Duster",
+    "Hat",
+    "Crown",
+    "Wrap",
+    "Wraps",
+    "Mantle",
+    "Facade",
+    "Treads",
+    "Chassis",
+    "Overcoat",
+    "Chest Rig",
+    "Harness",
+    "Rig",
+    "Cage",
+    "Fists",
+    "Guard",
+    "Armor",
+    "Footsteps",
+    "バイザー",
+    "コート",
+    "ハット",
+    "王冠",
+    "ラップ",
+    "マントル",
+    "ファサード",
+    "トレッド",
+    "シャーシ",
+    "オーバーコート",
+    "チェストリグ",
+    "ハーネス",
+    "リグ",
+    "ケージ",
+    "冠",
+    "アーマー",
+    "足跡",
+    "拳",
+    "ガード",
+  ];
+  const undelimitedPieceSuffixes = [
+    "オーバーコート",
+    "チェストリグ",
+    "ハーネス",
+    "コート",
+    "ハット",
+  ];
   const prefixed = coreName.replace(prefixPattern, "");
-  return [...slotSuffixes].sort((a, b) => b.length - a.length).reduce((name, suffix) => {
+  const slotStripped = [...slotSuffixes].sort((a, b) => b.length - a.length).reduce((name, suffix) => {
     const escaped = escapeRegExp(suffix);
     const englishPattern = new RegExp(`\\s+${escaped}$`, "i");
     const japanesePattern = new RegExp(`(?:の)?${escaped}$`, "u");
     return name.replace(englishPattern, "").replace(japanesePattern, "").trim();
-  }, prefixed).replace(/[・\s-]+$/u, "").trim();
+  }, prefixed);
+  const namedStripped = [...namedPieceSuffixes].sort((a, b) => b.length - a.length).reduce((name, suffix) => {
+    const escaped = escapeRegExp(suffix);
+    const englishPattern = new RegExp(`\\s+${escaped}$`, "i");
+    const japanesePattern = new RegExp(`の${escaped}$`, "u");
+    return name.replace(englishPattern, "").replace(japanesePattern, "").trim();
+  }, slotStripped);
+  return [...undelimitedPieceSuffixes].sort((a, b) => b.length - a.length).reduce((name, suffix) => {
+    const escaped = escapeRegExp(suffix);
+    const japanesePattern = new RegExp(`${escaped}$`, "u");
+    return name.replace(japanesePattern, "").trim();
+  }, namedStripped).replace(/[・\s-]+$/u, "").trim();
 }
 
 function armorSetName(row) {
@@ -1174,6 +1234,16 @@ function armorSetNameKey(value) {
     .normalize("NFKC")
     .replace(/[\s'’"“”・\-_:：/／]+/gu, "")
     .toLowerCase();
+}
+
+function armorSetFamilyName(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .replace(/[\s・-]*(?:タイプ|TYPE)\s*[0-9０-９]+$/iu, "")
+    .replace(/[\s・-]*(?:[0-9０-９]+[A-Z]{1,3}[0-9０-９]+|[A-Z]{1,3}\s*[0-9０-９]+|[0-9０-９]+(?:\.[0-9０-９]+)?)$/iu, "")
+    .replace(/[\s・-]+(?:I|II|III|IV|V|VI|VII|VIII|IX|X)$/iu, "")
+    .replace(/[\s・-]+(?:Ⅰ|Ⅱ|Ⅲ|Ⅳ|Ⅴ|Ⅵ|Ⅶ|Ⅷ|Ⅸ|Ⅹ)$/u, "")
+    .trim();
 }
 
 function compactMetaLabel(value) {
@@ -1520,18 +1590,21 @@ function armorSetRows(rows = armorCatalogRows()) {
       if (!classId || !slotId) return;
       const setName = armorSetName(row);
       if (!setName) return;
-      const groupKey = armorSetNameKey(setName) || setName;
+      const setFamily = armorSetFamilyName(setName) || setName;
+      const groupKey = armorSetNameKey(setFamily) || setFamily;
       if (!groups.has(groupKey)) {
         groups.set(groupKey, {
-          setName,
+          setName: setFamily,
           classIds: new Set(),
           tiers: new Set(),
           items: [],
+          sourceNames: new Set(),
         });
       }
       groups.get(groupKey).classIds.add(classId);
       if (row.tier) groups.get(groupKey).tiers.add(row.tier);
       groups.get(groupKey).items.push(row);
+      groups.get(groupKey).sourceNames.add(row.name);
     });
 
   return [...groups.entries()]
@@ -1551,6 +1624,7 @@ function armorSetRows(rows = armorCatalogRows()) {
       const tier = [...group.tiers][0] || "Tier";
       const hash = stableNegativeHash(groupKey);
       const variantCount = items.length;
+      const sourceNames = [...group.sourceNames].join(" ");
       return {
         hash,
         isArmorSet: true,
@@ -1584,7 +1658,7 @@ function armorSetRows(rows = armorCatalogRows()) {
         armorSlot,
         stats: {},
         release,
-        search: `${name} ${group.setName} ${classLabel} ${classFilterLabels.join(" ")} ${tier} ${armorSlot} ${slotCount} ${variantCount} ${releaseLabel(release)} ${hasSetBonus ? t("armorSetBonus") : t("armorLegacyNoBuild")}`.toLowerCase(),
+        search: `${name} ${group.setName} ${sourceNames} ${classLabel} ${classFilterLabels.join(" ")} ${tier} ${armorSlot} ${slotCount} ${variantCount} ${releaseLabel(release)} ${hasSetBonus ? t("armorSetBonus") : t("armorLegacyNoBuild")}`.toLowerCase(),
       };
     })
     .sort((a, b) => compareText(a.armorSetName, b.armorSetName) || armorClassOrder.indexOf(a.armorSetClassId) - armorClassOrder.indexOf(b.armorSetClassId) || compareNumberAsc(a.release?.seasonNumber, b.release?.seasonNumber));
