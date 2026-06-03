@@ -424,6 +424,11 @@ h1 {
   font-weight: 900;
 }
 
+.column-head--armor-set,
+.result-row--armor-set {
+  grid-template-columns: minmax(148px, 0.75fr) minmax(180px, 1.12fr) minmax(80px, 0.45fr) minmax(92px, 0.55fr) minmax(116px, 0.75fr);
+}
+
 .results {
   height: calc(100vh - 330px);
   min-height: 680px;
@@ -462,6 +467,38 @@ h1 {
   object-fit: cover;
   background: var(--icon-bg);
   border: 1px solid var(--line);
+}
+
+.armor-set-icon-strip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.armor-set-mini-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 27px;
+  height: 27px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  object-fit: cover;
+  color: var(--muted);
+  background: var(--icon-bg);
+  font-size: 10px;
+  font-weight: 1000;
+  line-height: 1;
+}
+
+.armor-set-mini-icon.is-missing,
+.armor-set-piece-card.is-missing .item-icon {
+  border-style: dashed;
+  color: var(--muted);
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(214, 161, 61, 0.12)),
+    var(--panel-muted);
 }
 
 .placeholder-icon {
@@ -1476,12 +1513,11 @@ h1 {
   background: var(--panel-alt);
   color: var(--body);
   text-align: left;
-  cursor: pointer;
 }
 
 .armor-set-piece-card:hover,
 .armor-set-piece-card:focus-visible {
-  border-color: var(--blue);
+  border-color: var(--line);
   outline: none;
 }
 
@@ -1677,6 +1713,41 @@ h1 {
   font-size: 14px;
 }
 
+.build-class-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.build-class-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 5px 10px 5px 6px;
+  color: var(--strong);
+  background: var(--panel);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.build-class-chip:hover,
+.build-class-chip.is-active {
+  border-color: var(--teal);
+  background: var(--teal-soft);
+}
+
+.build-class-icon {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  object-fit: cover;
+  background: var(--icon-bg);
+}
+
 .build-weapon-controls {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1736,6 +1807,50 @@ h1 {
 
 .build-weapon-pvp {
   min-width: 0;
+}
+
+.armor-bulk-panel {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--panel-alt);
+}
+
+.armor-bulk-head {
+  display: grid;
+  gap: 3px;
+}
+
+.armor-bulk-head h4,
+.armor-bulk-head span {
+  margin: 0;
+}
+
+.armor-bulk-head span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.apply-bulk-btn {
+  justify-self: start;
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #ffffff;
+  background: var(--gold);
+  font-size: 12px;
+  font-weight: 1000;
+}
+
+.apply-bulk-btn:hover,
+.apply-bulk-btn:focus-visible {
+  filter: brightness(0.98);
+  outline: 2px solid rgba(214, 161, 61, 0.35);
+  outline-offset: 2px;
 }
 
 .ability-detail-panel {
@@ -1929,6 +2044,17 @@ h1 {
   .column-head,
   .result-row {
     grid-template-columns: 48px minmax(0, 1fr) 72px;
+  }
+
+  .column-head--armor-set,
+  .result-row--armor-set {
+    grid-template-columns: minmax(128px, 0.72fr) minmax(0, 1fr) 72px;
+  }
+
+  .armor-set-mini-icon {
+    width: 23px;
+    height: 23px;
+    font-size: 9px;
   }
 
   .column-head span:nth-child(4),
