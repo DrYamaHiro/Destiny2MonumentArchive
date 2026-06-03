@@ -1522,14 +1522,17 @@ h1 {
   outline: none;
 }
 
-.armor-set-piece-card > span {
+.armor-set-piece-card > span,
+.armor-piece-copy {
   display: grid;
   gap: 3px;
   min-width: 0;
 }
 
 .armor-set-piece-card strong,
-.armor-set-piece-card span span {
+.armor-piece-main-name,
+.armor-piece-note,
+.armor-piece-name-empty {
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -1539,10 +1542,55 @@ h1 {
   font-size: 12px;
 }
 
-.armor-set-piece-card span span {
+.armor-piece-main-name,
+.armor-piece-note,
+.armor-piece-name-empty {
   color: var(--muted);
   font-size: 11px;
   font-weight: 900;
+}
+
+.armor-piece-official-label {
+  margin-top: 4px;
+  color: var(--body);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.armor-piece-name-list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.armor-piece-name-list li {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+
+.armor-piece-name-list span,
+.armor-piece-name-list small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.armor-piece-name-list span {
+  color: var(--strong);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.armor-piece-name-list small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
 }
 
 .set-bonus-selection {

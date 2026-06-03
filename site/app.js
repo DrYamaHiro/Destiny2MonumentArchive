@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260603-armor-set-completeness-v2";
+const DATA_VERSION = "20260604-armor-class-family-detail";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
@@ -132,6 +132,8 @@ const text = {
     armorSetDetailNote: "防具セットの構成とセット効果を確認できます。ビルド調整はキャラクターのビルドシミュレーターで行います。",
     armorViewItem: "装備詳細を見る",
     armorSetPieceVariants: "同部位候補",
+    armorOfficialNames: "正式名称",
+    armorOfficialNamePending: "正式名称未照合",
     armorLegacySet: "旧防具セット",
     armorLegacyNoBuild: "旧仕様またはセットボーナスなしの防具セットです。装備詳細の閲覧のみ行い、Tier5パラメータビルドは無効です。",
     armorLegacyNoBuildShort: "詳細閲覧のみ",
@@ -366,6 +368,8 @@ const text = {
     armorSetDetailNote: "Review set pieces and set effects here. Build tuning lives in the Character build simulator.",
     armorViewItem: "View item details",
     armorSetPieceVariants: "Slot variants",
+    armorOfficialNames: "Official names",
+    armorOfficialNamePending: "Official name pending",
     armorLegacySet: "Legacy armor set",
     armorLegacyNoBuild: "Legacy or no-set-bonus armor set. Item details remain available, but Tier 5 stat build tools are disabled.",
     armorLegacyNoBuildShort: "Details only",
@@ -1561,6 +1565,204 @@ function armorSetDisplaySlots(row) {
   });
 }
 
+function armorSetGroupSlots(group) {
+  return new Set((group.items || []).map(armorSlotId).filter(Boolean));
+}
+
+function armorSetGroupClassId(group) {
+  return armorClassOrder.find((id) => group.classIds?.has(id)) || group.classId || "";
+}
+
+function armorSetNamesLooselyRelated(shortName, longName) {
+  const shortKey = armorSetNameKey(armorSetFamilyName(shortName) || shortName);
+  const longKey = armorSetNameKey(armorSetFamilyName(longName) || longName);
+  if (!shortKey || !longKey) return false;
+  if (shortKey === longKey) return true;
+  if (shortKey.length < 3 || longKey.length < 3) return false;
+  return longKey.startsWith(shortKey) || shortKey.startsWith(longKey);
+}
+
+function armorSetGroupsShareTier(a, b) {
+  const aTiers = [...(a.tiers || [])].filter(Boolean);
+  const bTiers = [...(b.tiers || [])].filter(Boolean);
+  if (!aTiers.length || !bTiers.length) return true;
+  return aTiers.some((tier) => b.tiers?.has(tier));
+}
+
+function armorReleaseHasConcreteSource(release = {}) {
+  const source = String(release.sourceString || "");
+  if (!source && !release.sourceHash) return false;
+  return !/ランダムパーク|random perks?|コレクションから再入手|cannot be reacquired/i.test(source);
+}
+
+function armorSetSourceRelease(group) {
+  const releases = (group.items || []).map((item) => item.release || {}).filter((release) => release.sourceHash || release.sourceString);
+  return releases.find(armorReleaseHasConcreteSource) || releases[0] || armorSetBestRelease(group.items);
+}
+
+function armorSetReleaseSourceKey(group) {
+  const release = armorSetSourceRelease(group);
+  const source = release.sourceHash || release.sourceString || "";
+  if (!source) return "";
+  return [release.seasonNumber || "", release.releaseVersion || "", source].join("|");
+}
+
+function armorSetGroupsShareReleaseSource(a, b) {
+  const aKey = armorSetReleaseSourceKey(a);
+  const bKey = armorSetReleaseSourceKey(b);
+  return Boolean(aKey && bKey && aKey === bKey);
+}
+
+function armorSetCommonNamePrefix(names) {
+  const cleanNames = names.map((name) => String(name || "").trim()).filter(Boolean);
+  if (cleanNames.length < 2) return "";
+  let prefix = cleanNames[0];
+  cleanNames.slice(1).forEach((name) => {
+    let index = 0;
+    while (index < prefix.length && index < name.length && prefix[index] === name[index]) index += 1;
+    prefix = prefix.slice(0, index);
+  });
+  const endsAtBoundary = /[の・\s-]$/u.test(prefix);
+  const isFullName = cleanNames.some((name) => name === prefix);
+  const trimmed = prefix.replace(/[の・\s-]+$/u, "").trim();
+  if (!endsAtBoundary && !isFullName) return "";
+  return trimmed;
+}
+
+function armorSourceCollectionName(group) {
+  const release = armorSetSourceRelease(group);
+  const source = releaseSourceLabel({ release });
+  const season = releaseSeasonLabel({ release });
+  const base = source || season || group.setName;
+  return state.lang === "ja" ? `${base} 防具セット` : `${base} Armor Set`;
+}
+
+function armorMergedSourceSetName(entries, fallbackGroup) {
+  const nonClassNames = entries
+    .map(([, group]) => group)
+    .filter((group) => !armorSetGroupSlots(group).has("class"))
+    .map((group) => group.setName);
+  const prefix = armorSetCommonNamePrefix(nonClassNames);
+  if (prefix && armorSetNameKey(prefix).length >= 3) return prefix;
+  return armorSourceCollectionName(fallbackGroup);
+}
+
+function mergeArmorSetGroup(target, source) {
+  (source.items || []).forEach((item) => target.items.push(item));
+  (source.sourceNames || new Set()).forEach((name) => target.sourceNames.add(name));
+  (source.tiers || new Set()).forEach((tier) => target.tiers.add(tier));
+  (source.classIds || new Set()).forEach((id) => target.classIds.add(id));
+}
+
+function mergeArmorSetClassItemGroups(groups) {
+  [...groups.entries()].forEach(([sourceKey, sourceGroup]) => {
+    if (!groups.has(sourceKey)) return;
+    const sourceSlots = armorSetGroupSlots(sourceGroup);
+    if (sourceSlots.size !== 1 || !sourceSlots.has("class")) return;
+    const classId = armorSetGroupClassId(sourceGroup);
+    const candidates = [...groups.entries()].filter(([targetKey, targetGroup]) => {
+      if (targetKey === sourceKey) return false;
+      if (armorSetGroupClassId(targetGroup) !== classId) return false;
+      const targetSlots = armorSetGroupSlots(targetGroup);
+      if (targetSlots.has("class")) return false;
+      if (targetSlots.size < 2) return false;
+      if (!armorSetGroupsShareTier(sourceGroup, targetGroup)) return false;
+      if (armorSetNamesLooselyRelated(sourceGroup.setName, targetGroup.setName)) return true;
+      return targetSlots.size >= 4 && armorSetGroupsShareReleaseSource(sourceGroup, targetGroup);
+    });
+    const completeCandidates = candidates.filter(([, targetGroup]) => armorSetGroupSlots(targetGroup).size >= 4);
+    const selected = completeCandidates.length === 1 ? completeCandidates[0] : candidates.length === 1 ? candidates[0] : null;
+    if (!selected) return;
+    mergeArmorSetGroup(selected[1], sourceGroup);
+    groups.delete(sourceKey);
+  });
+}
+
+function mergeReleaseSourceArmorSetGroups(groups) {
+  const buckets = new Map();
+  [...groups.entries()].forEach(([groupKey, group]) => {
+    const sourceKey = armorSetReleaseSourceKey(group);
+    if (!sourceKey) return;
+    if (armorSetGroupSlots(group).size >= 5) return;
+    const bucketKey = [armorSetGroupClassId(group), sourceKey].join("|");
+    if (!buckets.has(bucketKey)) buckets.set(bucketKey, []);
+    buckets.get(bucketKey).push([groupKey, group]);
+  });
+  buckets.forEach((entries) => {
+    if (entries.length < 2 || entries.length > 8) return;
+    const unionSlots = new Set();
+    entries.forEach(([, group]) => armorSetGroupSlots(group).forEach((slot) => unionSlots.add(slot)));
+    if (unionSlots.size !== 5) return;
+    const [targetKey, targetGroup] = entries
+      .slice()
+      .sort((a, b) => armorSetGroupSlots(b[1]).size - armorSetGroupSlots(a[1]).size || b[1].items.length - a[1].items.length)[0];
+    entries.forEach(([sourceKey, sourceGroup]) => {
+      if (sourceKey === targetKey) return;
+      if (!groups.has(sourceKey)) return;
+      mergeArmorSetGroup(targetGroup, sourceGroup);
+      groups.delete(sourceKey);
+    });
+    targetGroup.setName = armorMergedSourceSetName(entries, targetGroup);
+  });
+}
+
+function isLowTierArmorTier(tier) {
+  const value = String(tier || "").toLowerCase();
+  return ["一般", "コモン", "アンコモン", "レア", "common", "uncommon", "rare"].includes(value);
+}
+
+function isLowTierArmorGroup(group) {
+  return [...(group.tiers || [])].some(isLowTierArmorTier);
+}
+
+function armorLowTierBucketKey(group) {
+  const release = armorSetBestRelease(group.items);
+  const classId = armorSetGroupClassId(group);
+  const tierKey = [...(group.tiers || [])].filter(Boolean).sort().join("+") || "low";
+  return [classId, tierKey, release.seasonNumber || "", release.releaseVersion || ""].join("|");
+}
+
+function armorLowTierCollectionName(group) {
+  const release = armorSetBestRelease(group.items);
+  const tier = [...(group.tiers || [])].find(Boolean) || (state.lang === "ja" ? "低レア" : "Low-tier");
+  const season = releaseSeasonLabel({ release });
+  const base = state.lang === "ja" ? `${tier}防具セット` : `${tier} Armor Set`;
+  return [base, season].filter(Boolean).join(" ");
+}
+
+function mergeLowTierArmorSetFragments(groups) {
+  const buckets = new Map();
+  [...groups.entries()].forEach(([groupKey, group]) => {
+    if (!isLowTierArmorGroup(group)) return;
+    if (armorSetGroupSlots(group).size >= 5) return;
+    const bucketKey = armorLowTierBucketKey(group);
+    if (!buckets.has(bucketKey)) buckets.set(bucketKey, []);
+    buckets.get(bucketKey).push([groupKey, group]);
+  });
+  buckets.forEach((entries) => {
+    const unionSlots = new Set();
+    entries.forEach(([, group]) => {
+      armorSetGroupSlots(group).forEach((slot) => unionSlots.add(slot));
+    });
+    if (unionSlots.size < 5) return;
+    const [targetKey, targetGroup] = entries
+      .slice()
+      .sort((a, b) => armorSetGroupSlots(b[1]).size - armorSetGroupSlots(a[1]).size || b[1].items.length - a[1].items.length)[0];
+    entries.forEach(([sourceKey, sourceGroup]) => {
+      if (sourceKey === targetKey) return;
+      if (!groups.has(sourceKey)) return;
+      mergeArmorSetGroup(targetGroup, sourceGroup);
+      groups.delete(sourceKey);
+    });
+    targetGroup.setName = armorLowTierCollectionName(targetGroup);
+  });
+}
+
+function shouldShowArmorSetGroup(group) {
+  if (isLowTierArmorGroup(group) && armorSetGroupSlots(group).size < 5) return false;
+  return true;
+}
+
 function armorSlotGlyph(slotId) {
   return armorSlotGlyphLabels[slotId]?.[state.lang] || armorSlotLabel(slotId).slice(0, 2).toUpperCase();
 }
@@ -1591,9 +1793,13 @@ function armorSetRows(rows = armorCatalogRows()) {
       const setName = armorSetName(row);
       if (!setName) return;
       const setFamily = armorSetFamilyName(setName) || setName;
-      const groupKey = armorSetNameKey(setFamily) || setFamily;
+      const familyKey = armorSetNameKey(setFamily) || setFamily;
+      const tierKey = armorSetNameKey(row.tier || "tier");
+      const groupKey = [classId, tierKey, familyKey].join("|");
       if (!groups.has(groupKey)) {
         groups.set(groupKey, {
+          classId,
+          familyKey,
           setName: setFamily,
           classIds: new Set(),
           tiers: new Set(),
@@ -1607,7 +1813,12 @@ function armorSetRows(rows = armorCatalogRows()) {
       groups.get(groupKey).sourceNames.add(row.name);
     });
 
+  mergeArmorSetClassItemGroups(groups);
+  mergeReleaseSourceArmorSetGroups(groups);
+  mergeLowTierArmorSetFragments(groups);
+
   return [...groups.entries()]
+    .filter(([, group]) => shouldShowArmorSetGroup(group))
     .map(([groupKey, group]) => {
       const items = armorSetItemsSorted(group.items);
       const release = armorSetBestRelease(items);
@@ -3432,20 +3643,54 @@ function renderArmorSetBonusPanel(setKey) {
   `;
 }
 
+function renderArmorSetOfficialNames(items = []) {
+  const rows = armorSetItemsSorted(items);
+  if (!rows.length) return `<span class="armor-piece-name-empty">${esc(t("armorOfficialNamePending"))}</span>`;
+  return `
+    <ul class="armor-piece-name-list">
+      ${rows
+        .map((item) => {
+          const meta = [releaseSeasonLabel(item), item.tier].filter(Boolean).join(" / ");
+          return `
+            <li>
+              <span>${esc(item.name)}</span>
+              ${meta ? `<small>${esc(meta)}</small>` : ""}
+            </li>
+          `;
+        })
+        .join("")}
+    </ul>
+  `;
+}
+
 function renderArmorSetPiecesPanel(row) {
-  const cards = armorSetDisplaySlots(row)
-    .map((slot) => {
+  const bySlot = armorSetItemsBySlot(row);
+  const cards = armorPieceSlots
+    .map((slotDef) => {
+      const items = bySlot.get(slotDef.id) || [];
+      const slot = {
+        slot: slotDef,
+        item: items[0] || null,
+        count: items.length,
+        missing: !items.length,
+      };
       const primary = slot.item;
-      const variant = slot.count > 1 ? `<span>${esc(t("armorSetPieceVariants"))}: ${esc(slot.count)}</span>` : "";
+      const variant = slot.count > 1 ? `<span class="armor-piece-note">${esc(t("armorSetPieceVariants"))}: ${esc(slot.count)}</span>` : "";
+      const officialNames =
+        slot.count > 1
+          ? `<span class="armor-piece-official-label">${esc(t("armorOfficialNames"))}</span>${renderArmorSetOfficialNames(items)}`
+          : slot.missing
+            ? `<span class="armor-piece-name-empty">${esc(t("armorOfficialNamePending"))}</span>`
+            : "";
       return `
         <article class="armor-set-piece-card${slot.missing ? " is-missing" : ""}">
           ${renderArmorSlotIcon(slot, "item-icon")}
-          <span>
+          <div class="armor-piece-copy">
             <strong>${esc(armorSlotLabel(slot.slot.id))}</strong>
-            <span>${esc(primary?.name || `${row.armorSetName} ${armorSlotLabel(slot.slot.id)}`)}</span>
+            <span class="armor-piece-main-name">${esc(primary?.name || t("armorOfficialNamePending"))}</span>
             ${variant}
-            ${slot.missing ? `<span>${esc(t("armorSlotPending"))}</span>` : ""}
-          </span>
+            ${officialNames}
+          </div>
         </article>
       `;
     })
