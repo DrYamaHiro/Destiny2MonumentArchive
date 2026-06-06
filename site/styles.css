@@ -336,6 +336,22 @@ h1 {
   min-height: calc(100vh - 260px);
 }
 
+.is-build-sim-full .catalog-shell {
+  grid-template-columns: 1fr;
+}
+
+.is-build-sim-full .browse-panel {
+  display: none;
+}
+
+.is-build-sim-full .detail-panel {
+  padding: 18px 24px 44px;
+}
+
+.is-build-sim-full .detail-shell {
+  max-width: none;
+}
+
 .browse-panel {
   min-width: 0;
   background: var(--panel);
@@ -1743,6 +1759,10 @@ h1 {
   margin-top: 14px;
 }
 
+.build-sim-layout--armor-only {
+  grid-template-columns: 1fr;
+}
+
 .build-sim-column,
 .build-sim-armor,
 .build-weapon-stack {
@@ -1756,7 +1776,7 @@ h1 {
 }
 
 .build-sim-armor {
-  grid-template-columns: minmax(250px, 0.36fr) minmax(520px, 1fr);
+  grid-template-columns: minmax(240px, 0.24fr) minmax(0, 1fr);
   align-items: start;
 }
 
@@ -1771,25 +1791,61 @@ h1 {
 
 .build-sim-armor .armor-pieces-panel {
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .build-sim-armor .armor-piece-grid {
-  grid-template-columns: repeat(5, minmax(184px, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: stretch;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-gutter: stable;
+  gap: 8px;
+  overflow: visible;
+  padding-bottom: 0;
 }
 
 .build-sim-armor .armor-piece-card {
-  min-width: 184px;
+  min-width: 0;
   align-content: start;
+  gap: 8px;
+  padding: 8px;
 }
 
 .build-sim-armor .armor-piece-controls,
 .build-sim-armor .armor-config-grid {
   grid-template-columns: 1fr;
+}
+
+.build-sim-armor .armor-piece-head {
+  display: grid;
+  gap: 2px;
+}
+
+.build-sim-armor .armor-piece-head h4 {
+  font-size: 12px;
+}
+
+.build-sim-armor .armor-piece-head span {
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.build-sim-armor .field {
+  gap: 3px;
+  font-size: 10px;
+}
+
+.build-sim-armor .field select {
+  min-height: 29px;
+  padding: 4px 5px;
+  font-size: 11px;
+}
+
+.build-sim-armor .armor-piece-stats {
+  gap: 4px;
+}
+
+.build-sim-armor .armor-stat-pill {
+  padding: 3px 5px;
+  font-size: 10px;
 }
 
 .build-armor-side {
@@ -1799,6 +1855,28 @@ h1 {
   gap: 14px;
   align-items: start;
   min-width: 0;
+}
+
+.build-skill-panel {
+  margin-top: 14px;
+}
+
+.build-skill-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(120px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.build-ability-field--subclass {
+  grid-column: span 2;
+}
+
+.build-skill-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
 }
 
 .build-sim-panel h4,
@@ -2046,6 +2124,14 @@ h1 {
   .build-armor-side {
     grid-template-columns: 1fr;
   }
+
+  .build-skill-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .build-ability-field--subclass {
+    grid-column: span 2;
+  }
 }
 
 @media (max-width: 1280px) and (min-width: 861px) {
@@ -2209,6 +2295,14 @@ h1 {
   .build-weapon-stats .stat-grid {
     grid-template-columns: 1fr;
   }
+
+  .build-skill-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .build-ability-field--subclass {
+    grid-column: 1 / -1;
+  }
 }
 
 @container (min-width: 640px) {
@@ -2265,5 +2359,13 @@ h1 {
 
   .build-armor-side {
     grid-template-columns: 1fr;
+  }
+
+  .build-skill-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .build-ability-field--subclass {
+    grid-column: 1 / -1;
   }
 }

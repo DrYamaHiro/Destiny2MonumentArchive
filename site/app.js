@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260606-build-armor-horizontal-complete";
+const DATA_VERSION = "20260607-build-abilities-filtered";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
@@ -18,6 +18,7 @@ const state = {
   armorSetBonuses: {},
   armorBulk: {},
   classBuildWeapons: {},
+  classBuildAbilities: {},
 };
 
 const taxonomy = [
@@ -143,9 +144,23 @@ const text = {
     manualArmorTuning: "旧防具ステータス調整",
     manualArmorNote: "旧仕様防具は実値を0-42で手動調整します。",
     buildSimulator: "ビルドシミュレーター",
-    buildSimulatorSub: "クラス別の武器・防具調整",
-    buildSimulatorDescription: "クラスごとに武器3枠とTier5防具パラメータ、エキゾチック防具、セットボーナスを横並びで確認します。",
+    buildSimulatorSub: "クラス別のスキル・防具調整",
+    buildSimulatorDescription: "クラスごとのサブクラス、アビリティ、Tier5防具パラメータ、エキゾチック防具、セットボーナスを横並びで確認します。",
     buildSimulatorNoLegendary: "レジェンダリー防具選択なし",
+    buildSkillConfig: "クラス / スキル構成",
+    buildSubclass: "サブクラス",
+    buildSuper: "スーパー",
+    buildGrenade: "グレネード",
+    buildMelee: "近接",
+    buildClassAbility: "クラススキル",
+    buildMovement: "移動",
+    buildAspect1: "特性 1",
+    buildAspect2: "特性 2",
+    buildFragment1: "かけら 1",
+    buildFragment2: "かけら 2",
+    buildFragment3: "かけら 3",
+    buildFragment4: "かけら 4",
+    noAbilitySelected: "未選択",
     abilityIndex: "アビリティ一覧",
     abilityIndexSub: "サブクラス・特性・かけら・スキル",
     abilityIndexDescription: "Manifestから取得できるサブクラス関連のアビリティ、特性、かけら、スーパースキル、近接、グレネード、クラススキル、移動スキルを一覧化します。",
@@ -379,9 +394,23 @@ const text = {
     manualArmorTuning: "Legacy Armor Stat Tuning",
     manualArmorNote: "Legacy armor stats can be adjusted manually from 0-42.",
     buildSimulator: "Build Simulator",
-    buildSimulatorSub: "Class weapon and armor tuning",
-    buildSimulatorDescription: "Compare three weapon slots with Tier 5 armor stats, Exotic armor, and set bonus layout for each class.",
+    buildSimulatorSub: "Class skill and armor tuning",
+    buildSimulatorDescription: "Compare subclass, abilities, Tier 5 armor stats, Exotic armor, and set bonus layout for each class.",
     buildSimulatorNoLegendary: "No Legendary armor selection",
+    buildSkillConfig: "Class / Skill Setup",
+    buildSubclass: "Subclass",
+    buildSuper: "Super",
+    buildGrenade: "Grenade",
+    buildMelee: "Melee",
+    buildClassAbility: "Class Ability",
+    buildMovement: "Movement",
+    buildAspect1: "Aspect 1",
+    buildAspect2: "Aspect 2",
+    buildFragment1: "Fragment 1",
+    buildFragment2: "Fragment 2",
+    buildFragment3: "Fragment 3",
+    buildFragment4: "Fragment 4",
+    noAbilitySelected: "None",
     abilityIndex: "Ability Index",
     abilityIndexSub: "Subclasses, aspects, fragments, and abilities",
     abilityIndexDescription: "Lists subclass-related abilities, aspects, fragments, Supers, melees, grenades, class abilities, and movement abilities available from the manifest.",
@@ -1445,9 +1474,11 @@ async function ensureCharacterSupportCatalogs() {
     requests.push(ensureSupportCatalog("equipment", "weapons"));
     requests.push(ensureSupportCatalog("equipment", "armor"));
     requests.push(ensureSupportCatalog("equipment", "emblems"));
+    requests.push(ensureSupportCatalog("character", "subclasses"));
   }
   if (needsAbilitySupport()) {
     requests.push(ensureSupportCatalog("mods", "perks"));
+    requests.push(ensureSupportCatalog("mods", "traits"));
   }
   await Promise.all(requests);
 }
@@ -2080,10 +2111,10 @@ function buildSimulatorRows() {
       sectionLabel: sectionLabel("build_simulator"),
       class: classLabel,
       classIds: [classId],
-      categories: [t("buildSimulator"), classLabel, t("weaponLoadout"), t("armorLoadout")],
+      categories: [t("buildSimulator"), classLabel, t("buildSkillConfig"), t("armorLoadout")],
       stats: {},
       release: {},
-      search: `${name} ${classLabel} ${emblem.name || ""} ${t("buildSimulator")} ${t("weaponLoadout")} ${t("armorLoadout")}`.toLowerCase(),
+      search: `${name} ${classLabel} ${emblem.name || ""} ${t("buildSimulator")} ${t("buildSkillConfig")} ${t("armorLoadout")}`.toLowerCase(),
     };
   });
 }
@@ -2099,14 +2130,14 @@ function isCharacterAbilityType(row) {
   if ((row.sections || []).includes("weapons") || row.weaponType) return false;
   const type = String(row.type || "").trim();
   const base = abilityBaseType(type);
-  const english = /^(Arc|Solar|Void|Stasis|Strand) (Aspect|Fragment|Grenade|Melee|Super)$|^Prismatic Fragment$|^Class Ability$|^Movement Ability$|^Super Ability$|^Utility Ability$|^Melee$/i;
-  const japanese = /^(アーク|ソーラー|ボイド|ステイシス|ストランド)(のかけら|グレネード|近接|近接攻撃|スーパースキル|アスペクト)$|^プリズムのかけら$|^クラススキル$|^移動スキル$|^スーパースキル$|^近接攻撃$/u;
+  const english = /^(Arc|Solar|Void|Stasis|Strand) (Aspect|Trait|Fragment|Grenade|Melee|Super)$|^Prismatic Fragment$|^Class Ability$|^Movement Ability$|^Super Ability$|^Utility Ability$|^Melee$/i;
+  const japanese = /^(アーク|ソーラー|ボイド|ステイシス|ストランド)(のかけら|グレネード|近接|近接攻撃|スーパースキル|アスペクト|特性)$|^プリズムのかけら$|^クラススキル$|^移動スキル$|^スーパースキル$|^近接攻撃$/u;
   return english.test(base) || japanese.test(base);
 }
 
 function characterAbilityRows() {
   const seen = new Set();
-  return supportRows("mods", "perks")
+  return [...supportRows("mods", "perks"), ...supportRows("mods", "traits")]
     .filter(isCharacterAbilityType)
     .filter((row) => {
       const key = `${String(row.name || "").toLowerCase()}|${abilityBaseType(row.type).toLowerCase()}|${String(row.class || "").toLowerCase()}`;
@@ -2126,6 +2157,167 @@ function characterAbilityRows() {
       search: `${row.search || ""} ${t("abilityIndex")} ${abilityBaseType(row.type)} ${row.class || ""}`.toLowerCase(),
     }))
     .sort((a, b) => compareText(a.type, b.type) || compareText(a.class, b.class) || compareText(a.name, b.name));
+}
+
+const buildAbilitySlots = [
+  { id: "super", labelKey: "buildSuper" },
+  { id: "grenade", labelKey: "buildGrenade" },
+  { id: "melee", labelKey: "buildMelee" },
+  { id: "classAbility", labelKey: "buildClassAbility" },
+  { id: "movement", labelKey: "buildMovement" },
+  { id: "aspect1", labelKey: "buildAspect1" },
+  { id: "aspect2", labelKey: "buildAspect2" },
+  { id: "fragment1", labelKey: "buildFragment1" },
+  { id: "fragment2", labelKey: "buildFragment2" },
+  { id: "fragment3", labelKey: "buildFragment3" },
+  { id: "fragment4", labelKey: "buildFragment4" },
+];
+
+function buildClassIdForRow(row) {
+  const explicit = (row.classIds || []).find((id) => armorClassOrder.includes(id));
+  if (explicit) return explicit;
+  const sections = row.sections || [];
+  const sectionClass = armorClassOrder.find((id) => sections.includes(id));
+  if (sectionClass) return sectionClass;
+  return classIdForRow(row);
+}
+
+function buildSubclassRows(classId) {
+  const seen = new Set();
+  return supportRows("character", "subclasses")
+    .filter((row) => buildClassIdForRow(row) === classId)
+    .filter((row) => !/未集束|unfocused/i.test(`${row.name || ""} ${row.type || ""}`))
+    .filter((row) => {
+      const key = armorSetNameKey(row.name);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => compareText(a.name, b.name));
+}
+
+function buildElementId(value = "") {
+  const textValue = String(value || "").toLowerCase();
+  if (/プリズム|prismatic/.test(textValue)) return "prismatic";
+  if (/アーク|arc|ストライカー|アークストライダー|ストームマスター/.test(textValue)) return "arc";
+  if (/ソーラー|solar|ガンスリンガー|サンブレーカー|ドーンブレード/.test(textValue)) return "solar";
+  if (/ボイド|void|ナイトクローラー|センティネル|ボイドウォーカー/.test(textValue)) return "void";
+  if (/ステイシス|stasis|レベナント|ベヒーモス|シェードバインダー/.test(textValue)) return "stasis";
+  if (/ストランド|strand|スレッドランナー|バーサーカー|ブルードウィーバー/.test(textValue)) return "strand";
+  return "";
+}
+
+function subclassElementId(row) {
+  return buildElementId(`${row?.name || ""} ${row?.type || ""} ${row?.search || ""}`);
+}
+
+function abilityKind(row) {
+  const type = abilityBaseType(row.type);
+  if (/アスペクト|Aspect/i.test(type) || /^(アーク|ソーラー|ボイド|ステイシス|ストランド)特性/u.test(type) || /^(Arc|Solar|Void|Stasis|Strand) (Trait|Aspect)$/i.test(type)) return "aspect";
+  if (/かけら|Fragment/i.test(type)) return "fragment";
+  if (/グレネード|Grenade/i.test(type)) return "grenade";
+  if (/近接|Melee/i.test(type)) return "melee";
+  if (/スーパー|Super/i.test(type)) return "super";
+  if (/クラススキル|Class Ability/i.test(type)) return "classAbility";
+  if (/移動|Movement/i.test(type)) return "movement";
+  return "";
+}
+
+const abilityClassPatterns = {
+  super: {
+    hunter: /ゴールデンガン|刃の雨|アークポール|嵐の鋭刃|シャドウショット|亡霊の刃|沈黙と悲鳴|シルクストライク|golden gun|blade barrage|arc staff|gathering storm|shadowshot|spectral blades|silence and squall|silkstrike|storm'?s edge/i,
+    warlock: /デイブレイク|炎のさえずり|ノヴァボム|ノヴァワープ|ストームトランス|カオスリーチ|冬の怒り|ニードルストーム|輝く泉|ラディエンスの泉|daybreak|song of flame|nova bomb|nova warp|stormtrance|chaos reach|winter'?s wrath|needle storm|needlestorm|well of radiance/i,
+    titan: /サンハンマー|モールバーニング|ハボックフィスト|サンダークラッシュ|センティネルシールド|ドーン・ウォード|トワイライトアーセナル|氷河の揺れ|ブレードフューリー|hammer of sol|burning maul|fists of havoc|thundercrash|sentinel shield|ward of dawn|twilight arsenal|glacial quake|bladefury/i,
+  },
+  melee: {
+    hunter: /ナイフトリック|投げナイフ|軽量ナイフ|爆破ナイフ|スネア爆弾|煙玉|衰弱の刃|嵐の打撃|コンビネーションブロー|スレッドスパイク|knife trick|throwing knife|weighted knife|lightweight knife|proximity explosive knife|snare bomb|smoke bomb|withering blade|combination blow|disorienting blow|threaded spike/i,
+    warlock: /焼却の指鳴らし|天の炎|アーケインニードル|連鎖する稲妻|稲妻の波動|ポケット・シンギュラリティ|ペナンブラルブラスト|incinerator snap|celestial fire|arcane needle|chain lightning|ball lightning|pocket singularity|penumbral blast/i,
+    titan: /ハンマーストライク|ハンマー投げ|シールドバッシュ|シールド投げ|地震攻撃|サンダークラップ|弾道スラム|氷河の一撃|フレンジーブレード|hammer strike|throwing hammer|shield bash|shield throw|seismic strike|thunderclap|ballistic slam|shiver strike|frenzied blade/i,
+  },
+  classAbility: {
+    hunter: /回避|曲芸師|dodge|acrobat/i,
+    warlock: /リフト|フェニックスダイブ|rift|phoenix dive/i,
+    titan: /バリケード|スラスター|barricade|thruster/i,
+  },
+  movement: {
+    hunter: /ジャンプ|跳躍|トリプルジャンプ|ストレイフジャンプ|ハイジャンプ|jump|triple jump|strafe jump|high jump/i,
+    warlock: /グライド|グライディング|ブリンク|glide|blink/i,
+    titan: /リフト|カタパルト|スライドリフト|ハイリフト|lift|catapult|strafe lift|high lift/i,
+  },
+  aspect: {
+    hunter: /オン・ユア・マーク|ガンパウダーギャンブル|一網打尽|致死電流|嵐の打撃|無我の境地|飛昇|消足|罠師の奇襲|粋な処刑人|シャッターダイブ|冬の帳|冬の気配|ウィドーズシルク|エンスネア・スラム|スレッドスペクター|大旋渦|on your mark|gunpowder gamble|knock '?em down|lethal current|tempest strike|flow state|ascension|vanishing step|trapper'?s ambush|stylish executioner|shatterdive|winter'?s shroud|touch of winter|widow'?s silk|ensnaring slam|threaded specter|whirling maelstrom/i,
+    warlock: /イカロスダッシュ|熱上昇|炎の囁き|アークソウル|静電気の心|ライトニングサージ|イオン番兵|カオス促進剤|古き神々の子|ボイドの餌|爆破解体|アイスフレアボルト|フロストパルス|冷たい監視者|氷河の恵み|心の紡ぎし祈り|織り手の呼び声|ザ・ワンダラー|ウィーブウォーク|icarus dash|heat rises|touch of flame|arc soul|electrostatic mind|lightning surge|ionic sentry|chaos accelerant|child of the old gods|feed the void|controlled demolition|iceflare bolts|frostpulse|bleak watcher|glacial harvest|mindspun invocation|weaver'?s call|the wanderer|weavewalk/i,
+    titan: /ソル・インビクタス|燃えさかる炎|聖別|乱暴者|ノックアウト|ジャガーノート|雷の造形|嵐の砦|バスティオン|攻勢防壁|難攻不落|クライオクラズム|ダイアモンドスピア|嵐の遠吠え|構造的収穫|ドレングルの鞭|フレシェット・ストーム|戦旗|騒乱の渦中|sol invictus|roaring flames|consecration|knockout|juggernaut|touch of thunder|bastion|offensive bulwark|unbreakable|cryoclasm|diamond lance|howl of the storm|tectonic harvest|drengr'?s lash|flechette storm|banner of war|into the fray/i,
+  },
+};
+
+function abilityClassHint(row, kind) {
+  const explicit = classIdForRow(row);
+  if (explicit) return explicit;
+  const patterns = abilityClassPatterns[kind];
+  if (!patterns) return "";
+  const primaryValue = `${row.name || ""} ${row.type || ""} ${row.class || ""}`;
+  const primaryMatches = armorClassOrder.filter((id) => patterns[id]?.test(primaryValue));
+  if (primaryMatches.length === 1) return primaryMatches[0];
+  if (kind === "movement") return "";
+  const value = `${primaryValue} ${row.description || ""} ${row.search || ""}`;
+  const matches = armorClassOrder.filter((id) => patterns[id]?.test(value));
+  return matches.length === 1 ? matches[0] : "";
+}
+
+function abilityMatchesClass(row, classId, kind) {
+  const hintedClass = abilityClassHint(row, kind);
+  if (hintedClass) return hintedClass === classId;
+  if (["super", "melee", "classAbility", "movement", "aspect"].includes(kind)) return false;
+  return true;
+}
+
+function buildAbilityOptions(classId, slotId, subclass) {
+  const kind = slotId.startsWith("aspect") ? "aspect" : slotId.startsWith("fragment") ? "fragment" : slotId;
+  const element = subclassElementId(subclass);
+  const seen = new Set();
+  return characterAbilityRows()
+    .filter((row) => abilityKind(row) === kind)
+    .filter((row) => abilityMatchesClass(row, classId, kind))
+    .filter((row) => {
+      if (!["super", "grenade", "melee", "aspect", "fragment"].includes(kind)) return true;
+      if (!element || element === "prismatic") return true;
+      const abilityElement = buildElementId(`${row.type || ""} ${row.name || ""} ${row.search || ""}`);
+      return !abilityElement || abilityElement === element;
+    })
+    .filter((row) => {
+      const key = `${armorSetNameKey(row.name)}|${kind}`;
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => compareText(abilityBaseType(a.type), abilityBaseType(b.type)) || compareText(a.name, b.name));
+}
+
+function classBuildAbilityState(classId) {
+  if (!state.classBuildAbilities[classId]) {
+    state.classBuildAbilities[classId] = { subclassHash: "", slots: {} };
+  }
+  const entry = state.classBuildAbilities[classId];
+  if (!entry.slots) entry.slots = {};
+  const subclasses = buildSubclassRows(classId);
+  if (!entry.subclassHash || !subclasses.some((row) => Number(row.hash) === Number(entry.subclassHash))) {
+    entry.subclassHash = subclasses[0]?.hash || "";
+    entry.slots = {};
+  }
+  return entry;
+}
+
+function selectedBuildSubclass(classId) {
+  const entry = classBuildAbilityState(classId);
+  return buildSubclassRows(classId).find((row) => Number(row.hash) === Number(entry.subclassHash)) || null;
+}
+
+function selectedBuildAbility(classId, slotId) {
+  const entry = classBuildAbilityState(classId);
+  const hash = entry.slots?.[slotId];
+  if (!hash) return null;
+  return characterAbilityRows().find((row) => Number(row.hash) === Number(hash)) || null;
 }
 
 function contextRows() {
@@ -3283,7 +3475,7 @@ function renderManualArmorTuning(row) {
 
 function detailSummary(row) {
   if (isBuildSimulatorRow(row)) {
-    return [row.class, t("weaponLoadout"), t("armorLoadout")].filter(Boolean).join(" / ");
+    return [row.class, t("buildSkillConfig"), t("armorLoadout")].filter(Boolean).join(" / ");
   }
   if (isArmorSetRow(row)) {
     return [row.class, row.armorSlot, row.tier].filter(Boolean).map(compactMetaLabel).join(" / ");
@@ -3298,6 +3490,8 @@ function detailSummary(row) {
 }
 
 function renderList() {
+  const fullBuildSimulator = state.group === "character" && state.section === "build_simulator";
+  document.body?.classList.toggle("is-build-sim-full", fullBuildSimulator);
   const all = listRows();
   const visible = all.slice(0, LIMIT);
   els.resultStatus.textContent = `${number(all.length)} ${t("results")}`;
@@ -4012,6 +4206,52 @@ function renderBuildWeaponsPanel(row) {
   `;
 }
 
+function renderBuildAbilitySelector(classId, slot, subclass) {
+  const entry = classBuildAbilityState(classId);
+  const options = buildAbilityOptions(classId, slot.id, subclass);
+  const selected = entry.slots?.[slot.id] || "";
+  return `
+    <label class="field build-ability-field">
+      <span>${esc(t(slot.labelKey))}</span>
+      <select data-build-ability-slot="${esc(slot.id)}">
+        <option value="">${esc(t("noAbilitySelected"))}</option>
+        ${options
+          .map((option) => `<option value="${esc(option.hash)}"${Number(selected) === Number(option.hash) ? " selected" : ""}>${esc(option.name)}</option>`)
+          .join("")}
+      </select>
+    </label>
+  `;
+}
+
+function renderBuildAbilityPanel(row) {
+  const classId = row.buildClassId;
+  const entry = classBuildAbilityState(classId);
+  const subclasses = buildSubclassRows(classId);
+  const subclass = selectedBuildSubclass(classId);
+  const selectedRows = [
+    subclass,
+    ...buildAbilitySlots.map((slot) => selectedBuildAbility(classId, slot.id)),
+  ].filter(Boolean);
+  return `
+    <section class="panel build-sim-panel build-skill-panel">
+      <h3>${esc(t("buildSkillConfig"))}</h3>
+      ${renderBuildClassSwitcher(classId)}
+      <div class="build-skill-grid">
+        <label class="field build-ability-field build-ability-field--subclass">
+          <span>${esc(t("buildSubclass"))}</span>
+          <select data-build-subclass>
+            ${subclasses
+              .map((option) => `<option value="${esc(option.hash)}"${Number(entry.subclassHash) === Number(option.hash) ? " selected" : ""}>${esc(option.name)}</option>`)
+              .join("")}
+          </select>
+        </label>
+        ${buildAbilitySlots.map((slot) => renderBuildAbilitySelector(classId, slot, subclass)).join("")}
+      </div>
+      ${selectedRows.length ? `<div class="build-skill-summary">${selectedRows.map((selected) => `<span class="badge">${esc(selected.name)}</span>`).join("")}</div>` : ""}
+    </section>
+  `;
+}
+
 function renderBuildArmorPanel(row) {
   const classId = row.buildClassId;
   const setKey = classBuildArmorKey(classId);
@@ -4026,7 +4266,6 @@ function renderBuildArmorPanel(row) {
       </section>
       <section class="panel build-sim-panel armor-pieces-panel">
         <h3>${esc(t("armorPieceConfig"))}</h3>
-        ${renderArmorBulkControls(setKey)}
         <div class="armor-piece-grid">
           ${armorPieceSlots.map((slot) => renderArmorPieceCard(setKey, slot)).join("")}
         </div>
@@ -4060,7 +4299,7 @@ function renderBuildSimulatorDetail(row) {
   const metadata = [
     [t("class"), row.class],
     [t("classEmblem"), emblem.name],
-    [t("weaponLoadout"), buildWeaponSlots.map((slot) => selectedBuildWeapon(classId, slot.id)?.name || t("noWeaponSelected")).join(" / ")],
+    [t("buildSkillConfig"), selectedBuildSubclass(classId)?.name || ""],
     [t("armorLoadout"), t("armorTier5")],
   ];
   els.detail.innerHTML = `
@@ -4074,19 +4313,17 @@ function renderBuildSimulatorDetail(row) {
           </div>
           <div class="badge-line">
             <span class="badge">${esc(row.class)}</span>
-            <span class="badge">${esc(t("weaponLoadout"))}</span>
+            <span class="badge">${esc(t("buildSkillConfig"))}</span>
             <span class="badge">${esc(t("armorLoadout"))}</span>
             <span class="badge">${esc(t("armorTier5"))}</span>
           </div>
           <p class="description">${esc(t("buildSimulatorDescription"))}</p>
-          ${renderBuildClassSwitcher(classId)}
         </div>
       </div>
 
-      <div class="build-sim-layout">
-        <div class="build-sim-column build-sim-column--weapons">
-          ${renderBuildWeaponsPanel(row)}
-        </div>
+      ${renderBuildAbilityPanel(row)}
+
+      <div class="build-sim-layout build-sim-layout--armor-only">
         <div class="build-sim-column build-sim-column--armor">
           ${renderBuildArmorPanel(row)}
         </div>
@@ -4134,6 +4371,19 @@ function bindBuildSimulatorControls(row) {
       if (!next) return;
       state.selectedHash = next.hash;
       renderList();
+    });
+  });
+  els.detail.querySelector("[data-build-subclass]")?.addEventListener("change", (event) => {
+    const entry = classBuildAbilityState(classId);
+    entry.subclassHash = event.target.value ? Number(event.target.value) : "";
+    entry.slots = {};
+    renderDetail(row);
+  });
+  els.detail.querySelectorAll("[data-build-ability-slot]").forEach((select) => {
+    select.addEventListener("change", () => {
+      const entry = classBuildAbilityState(classId);
+      entry.slots[select.dataset.buildAbilitySlot] = select.value ? Number(select.value) : "";
+      renderDetail(row);
     });
   });
   els.detail.querySelectorAll("[data-build-weapon-slot]").forEach((select) => {
