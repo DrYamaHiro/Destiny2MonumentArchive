@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260606-armor-class-item-candidates";
+const DATA_VERSION = "20260606-build-armor-horizontal-complete";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
@@ -1097,6 +1097,7 @@ function stripArmorSlotSuffix(coreName) {
     "Cloaked Stetson",
     "Vestment",
     "Tunic",
+    "Mind",
     "Boots",
     "Casque",
     "Cloak",
@@ -1148,7 +1149,9 @@ function stripArmorSlotSuffix(coreName) {
     "ヘルム",
     "マスク",
     "ローブ",
+    "式服",
     "ベスト",
+    "意志",
     "心",
     "バンド",
     "紋章",
@@ -1594,11 +1597,93 @@ function armorSetNamesLooselyRelated(shortName, longName) {
   return longKey.startsWith(shortKey) || shortKey.startsWith(longKey);
 }
 
+const armorClassItemSetAliases = [
+  {
+    classItems: ["binaryphoenix", "双頭のフェニックス"],
+    sets: ["anchorseeker", "アンカーシーカー", "swordflight", "ソードフライト", "phoenixstrife", "フェニックスの対立"],
+  },
+  {
+    classItems: ["shelter", "シェルター"],
+    sets: ["shelterinplace", "シェルターインプレイス"],
+  },
+  {
+    classItems: ["remembrance", "追憶"],
+    sets: ["ironremembrance", "鉄の追憶"],
+  },
+  {
+    classItems: ["efrideet", "エフリディート", "radegast", "ラデガスト", "timur", "ティムール"],
+    sets: ["irontribute", "鉄の賛辞"],
+  },
+  {
+    classItems: ["winterhart", "winterborn", "ウィンターボーン"],
+    sets: ["winterhart", "ウィンターハート"],
+  },
+  {
+    classItems: ["judgment", "判定"],
+    sets: ["flowing", "流動", "crushing", "粉砕"],
+  },
+  {
+    classItems: ["synapticconstruct", "シナプスコンストラクト"],
+    sets: ["tesseracttrace", "テセラクトトレース"],
+  },
+  {
+    classItems: ["hodiocentrist", "ホディオセントリスト"],
+    sets: ["insightvikti", "洞察のシャーマン"],
+  },
+  {
+    classItems: ["clandestinemaneuvers", "内密作戦"],
+    sets: ["insightrover", "洞察の放浪者"],
+  },
+  {
+    classItems: ["antiherovictory", "英雄に抗う勝利"],
+    sets: ["insightunyielding", "揺るぎない洞察"],
+  },
+];
+
+const armorSharedClassItemSetAliases = [
+  {
+    shared: ["shadow", "影"],
+    sets: ["fulminator", "ファルミネイター", "rull", "ラル", "acedefiant", "誇り高きエース"],
+  },
+];
+
+function armorSetMatchesAlias(name, aliases = []) {
+  const key = armorSetNameKey(armorSetFamilyName(name) || name);
+  return Boolean(key && aliases.some((alias) => key.includes(armorSetNameKey(alias))));
+}
+
+function armorSetAliasRelated(classItemName, targetSetName) {
+  const classItemKey = armorSetNameKey(armorSetFamilyName(classItemName) || classItemName);
+  const targetKey = armorSetNameKey(armorSetFamilyName(targetSetName) || targetSetName);
+  if (!classItemKey || !targetKey) return false;
+  return armorClassItemSetAliases.some((entry) => {
+    const classMatch = entry.classItems.some((alias) => classItemKey.includes(armorSetNameKey(alias)));
+    const setMatch = entry.sets.some((alias) => targetKey.includes(armorSetNameKey(alias)));
+    return classMatch && setMatch;
+  });
+}
+
+function armorSetSharedClassItemRelated(sourceName, targetSetName) {
+  return armorSharedClassItemSetAliases.some((entry) => armorSetMatchesAlias(sourceName, entry.shared) && armorSetMatchesAlias(targetSetName, entry.sets));
+}
+
 function armorSetGroupsShareTier(a, b) {
   const aTiers = [...(a.tiers || [])].filter(Boolean);
   const bTiers = [...(b.tiers || [])].filter(Boolean);
   if (!aTiers.length || !bTiers.length) return true;
   return aTiers.some((tier) => b.tiers?.has(tier));
+}
+
+function armorSetGroupReleaseKey(group) {
+  const release = armorSetBestRelease(group.items || []);
+  return String(release.seasonNumber || release.releaseVersion || "");
+}
+
+function armorSetGroupsShareReleaseWindow(a, b) {
+  const aKey = armorSetGroupReleaseKey(a);
+  const bKey = armorSetGroupReleaseKey(b);
+  if (!aKey || !bKey) return true;
+  return aKey === bKey;
 }
 
 function armorReleaseHasConcreteSource(release = {}) {
@@ -1701,7 +1786,9 @@ function mergeArmorSetClassItemGroups(groups) {
       if (targetSlots.has("class")) return false;
       if (targetSlots.size < 2) return false;
       if (!armorSetGroupsShareTier(sourceGroup, targetGroup)) return false;
+      if (!armorSetGroupsShareReleaseWindow(sourceGroup, targetGroup)) return false;
       if (armorSetNamesLooselyRelated(sourceGroup.setName, targetGroup.setName)) return true;
+      if (armorSetAliasRelated(sourceGroup.setName, targetGroup.setName)) return true;
       return targetSlots.size >= 4 && armorSetGroupsShareReleaseSource(sourceGroup, targetGroup);
     });
     const completeCandidates = candidates.filter(([, targetGroup]) => armorSetGroupSlots(targetGroup).size >= 4);
@@ -1709,6 +1796,41 @@ function mergeArmorSetClassItemGroups(groups) {
     if (!selected) return;
     mergeArmorSetGroup(selected[1], sourceGroup);
     groups.delete(sourceKey);
+  });
+}
+
+function duplicateArmorSetClassItems(target, source) {
+  const existing = new Set((target.items || []).map((item) => String(item.hash || "")));
+  (source.items || [])
+    .filter((item) => armorSlotId(item) === "class")
+    .forEach((item) => {
+      const key = String(item.hash || "");
+      if (key && existing.has(key)) return;
+      target.items.push(item);
+      if (key) existing.add(key);
+      target.sourceNames.add(item.name);
+    });
+}
+
+function duplicateSharedArmorClassItems(groups) {
+  const entries = [...groups.entries()];
+  entries.forEach(([, sourceGroup]) => {
+    const sourceSlots = armorSetGroupSlots(sourceGroup);
+    if (!sourceSlots.has("class")) return;
+    const classItems = (sourceGroup.items || []).filter((item) => armorSlotId(item) === "class");
+    if (!classItems.length) return;
+    const classId = armorSetGroupClassId(sourceGroup);
+    entries.forEach(([targetKey, targetGroup]) => {
+      if (!groups.has(targetKey) || sourceGroup === targetGroup) return;
+      if (armorSetGroupClassId(targetGroup) !== classId) return;
+      const targetSlots = armorSetGroupSlots(targetGroup);
+      if (targetSlots.has("class")) return;
+      if (targetSlots.size < 4) return;
+      if (!armorSetGroupsShareTier(sourceGroup, targetGroup)) return;
+      if (!armorSetGroupsShareReleaseWindow(sourceGroup, targetGroup)) return;
+      if (!armorSetSharedClassItemRelated(sourceGroup.setName, targetGroup.setName)) return;
+      duplicateArmorSetClassItems(targetGroup, sourceGroup);
+    });
   });
 }
 
@@ -1849,6 +1971,7 @@ function armorSetRows(rows = armorCatalogRows()) {
     });
 
   mergeArmorSetClassItemGroups(groups);
+  duplicateSharedArmorClassItems(groups);
   mergeReleaseSourceArmorSetGroups(groups);
   mergeLowTierArmorSetFragments(groups);
   groups.forEach((group) => {
@@ -3908,8 +4031,10 @@ function renderBuildArmorPanel(row) {
           ${armorPieceSlots.map((slot) => renderArmorPieceCard(setKey, slot)).join("")}
         </div>
       </section>
-      ${renderArmorExoticPanel(setKey, classId)}
-      ${renderArmorSetBonusPanel(setKey)}
+      <div class="build-armor-side">
+        ${renderArmorExoticPanel(setKey, classId)}
+        ${renderArmorSetBonusPanel(setKey)}
+      </div>
     </div>
   `;
 }

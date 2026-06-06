@@ -1737,7 +1737,7 @@ h1 {
 
 .build-sim-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+  grid-template-columns: minmax(320px, 0.42fr) minmax(760px, 1fr);
   gap: 14px;
   align-items: start;
   margin-top: 14px;
@@ -1752,6 +1752,52 @@ h1 {
 }
 
 .build-sim-panel {
+  min-width: 0;
+}
+
+.build-sim-armor {
+  grid-template-columns: minmax(250px, 0.36fr) minmax(520px, 1fr);
+  align-items: start;
+}
+
+.build-sim-armor > .build-sim-panel:first-child {
+  position: sticky;
+  top: 14px;
+}
+
+.build-sim-armor .armor-total-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.build-sim-armor .armor-pieces-panel {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.build-sim-armor .armor-piece-grid {
+  grid-template-columns: repeat(5, minmax(184px, 1fr));
+  align-items: stretch;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-gutter: stable;
+}
+
+.build-sim-armor .armor-piece-card {
+  min-width: 184px;
+  align-content: start;
+}
+
+.build-sim-armor .armor-piece-controls,
+.build-sim-armor .armor-config-grid {
+  grid-template-columns: 1fr;
+}
+
+.build-armor-side {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
   min-width: 0;
 }
 
@@ -1982,6 +2028,24 @@ h1 {
   .armor-set-side {
     position: static;
   }
+
+  .build-sim-armor {
+    grid-template-columns: 1fr;
+  }
+
+  .build-sim-armor > .build-sim-panel:first-child {
+    position: sticky;
+    top: 8px;
+    z-index: 2;
+  }
+
+  .build-sim-armor .armor-total-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .build-armor-side {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 1280px) and (min-width: 861px) {
@@ -2175,5 +2239,31 @@ h1 {
     grid-column: auto;
     position: sticky;
     top: 14px;
+  }
+}
+
+@container (max-width: 1180px) {
+  .build-sim-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@container (max-width: 880px) {
+  .build-sim-armor {
+    grid-template-columns: 1fr;
+  }
+
+  .build-sim-armor > .build-sim-panel:first-child {
+    position: sticky;
+    top: 8px;
+    z-index: 2;
+  }
+
+  .build-sim-armor .armor-total-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .build-armor-side {
+    grid-template-columns: 1fr;
   }
 }
