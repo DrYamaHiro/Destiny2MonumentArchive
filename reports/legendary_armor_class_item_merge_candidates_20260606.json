@@ -1,0 +1,4157 @@
+{
+  "summary": {
+    "generatedAt": "2026-06-06",
+    "sourceFiles": [
+      "site/data/catalog/ja/sections/equipment.armor.json",
+      "site/data/catalog/en/sections/equipment.armor.json"
+    ],
+    "legendaryRows": {
+      "ja": 4423,
+      "en": 4423
+    },
+    "nonEmptyLegendaryDescriptions": {
+      "ja": 0,
+      "en": 0
+    },
+    "criteria": [
+      "tier == レジェンダリー",
+      "same class",
+      "same seasonNumber",
+      "same concrete sourceString/sourceHash; random-perk reacquisition text excluded",
+      "all five slots present",
+      "unique item names <= 6 to avoid mixed-source multi-set buckets",
+      "class item base name differs from body armor base/common name after slot suffix normalization"
+    ],
+    "candidateCount": 58
+  },
+  "candidates": [
+    {
+      "class": "ウォーロック",
+      "season": 26,
+      "seasonName": "エピソード: 異端",
+      "source": "入手方法: 経典の潰滅",
+      "mergeName": "削剥",
+      "bodyBases": [
+        "削剥の形相",
+        "削剥のリーチ",
+        "削剥の装身具",
+        "削剥の鉤爪"
+      ],
+      "classBases": [
+        "ウィーバー"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "削剥の形相",
+          "description": "",
+          "source": "入手方法: 経典の潰滅",
+          "seasonNumber": 26,
+          "seasonName": "エピソード: 異端",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "削剥のリーチ",
+          "description": "",
+          "source": "入手方法: 経典の潰滅",
+          "seasonNumber": 26,
+          "seasonName": "エピソード: 異端",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "削剥の装身具",
+          "description": "",
+          "source": "入手方法: 経典の潰滅",
+          "seasonNumber": 26,
+          "seasonName": "エピソード: 異端",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "削剥の鉤爪",
+          "description": "",
+          "source": "入手方法: 経典の潰滅",
+          "seasonNumber": 26,
+          "seasonName": "エピソード: 異端",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "ウィーバーのバンド",
+          "description": "",
+          "source": "入手方法: 経典の潰滅",
+          "seasonNumber": 26,
+          "seasonName": "エピソード: 異端",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 26,
+      "seasonName": "エピソード: 異端",
+      "source": "入手方法: 経典の潰滅",
+      "mergeName": "削剥",
+      "bodyBases": [
+        "削剥の頭蓋骨",
+        "削剥",
+        "削剥の甲皮",
+        "削剥の爪"
+      ],
+      "classBases": [
+        "アテンダント"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "削剥の頭蓋骨",
+          "description": "",
+          "source": "入手方法: 経典の潰滅",
+          "seasonNumber": 26,
+          "seasonName": "エピソード: 異端",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "削剥のグリップ",
+          "description": "",
+          "source": "入手方法: 経典の潰滅",
+          "seasonNumber": 26,
+          "seasonName": "エピソード: 異端",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "削剥の甲皮",
+          "description": "",
+          "source": "入手方法: 経典の潰滅",
+          "seasonNumber": 26,
+          "seasonName": "エピソード: 異端",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "削剥の爪",
+          "description": "",
+          "source": "入手方法: 経典の潰滅",
+          "seasonNumber": 26,
+          "seasonName": "エピソード: 異端",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "アテンダントの紋章",
+          "description": "",
+          "source": "入手方法: 経典の潰滅",
+          "seasonNumber": 26,
+          "seasonName": "エピソード: 異端",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 26,
+      "seasonName": "エピソード: 異端",
+      "source": "入手方法: 経典の潰滅",
+      "mergeName": "削剥",
+      "bodyBases": [
+        "削剥",
+        "削剥のグラスプ",
+        "削剥の鱗",
+        "削剥のフック"
+      ],
+      "classBases": [
+        "ハスク"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "削剥のマスク",
+          "description": "",
+          "source": "入手方法: 経典の潰滅",
+          "seasonNumber": 26,
+          "seasonName": "エピソード: 異端",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "削剥のグラスプ",
+          "description": "",
+          "source": "入手方法: 経典の潰滅",
+          "seasonNumber": 26,
+          "seasonName": "エピソード: 異端",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "削剥の鱗",
+          "description": "",
+          "source": "入手方法: 経典の潰滅",
+          "seasonNumber": 26,
+          "seasonName": "エピソード: 異端",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "削剥のフック",
+          "description": "",
+          "source": "入手方法: 経典の潰滅",
+          "seasonNumber": 26,
+          "seasonName": "エピソード: 異端",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "ハスクのクローク",
+          "description": "",
+          "source": "入手方法: 経典の潰滅",
+          "seasonNumber": 26,
+          "seasonName": "エピソード: 異端",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 22,
+      "seasonName": "魔術のシーズン",
+      "source": "入手方法: レイド「クロタの最期」",
+      "mergeName": "デスシンガー",
+      "bodyBases": [
+        "デスシンガーのゲイズ",
+        "デスシンガー",
+        "デスシンガーのマントル",
+        "デスシンガーのヘラルド"
+      ],
+      "classBases": [
+        "ボーン"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "デスシンガーのゲイズ",
+          "description": "",
+          "source": "入手方法: レイド「クロタの最期」",
+          "seasonNumber": 22,
+          "seasonName": "魔術のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "デスシンガーのグリップ",
+          "description": "",
+          "source": "入手方法: レイド「クロタの最期」",
+          "seasonNumber": 22,
+          "seasonName": "魔術のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "デスシンガーのマントル",
+          "description": "",
+          "source": "入手方法: レイド「クロタの最期」",
+          "seasonNumber": 22,
+          "seasonName": "魔術のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "デスシンガーのヘラルド",
+          "description": "",
+          "source": "入手方法: レイド「クロタの最期」",
+          "seasonNumber": 22,
+          "seasonName": "魔術のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "ボーン・サークレット",
+          "description": "",
+          "source": "入手方法: レイド「クロタの最期」",
+          "seasonNumber": 22,
+          "seasonName": "魔術のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 22,
+      "seasonName": "魔術のシーズン",
+      "source": "入手方法: レイド「クロタの最期」",
+      "mergeName": "レイド「クロタの最期」 防具セット",
+      "bodyBases": [
+        "マインドブレイカー",
+        "マインドブレーカー"
+      ],
+      "classBases": [
+        "穴"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "マインドブレイカー・ウォッチ",
+          "description": "",
+          "source": "入手方法: レイド「クロタの最期」",
+          "seasonNumber": 22,
+          "seasonName": "魔術のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "マインドブレイカー・フィスト",
+          "description": "",
+          "source": "入手方法: レイド「クロタの最期」",
+          "seasonNumber": 22,
+          "seasonName": "魔術のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "マインドブレイカー・リゾルブ",
+          "description": "",
+          "source": "入手方法: レイド「クロタの最期」",
+          "seasonNumber": 22,
+          "seasonName": "魔術のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "マインドブレーカー・グリーブ",
+          "description": "",
+          "source": "入手方法: レイド「クロタの最期」",
+          "seasonNumber": 22,
+          "seasonName": "魔術のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "穴の紋章",
+          "description": "",
+          "source": "入手方法: レイド「クロタの最期」",
+          "seasonNumber": 22,
+          "seasonName": "魔術のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 22,
+      "seasonName": "魔術のシーズン",
+      "source": "入手方法: レイド「クロタの最期」",
+      "mergeName": "レイド「クロタの最期」 防具セット",
+      "bodyBases": [
+        "アンイールディング",
+        "ドッグド・ゲイジ",
+        "リレントレス・ハーネス",
+        "タイヤレス・ストライダー"
+      ],
+      "classBases": [
+        "フライ"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "アンイールディング・カスク",
+          "description": "",
+          "source": "入手方法: レイド「クロタの最期」",
+          "seasonNumber": 22,
+          "seasonName": "魔術のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "ドッグド・ゲイジ",
+          "description": "",
+          "source": "入手方法: レイド「クロタの最期」",
+          "seasonNumber": 22,
+          "seasonName": "魔術のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "リレントレス・ハーネス",
+          "description": "",
+          "source": "入手方法: レイド「クロタの最期」",
+          "seasonNumber": 22,
+          "seasonName": "魔術のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "タイヤレス・ストライダー",
+          "description": "",
+          "source": "入手方法: レイド「クロタの最期」",
+          "seasonNumber": 22,
+          "seasonName": "魔術のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "フライの覆い",
+          "description": "",
+          "source": "入手方法: レイド「クロタの最期」",
+          "seasonNumber": 22,
+          "seasonName": "魔術のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 19,
+      "seasonName": "熾天使のシーズン",
+      "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+      "mergeName": "鉄の友",
+      "bodyBases": [
+        "鉄の友",
+        "鉄の友の式服",
+        "鉄の友のレッグ"
+      ],
+      "classBases": [
+        "ウルフウッド"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "鉄の友のフード",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 19,
+          "seasonName": "熾天使のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "鉄の友のグローブ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 19,
+          "seasonName": "熾天使のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "鉄の友の式服",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 19,
+          "seasonName": "熾天使のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "鉄の友のレッグ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 19,
+          "seasonName": "熾天使のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "ウルフウッドのバンド",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 19,
+          "seasonName": "熾天使のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 19,
+      "seasonName": "熾天使のシーズン",
+      "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+      "mergeName": "鉄の友",
+      "bodyBases": [
+        "鉄の友"
+      ],
+      "classBases": [
+        "ウルフウッド"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "鉄の友のヘルム",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 19,
+          "seasonName": "熾天使のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "鉄の友のガントレット",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 19,
+          "seasonName": "熾天使のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "鉄の友のプレート",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 19,
+          "seasonName": "熾天使のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "鉄の友のグリーブ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 19,
+          "seasonName": "熾天使のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "ウルフウッドの紋章",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 19,
+          "seasonName": "熾天使のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 19,
+      "seasonName": "熾天使のシーズン",
+      "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+      "mergeName": "鉄の友",
+      "bodyBases": [
+        "鉄の友",
+        "鉄の友のスリーブ"
+      ],
+      "classBases": [
+        "ウルフウッド"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "鉄の友のマスク",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 19,
+          "seasonName": "熾天使のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "鉄の友のスリーブ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 19,
+          "seasonName": "熾天使のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "鉄の友のベスト",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 19,
+          "seasonName": "熾天使のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "鉄の友のブーツ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 19,
+          "seasonName": "熾天使のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "ウルフウッドのクローク",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 19,
+          "seasonName": "熾天使のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 18,
+      "seasonName": "宙賊のシーズン",
+      "source": "入手方法: レイド「邪神、滅びる」",
+      "mergeName": "レイド「邪神、滅びる」 防具セット",
+      "bodyBases": [
+        "ユールの言葉",
+        "エイルの支配",
+        "ユルの深遠",
+        "ソルの道"
+      ],
+      "classBases": [
+        "虫の伝承"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "ユールの言葉",
+          "description": "",
+          "source": "入手方法: レイド「邪神、滅びる」",
+          "seasonNumber": 18,
+          "seasonName": "宙賊のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "エイルの支配",
+          "description": "",
+          "source": "入手方法: レイド「邪神、滅びる」",
+          "seasonNumber": 18,
+          "seasonName": "宙賊のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "ユルの深遠",
+          "description": "",
+          "source": "入手方法: レイド「邪神、滅びる」",
+          "seasonNumber": 18,
+          "seasonName": "宙賊のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "ソルの道",
+          "description": "",
+          "source": "入手方法: レイド「邪神、滅びる」",
+          "seasonNumber": 18,
+          "seasonName": "宙賊のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "虫の伝承のバンド",
+          "description": "",
+          "source": "入手方法: レイド「邪神、滅びる」",
+          "seasonNumber": 18,
+          "seasonName": "宙賊のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 15,
+      "seasonName": "彷徨のシーズン",
+      "source": "入手方法: 彷徨のシーズンの儀式プレイリスト",
+      "mergeName": "開拓者",
+      "bodyBases": [
+        "開拓者",
+        "開拓者のチュニック"
+      ],
+      "classBases": [
+        "開拓者のフード"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "開拓者のヘルメット",
+          "description": "",
+          "source": "入手方法: 彷徨のシーズンの儀式プレイリスト",
+          "seasonNumber": 15,
+          "seasonName": "彷徨のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "開拓者のグリップ",
+          "description": "",
+          "source": "入手方法: 彷徨のシーズンの儀式プレイリスト",
+          "seasonNumber": 15,
+          "seasonName": "彷徨のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "開拓者のチュニック",
+          "description": "",
+          "source": "入手方法: 彷徨のシーズンの儀式プレイリスト",
+          "seasonNumber": 15,
+          "seasonName": "彷徨のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "開拓者のレッグガード",
+          "description": "",
+          "source": "入手方法: 彷徨のシーズンの儀式プレイリスト",
+          "seasonNumber": 15,
+          "seasonName": "彷徨のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "開拓者のフード",
+          "description": "",
+          "source": "入手方法: 彷徨のシーズンの儀式プレイリスト",
+          "seasonNumber": 15,
+          "seasonName": "彷徨のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 14,
+      "seasonName": "永夜のシーズン",
+      "source": "入手方法: レイド「ガラスの間」",
+      "mergeName": "ヘゼンロード",
+      "bodyBases": [
+        "ヘゼンロードのファサード",
+        "ヘゼンロード",
+        "ヘゼンロードのトレッド"
+      ],
+      "classBases": [
+        "プライムの破片"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "ヘゼンロードのファサード",
+          "description": "",
+          "source": "入手方法: レイド「ガラスの間」",
+          "seasonNumber": 14,
+          "seasonName": "永夜のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "ヘゼンロードのグローブ",
+          "description": "",
+          "source": "入手方法: レイド「ガラスの間」",
+          "seasonNumber": 14,
+          "seasonName": "永夜のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "ヘゼンロードのキュイラス",
+          "description": "",
+          "source": "入手方法: レイド「ガラスの間」",
+          "seasonNumber": 14,
+          "seasonName": "永夜のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "ヘゼンロードのトレッド",
+          "description": "",
+          "source": "入手方法: レイド「ガラスの間」",
+          "seasonNumber": 14,
+          "seasonName": "永夜のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "プライムの破片",
+          "description": "",
+          "source": "入手方法: レイド「ガラスの間」",
+          "seasonNumber": 14,
+          "seasonName": "永夜のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 14,
+      "seasonName": "永夜のシーズン",
+      "source": "入手方法: レイド「ガラスの間」",
+      "mergeName": "カブル",
+      "bodyBases": [
+        "カブルのバトルケージ",
+        "カブルの真鍮",
+        "カブルの怒り",
+        "カブルのフォースフル"
+      ],
+      "classBases": [
+        "グレートプリズムの光"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "カブルのバトルケージ",
+          "description": "",
+          "source": "入手方法: レイド「ガラスの間」",
+          "seasonNumber": 14,
+          "seasonName": "永夜のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "カブルの真鍮グリップ",
+          "description": "",
+          "source": "入手方法: レイド「ガラスの間」",
+          "seasonNumber": 14,
+          "seasonName": "永夜のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "カブルの怒り",
+          "description": "",
+          "source": "入手方法: レイド「ガラスの間」",
+          "seasonNumber": 14,
+          "seasonName": "永夜のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "カブルのフォースフルグリーブ",
+          "description": "",
+          "source": "入手方法: レイド「ガラスの間」",
+          "seasonNumber": 14,
+          "seasonName": "永夜のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "グレートプリズムの光",
+          "description": "",
+          "source": "入手方法: レイド「ガラスの間」",
+          "seasonNumber": 14,
+          "seasonName": "永夜のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 14,
+      "seasonName": "永夜のシーズン",
+      "source": "入手方法: レイド「ガラスの間」",
+      "mergeName": "プライムゼロット",
+      "bodyBases": [
+        "プライムゼロット"
+      ],
+      "classBases": [
+        "シャッタードボルト"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "プライムゼロットのマスク",
+          "description": "",
+          "source": "入手方法: レイド「ガラスの間」",
+          "seasonNumber": 14,
+          "seasonName": "永夜のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "プライムゼロットのグローブ",
+          "description": "",
+          "source": "入手方法: レイド「ガラスの間」",
+          "seasonNumber": 14,
+          "seasonName": "永夜のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "プライムゼロットのキュイラス",
+          "description": "",
+          "source": "入手方法: レイド「ガラスの間」",
+          "seasonNumber": 14,
+          "seasonName": "永夜のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "プライムゼロットのストライド",
+          "description": "",
+          "source": "入手方法: レイド「ガラスの間」",
+          "seasonNumber": 14,
+          "seasonName": "永夜のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "シャッタードボルトのクローク",
+          "description": "",
+          "source": "入手方法: レイド「ガラスの間」",
+          "seasonNumber": 14,
+          "seasonName": "永夜のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 10,
+      "seasonName": "名士のシーズン",
+      "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+      "mergeName": "アンカー・シーカー IV",
+      "bodyBases": [
+        "アンカー・シーカー IV"
+      ],
+      "classBases": [
+        "双頭のフェニックス"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "アンカー・シーカー IV",
+          "description": "",
+          "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "アンカー・シーカー IV",
+          "description": "",
+          "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "アンカー・シーカー IV",
+          "description": "",
+          "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "アンカー・シーカー IV",
+          "description": "",
+          "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "双頭のフェニックスのバンド",
+          "description": "",
+          "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 10,
+      "seasonName": "名士のシーズン",
+      "source": "入手方法: ストライクを完了してザヴァラ司令官からランクアップパッケージを入手する。",
+      "mergeName": "ゼノス・ヴェイル IV",
+      "bodyBases": [
+        "ゼノス・ヴェイル IV"
+      ],
+      "classBases": [
+        "ゼノス・ヴェイル"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "ゼノス・ヴェイル IV",
+          "description": "",
+          "source": "入手方法: ストライクを完了してザヴァラ司令官からランクアップパッケージを入手する。",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "ゼノス・ヴェイル IV",
+          "description": "",
+          "source": "入手方法: ストライクを完了してザヴァラ司令官からランクアップパッケージを入手する。",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "ゼノス・ヴェイル IV",
+          "description": "",
+          "source": "入手方法: ストライクを完了してザヴァラ司令官からランクアップパッケージを入手する。",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "ゼノス・ヴェイル IV",
+          "description": "",
+          "source": "入手方法: ストライクを完了してザヴァラ司令官からランクアップパッケージを入手する。",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "ゼノス・ヴェイルのバンド",
+          "description": "",
+          "source": "入手方法: ストライクを完了してザヴァラ司令官からランクアップパッケージを入手する。",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 10,
+      "seasonName": "名士のシーズン",
+      "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+      "mergeName": "フェニックスの対立・タイプ0",
+      "bodyBases": [
+        "フェニックスの対立・タイプ0"
+      ],
+      "classBases": [
+        "双頭のフェニックス"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "フェニックスの対立・タイプ0",
+          "description": "",
+          "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "フェニックスの対立・タイプ0",
+          "description": "",
+          "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "フェニックスの対立・タイプ0",
+          "description": "",
+          "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "フェニックスの対立・タイプ0",
+          "description": "",
+          "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "双頭のフェニックスの紋章",
+          "description": "",
+          "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 10,
+      "seasonName": "名士のシーズン",
+      "source": "入手方法: ストライクを完了してザヴァラ司令官からランクアップパッケージを入手する。",
+      "mergeName": "シェルター・イン・プレイス",
+      "bodyBases": [
+        "シェルター・イン・プレイス"
+      ],
+      "classBases": [
+        "シェルター"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "シェルター・イン・プレイス",
+          "description": "",
+          "source": "入手方法: ストライクを完了してザヴァラ司令官からランクアップパッケージを入手する。",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "シェルター・イン・プレイス",
+          "description": "",
+          "source": "入手方法: ストライクを完了してザヴァラ司令官からランクアップパッケージを入手する。",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "シェルター・イン・プレイス",
+          "description": "",
+          "source": "入手方法: ストライクを完了してザヴァラ司令官からランクアップパッケージを入手する。",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "シェルター・イン・プレイス",
+          "description": "",
+          "source": "入手方法: ストライクを完了してザヴァラ司令官からランクアップパッケージを入手する。",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "シェルターの紋章",
+          "description": "",
+          "source": "入手方法: ストライクを完了してザヴァラ司令官からランクアップパッケージを入手する。",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 10,
+      "seasonName": "名士のシーズン",
+      "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+      "mergeName": "ソードフライト 4.1",
+      "bodyBases": [
+        "ソードフライト 4.1"
+      ],
+      "classBases": [
+        "双頭のフェニックス"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "ソードフライト 4.1",
+          "description": "",
+          "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "ソードフライト 4.1",
+          "description": "",
+          "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "ソードフライト 4.1",
+          "description": "",
+          "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "ソードフライト 4.1",
+          "description": "",
+          "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "双頭のフェニックスのクローク",
+          "description": "",
+          "source": "入手方法: クルーシブルの対戦を完了、もしくはシャックス卿のランクアップのパッケージ",
+          "seasonNumber": 10,
+          "seasonName": "名士のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 8,
+      "seasonName": "不死のシーズン",
+      "source": "入手方法: レイド「救済の庭園」",
+      "mergeName": "レイド「救済の庭園」 防具セット",
+      "bodyBases": [
+        "公正",
+        "高揚",
+        "悟り",
+        "権勢"
+      ],
+      "classBases": [
+        "誘惑"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "公正のマスク",
+          "description": "",
+          "source": "入手方法: レイド「救済の庭園」",
+          "seasonNumber": 8,
+          "seasonName": "不死のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "高揚のグローブ",
+          "description": "",
+          "source": "入手方法: レイド「救済の庭園」",
+          "seasonNumber": 8,
+          "seasonName": "不死のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "悟りのローブ",
+          "description": "",
+          "source": "入手方法: レイド「救済の庭園」",
+          "seasonNumber": 8,
+          "seasonName": "不死のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "権勢のブーツ",
+          "description": "",
+          "source": "入手方法: レイド「救済の庭園」",
+          "seasonNumber": 8,
+          "seasonName": "不死のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "誘惑のバンド",
+          "description": "",
+          "source": "入手方法: レイド「救済の庭園」",
+          "seasonNumber": 8,
+          "seasonName": "不死のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 8,
+      "seasonName": "不死のシーズン",
+      "source": "入手方法: レイド「救済の庭園」",
+      "mergeName": "レイド「救済の庭園」 防具セット",
+      "bodyBases": [
+        "公正",
+        "高揚",
+        "悟り",
+        "権勢"
+      ],
+      "classBases": [
+        "誘惑"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "公正のヘルム",
+          "description": "",
+          "source": "入手方法: レイド「救済の庭園」",
+          "seasonNumber": 8,
+          "seasonName": "不死のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "高揚のガントレット",
+          "description": "",
+          "source": "入手方法: レイド「救済の庭園」",
+          "seasonNumber": 8,
+          "seasonName": "不死のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "悟りのプレート",
+          "description": "",
+          "source": "入手方法: レイド「救済の庭園」",
+          "seasonNumber": 8,
+          "seasonName": "不死のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "権勢のグリーブ",
+          "description": "",
+          "source": "入手方法: レイド「救済の庭園」",
+          "seasonNumber": 8,
+          "seasonName": "不死のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "誘惑の紋章",
+          "description": "",
+          "source": "入手方法: レイド「救済の庭園」",
+          "seasonNumber": 8,
+          "seasonName": "不死のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 8,
+      "seasonName": "不死のシーズン",
+      "source": "入手方法: レイド「救済の庭園」",
+      "mergeName": "レイド「救済の庭園」 防具セット",
+      "bodyBases": [
+        "公正",
+        "高揚",
+        "悟り",
+        "権勢"
+      ],
+      "classBases": [
+        "誘惑"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "公正のフード",
+          "description": "",
+          "source": "入手方法: レイド「救済の庭園」",
+          "seasonNumber": 8,
+          "seasonName": "不死のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "高揚のグリップ",
+          "description": "",
+          "source": "入手方法: レイド「救済の庭園」",
+          "seasonNumber": 8,
+          "seasonName": "不死のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "悟りのベスト",
+          "description": "",
+          "source": "入手方法: レイド「救済の庭園」",
+          "seasonNumber": 8,
+          "seasonName": "不死のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "権勢のストライド",
+          "description": "",
+          "source": "入手方法: レイド「救済の庭園」",
+          "seasonNumber": 8,
+          "seasonName": "不死のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "誘惑のクローク",
+          "description": "",
+          "source": "入手方法: レイド「救済の庭園」",
+          "seasonNumber": 8,
+          "seasonName": "不死のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 7,
+      "seasonName": "絢爛のシーズン",
+      "source": "レイド「悲哀の冠」で入手できる。",
+      "mergeName": "影",
+      "bodyBases": [
+        "影の意志",
+        "影"
+      ],
+      "classBases": [
+        "半影"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "影の意志",
+          "description": "",
+          "source": "レイド「悲哀の冠」で入手できる。",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "影のグローブ",
+          "description": "",
+          "source": "レイド「悲哀の冠」で入手できる。",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "影のローブ",
+          "description": "",
+          "source": "レイド「悲哀の冠」で入手できる。",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "影のブーツ",
+          "description": "",
+          "source": "レイド「悲哀の冠」で入手できる。",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "半影のバンド",
+          "description": "",
+          "source": "レイド「悲哀の冠」で入手できる。",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 7,
+      "seasonName": "絢爛のシーズン",
+      "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+      "mergeName": "鉄の賛辞",
+      "bodyBases": [
+        "鉄の賛辞",
+        "鉄の賛辞の式服",
+        "鉄の賛辞のレッグ"
+      ],
+      "classBases": [
+        "ティムールのアイアン"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "鉄の賛辞のフード",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "鉄の賛辞のグローブ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "鉄の賛辞の式服",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "鉄の賛辞のレッグ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "ティムールのアイアンバンド",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 7,
+      "seasonName": "絢爛のシーズン",
+      "source": "入手方法: 夏季の宴2019",
+      "mergeName": "夏季",
+      "bodyBases": [
+        "夏季のフード(マジェスティック)",
+        "夏季のグローブ(マジェスティック)",
+        "夏季のローブ(マジェスティック)",
+        "夏季のブーツ(マジェスティック)"
+      ],
+      "classBases": [
+        "夏季のバンド(マジェスティック)"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "夏季のフード(マジェスティック)",
+          "description": "",
+          "source": "入手方法: 夏季の宴2019",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "夏季のグローブ(マジェスティック)",
+          "description": "",
+          "source": "入手方法: 夏季の宴2019",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "夏季のローブ(マジェスティック)",
+          "description": "",
+          "source": "入手方法: 夏季の宴2019",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "夏季のブーツ(マジェスティック)",
+          "description": "",
+          "source": "入手方法: 夏季の宴2019",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "夏季のバンド(マジェスティック)",
+          "description": "",
+          "source": "入手方法: 夏季の宴2019",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 7,
+      "seasonName": "絢爛のシーズン",
+      "source": "レイド「悲哀の冠」で入手できる。",
+      "mergeName": "影",
+      "bodyBases": [
+        "影"
+      ],
+      "classBases": [
+        "半影の印"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "影のヘルム",
+          "description": "",
+          "source": "レイド「悲哀の冠」で入手できる。",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "影のガントレット",
+          "description": "",
+          "source": "レイド「悲哀の冠」で入手できる。",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "影のプレート",
+          "description": "",
+          "source": "レイド「悲哀の冠」で入手できる。",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "影のグリーブ",
+          "description": "",
+          "source": "レイド「悲哀の冠」で入手できる。",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "半影の印",
+          "description": "",
+          "source": "レイド「悲哀の冠」で入手できる。",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 7,
+      "seasonName": "絢爛のシーズン",
+      "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+      "mergeName": "鉄の賛辞",
+      "bodyBases": [
+        "鉄の賛辞"
+      ],
+      "classBases": [
+        "ラデガストのアイアンサッシュ"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "鉄の賛辞のヘルム",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "鉄の賛辞のガントレット",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "鉄の賛辞のプレート",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "鉄の賛辞のグリーブ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "ラデガストのアイアンサッシュ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 7,
+      "seasonName": "絢爛のシーズン",
+      "source": "入手方法: シュール",
+      "mergeName": "絢爛な決闘者",
+      "bodyBases": [
+        "絢爛な決闘者"
+      ],
+      "classBases": [
+        "絢爛な決闘者のプレート"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "絢爛な決闘者のヘルム",
+          "description": "",
+          "source": "入手方法: シュール",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "絢爛な決闘者のガントレット",
+          "description": "",
+          "source": "入手方法: シュール",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "絢爛な決闘者のプレート",
+          "description": "",
+          "source": "入手方法: シュール",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "絢爛な決闘者のグリーブ",
+          "description": "",
+          "source": "入手方法: シュール",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "絢爛な決闘者のプレート",
+          "description": "",
+          "source": "入手方法: シュール",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 7,
+      "seasonName": "絢爛のシーズン",
+      "source": "入手方法: 夏季の宴2019",
+      "mergeName": "夏季",
+      "bodyBases": [
+        "夏季のヘルム(マジェスティック)",
+        "夏季のガントレット(マジェスティック)",
+        "夏季のプレート(マジェスティック)",
+        "夏季のグリーブ(マジェスティック)"
+      ],
+      "classBases": [
+        "夏季の紋章(マジェスティック)"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "夏季のヘルム(マジェスティック)",
+          "description": "",
+          "source": "入手方法: 夏季の宴2019",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "夏季のガントレット(マジェスティック)",
+          "description": "",
+          "source": "入手方法: 夏季の宴2019",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "夏季のプレート(マジェスティック)",
+          "description": "",
+          "source": "入手方法: 夏季の宴2019",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "夏季のグリーブ(マジェスティック)",
+          "description": "",
+          "source": "入手方法: 夏季の宴2019",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "夏季の紋章(マジェスティック)",
+          "description": "",
+          "source": "入手方法: 夏季の宴2019",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 7,
+      "seasonName": "絢爛のシーズン",
+      "source": "レイド「悲哀の冠」で入手できる。",
+      "mergeName": "影",
+      "bodyBases": [
+        "影"
+      ],
+      "classBases": [
+        "半影"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "影のマスク",
+          "description": "",
+          "source": "レイド「悲哀の冠」で入手できる。",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "影のグリップ",
+          "description": "",
+          "source": "レイド「悲哀の冠」で入手できる。",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "影のベスト",
+          "description": "",
+          "source": "レイド「悲哀の冠」で入手できる。",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "影のストライド",
+          "description": "",
+          "source": "レイド「悲哀の冠」で入手できる。",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "半影のクローク",
+          "description": "",
+          "source": "レイド「悲哀の冠」で入手できる。",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 7,
+      "seasonName": "絢爛のシーズン",
+      "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+      "mergeName": "鉄の賛辞",
+      "bodyBases": [
+        "鉄の賛辞"
+      ],
+      "classBases": [
+        "エフリディート"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "鉄の賛辞のカスク",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "鉄の賛辞のグリップ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "鉄の賛辞のベスト",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "鉄の賛辞のブーツ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "エフリディートのマントル",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 7,
+      "seasonName": "絢爛のシーズン",
+      "source": "入手方法: 夏季の宴2019",
+      "mergeName": "夏季",
+      "bodyBases": [
+        "夏季のマスク(マジェスティック)",
+        "夏季のグラスプ(マジェスティック)",
+        "夏季のベスト(マジェスティック)",
+        "夏季のストライド(マジェスティック)"
+      ],
+      "classBases": [
+        "夏季のクローク(マジェスティック)"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "夏季のマスク(マジェスティック)",
+          "description": "",
+          "source": "入手方法: 夏季の宴2019",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "夏季のグラスプ(マジェスティック)",
+          "description": "",
+          "source": "入手方法: 夏季の宴2019",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "夏季のベスト(マジェスティック)",
+          "description": "",
+          "source": "入手方法: 夏季の宴2019",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "夏季のストライド(マジェスティック)",
+          "description": "",
+          "source": "入手方法: 夏季の宴2019",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "夏季のクローク(マジェスティック)",
+          "description": "",
+          "source": "入手方法: 夏季の宴2019",
+          "seasonNumber": 7,
+          "seasonName": "絢爛のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 4,
+      "seasonName": "無法者のシーズン",
+      "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+      "mergeName": "鉄の追憶",
+      "bodyBases": [
+        "鉄の追憶",
+        "鉄の追憶の式服",
+        "鉄の追憶のレッグアーマー"
+      ],
+      "classBases": [
+        "追憶"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "鉄の追憶のフード",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 4,
+          "seasonName": "無法者のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "鉄の追憶のグローブ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 4,
+          "seasonName": "無法者のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "鉄の追憶の式服",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 4,
+          "seasonName": "無法者のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "鉄の追憶のレッグアーマー",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 4,
+          "seasonName": "無法者のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "追憶のバンド",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 4,
+          "seasonName": "無法者のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 4,
+      "seasonName": "無法者のシーズン",
+      "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+      "mergeName": "鉄の追憶",
+      "bodyBases": [
+        "鉄の追憶"
+      ],
+      "classBases": [
+        "追憶"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "鉄の追憶のヘルム",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 4,
+          "seasonName": "無法者のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "鉄の追憶のガントレット",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 4,
+          "seasonName": "無法者のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "鉄の追憶のプレート",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 4,
+          "seasonName": "無法者のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "鉄の追憶のグリーブ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 4,
+          "seasonName": "無法者のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "追憶の紋章",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 4,
+          "seasonName": "無法者のシーズン",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 4,
+      "seasonName": "無法者のシーズン",
+      "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+      "mergeName": "鉄の追憶",
+      "bodyBases": [
+        "鉄の追憶"
+      ],
+      "classBases": [
+        "追憶"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "鉄の追憶のカスク",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 4,
+          "seasonName": "無法者のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "鉄の追憶のグリップ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 4,
+          "seasonName": "無法者のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "鉄の追憶のベスト",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 4,
+          "seasonName": "無法者のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "鉄の追憶のストライド",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 4,
+          "seasonName": "無法者のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "追憶のクローク",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 4,
+          "seasonName": "無法者のシーズン",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 3,
+      "seasonName": "再帰",
+      "source": "入手方法: ブライトエングラム",
+      "mergeName": "ミハイロワ",
+      "bodyBases": [
+        "ミハイロワの勝利",
+        "ミハイロワの装置",
+        "ミハイロワの選択",
+        "ミハイロワの道"
+      ],
+      "classBases": [
+        "ミハイロワの物語"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "ミハイロワの勝利",
+          "description": "",
+          "source": "入手方法: ブライトエングラム",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "ミハイロワの装置",
+          "description": "",
+          "source": "入手方法: ブライトエングラム",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "ミハイロワの選択",
+          "description": "",
+          "source": "入手方法: ブライトエングラム",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "ミハイロワの道",
+          "description": "",
+          "source": "入手方法: ブライトエングラム",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "ミハイロワの物語",
+          "description": "",
+          "source": "入手方法: ブライトエングラム",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 3,
+      "seasonName": "再帰",
+      "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+      "mergeName": "洞察のシャーマン",
+      "bodyBases": [
+        "洞察のシャーマン"
+      ],
+      "classBases": [
+        "シナプス・コンストラクト"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "洞察のシャーマンのフード",
+          "description": "",
+          "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "洞察のシャーマンのグローブ",
+          "description": "",
+          "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "洞察のシャーマンのローブ",
+          "description": "",
+          "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "洞察のシャーマンのブーツ",
+          "description": "",
+          "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "シナプス・コンストラクト",
+          "description": "",
+          "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 3,
+      "seasonName": "再帰",
+      "source": "入手方法: ブライトエングラム",
+      "mergeName": "ハーディ",
+      "bodyBases": [
+        "ハーディの平静",
+        "ハーディの制御",
+        "ハーディの旅",
+        "ハーディの歩み"
+      ],
+      "classBases": [
+        "ハーディの指令"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "ハーディの平静",
+          "description": "",
+          "source": "入手方法: ブライトエングラム",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "ハーディの制御",
+          "description": "",
+          "source": "入手方法: ブライトエングラム",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "ハーディの旅",
+          "description": "",
+          "source": "入手方法: ブライトエングラム",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "ハーディの歩み",
+          "description": "",
+          "source": "入手方法: ブライトエングラム",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "ハーディの指令",
+          "description": "",
+          "source": "入手方法: ブライトエングラム",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 3,
+      "seasonName": "再帰",
+      "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+      "mergeName": "揺るぎない洞察",
+      "bodyBases": [
+        "揺るぎない洞察"
+      ],
+      "classBases": [
+        "英雄に抗う勝利"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "揺るぎない洞察のヘルム",
+          "description": "",
+          "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "揺るぎない洞察のガントレット",
+          "description": "",
+          "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "揺るぎない洞察のプレート",
+          "description": "",
+          "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "揺るぎない洞察のグリーブ",
+          "description": "",
+          "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "英雄に抗う勝利",
+          "description": "",
+          "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 3,
+      "seasonName": "再帰",
+      "source": "入手方法: ブライトエングラム",
+      "mergeName": "チャオ",
+      "bodyBases": [
+        "チャオの笑顔",
+        "チャオの思いやり",
+        "チャオの心",
+        "チャオの歩み"
+      ],
+      "classBases": [
+        "チャオの死"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "チャオの笑顔",
+          "description": "",
+          "source": "入手方法: ブライトエングラム",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "チャオの思いやり",
+          "description": "",
+          "source": "入手方法: ブライトエングラム",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "チャオの心",
+          "description": "",
+          "source": "入手方法: ブライトエングラム",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "チャオの歩み",
+          "description": "",
+          "source": "入手方法: ブライトエングラム",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "チャオの死",
+          "description": "",
+          "source": "入手方法: ブライトエングラム",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 3,
+      "seasonName": "再帰",
+      "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+      "mergeName": "洞察の放浪者",
+      "bodyBases": [
+        "洞察の放浪者"
+      ],
+      "classBases": [
+        "内密作戦"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "洞察の放浪者のマスク",
+          "description": "",
+          "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "洞察の放浪者のグリップ",
+          "description": "",
+          "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "洞察の放浪者のベスト",
+          "description": "",
+          "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "洞察の放浪者のブーツ",
+          "description": "",
+          "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "内密作戦",
+          "description": "",
+          "source": "入手方法: レジェンダリーエングラム、もしくはファクションのランクアップのパッケージから",
+          "seasonNumber": 3,
+          "seasonName": "再帰",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+      "mergeName": "鉄の賛辞",
+      "bodyBases": [
+        "鉄の賛辞",
+        "鉄の賛辞の式服",
+        "鉄の賛辞のレッグ"
+      ],
+      "classBases": [
+        "ティムールのアイアン"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "鉄の賛辞のフード",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "鉄の賛辞のグローブ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "鉄の賛辞の式服",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "鉄の賛辞のレッグ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "ティムールのアイアンバンド",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+      "mergeName": "絶滅に抗う",
+      "bodyBases": [
+        "絶滅に抗う"
+      ],
+      "classBases": [
+        "未知の星"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "絶滅に抗うフード",
+          "description": "",
+          "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "絶滅に抗うグローブ",
+          "description": "",
+          "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "絶滅に抗うローブ",
+          "description": "",
+          "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "絶滅に抗うブーツ",
+          "description": "",
+          "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "未知の星のバンド",
+          "description": "",
+          "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: イコラ・レイのランクアップのパッケージから",
+      "mergeName": "エゴ・タロン IV",
+      "bodyBases": [
+        "エゴ・タロン IV"
+      ],
+      "classBases": [
+        "エゴ・タロン"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "エゴ・タロン IV",
+          "description": "",
+          "source": "入手方法: イコラ・レイのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "エゴ・タロン IV",
+          "description": "",
+          "source": "入手方法: イコラ・レイのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "エゴ・タロン IV",
+          "description": "",
+          "source": "入手方法: イコラ・レイのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "エゴ・タロン IV",
+          "description": "",
+          "source": "入手方法: イコラ・レイのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "エゴ・タロンのバンド",
+          "description": "",
+          "source": "入手方法: イコラ・レイのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+      "mergeName": "シミュレーター",
+      "bodyBases": [
+        "シミュレーター",
+        "シミュレーター・レッグ"
+      ],
+      "classBases": [
+        "絡み合い"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "シミュレーター・フード",
+          "description": "",
+          "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "シミュレーター・グローブ",
+          "description": "",
+          "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "シミュレーター・ローブ",
+          "description": "",
+          "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "シミュレーター・レッグ",
+          "description": "",
+          "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "絡み合いのバンド",
+          "description": "",
+          "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+      "mergeName": "集中",
+      "bodyBases": [
+        "集中",
+        "集中のラップ"
+      ],
+      "classBases": [
+        "容赦なき"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "集中のフード",
+          "description": "",
+          "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "集中のラップ",
+          "description": "",
+          "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "集中のローブ",
+          "description": "",
+          "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "集中のブーツ",
+          "description": "",
+          "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "容赦なきバンド",
+          "description": "",
+          "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "ウォーロック",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+      "mergeName": "君主",
+      "bodyBases": [
+        "君主",
+        "君主のレッグ"
+      ],
+      "classBases": [
+        "即位"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "君主のフード",
+          "description": "",
+          "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "君主のグローブ",
+          "description": "",
+          "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "君主のローブ",
+          "description": "",
+          "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "君主のレッグ",
+          "description": "",
+          "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "即位のバンド",
+          "description": "",
+          "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ウォーロック"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+      "mergeName": "鉄の賛辞",
+      "bodyBases": [
+        "鉄の賛辞"
+      ],
+      "classBases": [
+        "ラデガストのアイアンサッシュ"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "鉄の賛辞のヘルム",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "鉄の賛辞のガントレット",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "鉄の賛辞のプレート",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "鉄の賛辞のグリーブ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "ラデガストのアイアンサッシュ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+      "mergeName": "絶滅に抗う",
+      "bodyBases": [
+        "絶滅に抗う"
+      ],
+      "classBases": [
+        "未知の星"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "絶滅に抗うヘルム",
+          "description": "",
+          "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "絶滅に抗うガントレット",
+          "description": "",
+          "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "絶滅に抗うプレート",
+          "description": "",
+          "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "絶滅に抗うグリーブ",
+          "description": "",
+          "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "未知の星の紋章",
+          "description": "",
+          "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: イコラ・レイのランクアップのパッケージから",
+      "mergeName": "不変の闘士・タイプ2",
+      "bodyBases": [
+        "不変の闘士・タイプ2"
+      ],
+      "classBases": [
+        "不変の闘士"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "不変の闘士・タイプ2",
+          "description": "",
+          "source": "入手方法: イコラ・レイのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "不変の闘士・タイプ2",
+          "description": "",
+          "source": "入手方法: イコラ・レイのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "不変の闘士・タイプ2",
+          "description": "",
+          "source": "入手方法: イコラ・レイのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "不変の闘士・タイプ2",
+          "description": "",
+          "source": "入手方法: イコラ・レイのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "不変の闘士の紋章",
+          "description": "",
+          "source": "入手方法: イコラ・レイのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+      "mergeName": "シミュレーター",
+      "bodyBases": [
+        "シミュレーター"
+      ],
+      "classBases": [
+        "絡み合い"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "シミュレーター・ヘルム",
+          "description": "",
+          "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "シミュレーター・ガントレット",
+          "description": "",
+          "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "シミュレーター・プレート",
+          "description": "",
+          "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "シミュレーター・グリーブ",
+          "description": "",
+          "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "絡み合いの紋章",
+          "description": "",
+          "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+      "mergeName": "殲滅",
+      "bodyBases": [
+        "殲滅",
+        "殲滅のガード"
+      ],
+      "classBases": [
+        "容赦なき"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "殲滅のヘルム",
+          "description": "",
+          "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "殲滅のガード",
+          "description": "",
+          "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "殲滅のプレート",
+          "description": "",
+          "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "殲滅のグリーブ",
+          "description": "",
+          "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "容赦なき紋章",
+          "description": "",
+          "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "タイタン",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+      "mergeName": "君主",
+      "bodyBases": [
+        "君主"
+      ],
+      "classBases": [
+        "即位"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "君主のヘルム",
+          "description": "",
+          "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "君主のガントレット",
+          "description": "",
+          "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "君主のプレート",
+          "description": "",
+          "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "君主のグリーブ",
+          "description": "",
+          "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "即位の紋章",
+          "description": "",
+          "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "タイタン"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+      "mergeName": "鉄の賛辞",
+      "bodyBases": [
+        "鉄の賛辞"
+      ],
+      "classBases": [
+        "エフリディート"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "鉄の賛辞のカスク",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "鉄の賛辞のグリップ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "鉄の賛辞のベスト",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "鉄の賛辞のブーツ",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "エフリディートのマントル",
+          "description": "",
+          "source": "入手方法: アイアンバナーの対戦を完了、もしくはサラディン卿のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+      "mergeName": "絶滅に抗う",
+      "bodyBases": [
+        "絶滅に抗う",
+        "絶滅に抗うグラスプ",
+        "絶滅に抗うレッグ"
+      ],
+      "classBases": [
+        "未知の星"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "絶滅に抗うマスク",
+          "description": "",
+          "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "絶滅に抗うグラスプ",
+          "description": "",
+          "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "絶滅に抗うベスト",
+          "description": "",
+          "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "絶滅に抗うレッグ",
+          "description": "",
+          "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "未知の星のクローク",
+          "description": "",
+          "source": "入手方法: アラーハ・ジャラールのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+      "mergeName": "シミュレーター",
+      "bodyBases": [
+        "シミュレーター"
+      ],
+      "classBases": [
+        "絡み合い"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "シミュレーター・マスク",
+          "description": "",
+          "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "シミュレーター・グリップ",
+          "description": "",
+          "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "シミュレーター・ベスト",
+          "description": "",
+          "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "シミュレーター・ブーツ",
+          "description": "",
+          "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "絡み合いのクローク",
+          "description": "",
+          "source": "入手方法: ラクシュミ IIのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+      "mergeName": "浮遊",
+      "bodyBases": [
+        "浮遊"
+      ],
+      "classBases": [
+        "容赦なき"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "浮遊のフード",
+          "description": "",
+          "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "浮遊のグリップ",
+          "description": "",
+          "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "浮遊のベスト",
+          "description": "",
+          "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "浮遊のブーツ",
+          "description": "",
+          "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "容赦なきクローク",
+          "description": "",
+          "source": "入手方法: 試練の対戦を完了、もしくはナインの使者のランクアップのパッケージ",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    },
+    {
+      "class": "ハンター",
+      "season": 1,
+      "seasonName": "",
+      "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+      "mergeName": "君主",
+      "bodyBases": [
+        "君主"
+      ],
+      "classBases": [
+        "即位"
+      ],
+      "items": [
+        {
+          "slot": "head",
+          "slotLabel": "ヘルメット",
+          "name": "君主のマスク",
+          "description": "",
+          "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "arms",
+          "slotLabel": "腕",
+          "name": "君主のグリップ",
+          "description": "",
+          "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "chest",
+          "slotLabel": "胴",
+          "name": "君主のベスト",
+          "description": "",
+          "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "legs",
+          "slotLabel": "脚",
+          "name": "君主のブーツ",
+          "description": "",
+          "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        },
+        {
+          "slot": "class",
+          "slotLabel": "クラスアイテム",
+          "name": "即位のクローク",
+          "description": "",
+          "source": "入手方法: 遂行者ヒデオのランクアップのパッケージから",
+          "seasonNumber": 1,
+          "seasonName": "",
+          "tier": "レジェンダリー",
+          "class": "ハンター"
+        }
+      ]
+    }
+  ]
+}

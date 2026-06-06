@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260604-armor-class-family-detail";
+const DATA_VERSION = "20260606-armor-class-item-candidates";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
@@ -1154,6 +1154,7 @@ function stripArmorSlotSuffix(coreName) {
     "紋章",
     "ボンド",
     "マント",
+    "ケープ",
   ];
   const namedPieceSuffixes = [
     "Visor",
@@ -1195,11 +1196,16 @@ function stripArmorSlotSuffix(coreName) {
     "足跡",
     "拳",
     "ガード",
+    "サークレット",
+    "覆い",
   ];
   const undelimitedPieceSuffixes = [
     "オーバーコート",
     "チェストリグ",
     "ハーネス",
+    "サークレット",
+    "覆い",
+    "ケープ",
     "コート",
     "ハット",
   ];
@@ -1238,6 +1244,12 @@ function armorSetNameKey(value) {
     .normalize("NFKC")
     .replace(/[\s'’"“”・\-_:：/／]+/gu, "")
     .toLowerCase();
+}
+
+function isReadableArmorSetName(value) {
+  const key = armorSetNameKey(value);
+  if (!key) return false;
+  return key.length >= 3 || /[\u3040-\u30ff\u3400-\u9fff]/u.test(key);
 }
 
 function armorSetFamilyName(value) {
@@ -1595,13 +1607,20 @@ function armorReleaseHasConcreteSource(release = {}) {
   return !/ランダムパーク|random perks?|コレクションから再入手|cannot be reacquired/i.test(source);
 }
 
+function armorSetConcreteSourceRelease(group) {
+  return (group.items || [])
+    .map((item) => item.release || {})
+    .find(armorReleaseHasConcreteSource);
+}
+
 function armorSetSourceRelease(group) {
   const releases = (group.items || []).map((item) => item.release || {}).filter((release) => release.sourceHash || release.sourceString);
-  return releases.find(armorReleaseHasConcreteSource) || releases[0] || armorSetBestRelease(group.items);
+  return armorSetConcreteSourceRelease(group) || releases[0] || armorSetBestRelease(group.items);
 }
 
 function armorSetReleaseSourceKey(group) {
-  const release = armorSetSourceRelease(group);
+  const release = armorSetConcreteSourceRelease(group);
+  if (!release) return "";
   const source = release.sourceHash || release.sourceString || "";
   if (!source) return "";
   return [release.seasonNumber || "", release.releaseVersion || "", source].join("|");
@@ -1630,8 +1649,11 @@ function armorSetCommonNamePrefix(names) {
 }
 
 function armorSourceCollectionName(group) {
-  const release = armorSetSourceRelease(group);
-  const source = releaseSourceLabel({ release });
+  const release = armorSetConcreteSourceRelease(group) || armorSetSourceRelease(group);
+  const source = releaseSourceLabel({ release })
+    .replace(/で入手できる。?$/u, "")
+    .replace(/^このアイテムは.+$/u, "")
+    .trim();
   const season = releaseSeasonLabel({ release });
   const base = source || season || group.setName;
   return state.lang === "ja" ? `${base} 防具セット` : `${base} Armor Set`;
@@ -1643,8 +1665,20 @@ function armorMergedSourceSetName(entries, fallbackGroup) {
     .filter((group) => !armorSetGroupSlots(group).has("class"))
     .map((group) => group.setName);
   const prefix = armorSetCommonNamePrefix(nonClassNames);
-  if (prefix && armorSetNameKey(prefix).length >= 3) return prefix;
+  if (isReadableArmorSetName(prefix)) return prefix;
+  if (nonClassNames.length === 1 && isReadableArmorSetName(nonClassNames[0])) return nonClassNames[0];
   return armorSourceCollectionName(fallbackGroup);
+}
+
+function armorReadableSetNameFromItems(items = []) {
+  const bodyNames = items
+    .filter((item) => armorSlotId(item) && armorSlotId(item) !== "class")
+    .map((item) => armorSetName(item))
+    .filter(Boolean);
+  const uniqueNames = [...new Set(bodyNames)];
+  if (uniqueNames.length === 1 && isReadableArmorSetName(uniqueNames[0])) return uniqueNames[0];
+  const prefix = armorSetCommonNamePrefix(bodyNames);
+  return isReadableArmorSetName(prefix) ? prefix : "";
 }
 
 function mergeArmorSetGroup(target, source) {
@@ -1795,7 +1829,8 @@ function armorSetRows(rows = armorCatalogRows()) {
       const setFamily = armorSetFamilyName(setName) || setName;
       const familyKey = armorSetNameKey(setFamily) || setFamily;
       const tierKey = armorSetNameKey(row.tier || "tier");
-      const groupKey = [classId, tierKey, familyKey].join("|");
+      const seasonKey = row.release?.seasonNumber || row.release?.releaseVersion || "unknown";
+      const groupKey = [classId, tierKey, seasonKey, familyKey].join("|");
       if (!groups.has(groupKey)) {
         groups.set(groupKey, {
           classId,
@@ -1816,6 +1851,11 @@ function armorSetRows(rows = armorCatalogRows()) {
   mergeArmorSetClassItemGroups(groups);
   mergeReleaseSourceArmorSetGroups(groups);
   mergeLowTierArmorSetFragments(groups);
+  groups.forEach((group) => {
+    if (isLowTierArmorGroup(group)) return;
+    const readableName = armorReadableSetNameFromItems(group.items);
+    if (readableName) group.setName = readableName;
+  });
 
   return [...groups.entries()]
     .filter(([, group]) => shouldShowArmorSetGroup(group))
