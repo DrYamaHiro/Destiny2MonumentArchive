@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260607-weapon-versions-armor-tertiary";
+const DATA_VERSION = "20260607-balanced-armor-360-auto";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
@@ -115,6 +115,7 @@ const text = {
     armorGeneralMod: "一般Mod",
     armorFocusMod: "特化Mod",
     armorNoMod: "Modなし",
+    armorLowestThreeStats: "低い3ステータス",
     armorExotic: "エキゾチック防具",
     armorExoticSlot: "エキゾ枠",
     armorNoExotic: "未選択",
@@ -369,6 +370,7 @@ const text = {
     armorGeneralMod: "General Mod",
     armorFocusMod: "Focus Mod",
     armorNoMod: "No mod",
+    armorLowestThreeStats: "Lowest 3 stats",
     armorExotic: "Exotic Armor",
     armorExoticSlot: "Exotic slot",
     armorNoExotic: "Not selected",
@@ -2995,7 +2997,66 @@ function positiveArmorStatForPlug(plug) {
 
 function isBalancedArmorTuningPlug(plug) {
   const deltas = plug?.statDeltas || {};
-  return armorStatKeys.every((key) => Number(deltas[key] || 0) === 1);
+  const values = armorStatKeys.map((key) => Number(deltas[key] || 0));
+  const magnitude = values[0] || 0;
+  return magnitude > 0 && values.every((value) => value === magnitude);
+}
+
+function isArmorStatTradeoffPlug(plug) {
+  const entries = Object.entries(plug?.statDeltas || {})
+    .filter(([key, value]) => armorStatKeys.includes(key) && Number(value || 0) !== 0)
+    .map(([key, value]) => [key, Number(value || 0)]);
+  const positives = entries.filter(([, value]) => value > 0);
+  const negatives = entries.filter(([, value]) => value < 0);
+  return entries.length === 2
+    && positives.length === 1
+    && negatives.length === 1
+    && positives[0][1] === 5
+    && negatives[0][1] === -5;
+}
+
+function isNewArmorFocusPlug(plug) {
+  if (!/core\.gear_systems\.armor_tiering\.plugs\.tuning\.mods/i.test(plug?.identifier || "")) return false;
+  return isBalancedArmorTuningPlug(plug) || isArmorStatTradeoffPlug(plug);
+}
+
+function balancedArmorTuningMagnitude(plug) {
+  return isBalancedArmorTuningPlug(plug) ? Number(plug?.statDeltas?.[armorStatKeys[0]] || 0) : 0;
+}
+
+function lowestArmorStatKeys(stats, count = 3) {
+  return [...armorTertiaryStatOrder]
+    .sort((a, b) => Number(stats[a] || 0) - Number(stats[b] || 0) || armorTertiaryStatOrder.indexOf(a) - armorTertiaryStatOrder.indexOf(b))
+    .slice(0, count);
+}
+
+function balancedArmorTuningDeltas(stats, plug) {
+  const magnitude = balancedArmorTuningMagnitude(plug);
+  if (!magnitude) return {};
+  return Object.fromEntries(lowestArmorStatKeys(stats, 3).map((key) => [key, magnitude]));
+}
+
+function armorModDeltaSummary(plug) {
+  if (isBalancedArmorTuningPlug(plug)) {
+    return `${t("armorLowestThreeStats")} ${signedValue(balancedArmorTuningMagnitude(plug))}`;
+  }
+  const entries = Object.entries(plug?.statDeltas || {}).filter(([key, value]) => armorStatKeys.includes(key) && Number(value || 0) !== 0);
+  return entries.map(([key, value]) => `${statLabel(key, true)} ${signedValue(value)}`).join(" / ");
+}
+
+function armorModOptionLabel(plug) {
+  const summary = armorModDeltaSummary(plug);
+  return `${plug.name}${summary ? ` (${summary})` : ""}`;
+}
+
+function addArmorModStats(stats, plug) {
+  const deltas = isBalancedArmorTuningPlug(plug)
+    ? balancedArmorTuningDeltas(stats, plug)
+    : plug?.statDeltas || {};
+  Object.entries(deltas).forEach(([key, value]) => {
+    if (!armorStatKeys.includes(key)) return;
+    stats[key] += Number(value || 0);
+  });
 }
 
 function isArmorTuningAllowed(row, plug) {
@@ -3030,9 +3091,30 @@ function armorMasterworkDeltas(row, plug) {
   );
 }
 
+function armorRowStatsBeforeBalancedTuning(row, balancedPlug) {
+  const stats = {};
+  armorStatKeys.forEach((key) => { stats[key] = Number(row.stats?.[key] || 0); });
+  Object.entries(armorArchetypeDeltas(row)).forEach(([key, value]) => {
+    if (!armorStatKeys.includes(key)) return;
+    stats[key] += Number(value || 0);
+  });
+  selectedPlugsFor(row).forEach((plug) => {
+    if (!plug || Number(plug.hash) === Number(balancedPlug?.hash) || isBalancedArmorTuningPlug(plug)) return;
+    const deltas = armorMasterworkDeltas(row, plug) ?? plug.statDeltas ?? {};
+    Object.entries(deltas).forEach(([key, value]) => {
+      if (!armorStatKeys.includes(key)) return;
+      stats[key] += Number(value || 0);
+    });
+  });
+  return stats;
+}
+
 function applicableStatDeltas(row, plug) {
   if (armorArchetypeConfigForPlug(plug)) return {};
   if (!isArmorTuningAllowed(row, plug)) return {};
+  if (isArmorRow(row) && isBalancedArmorTuningPlug(plug)) {
+    return balancedArmorTuningDeltas(armorRowStatsBeforeBalancedTuning(row, plug), plug);
+  }
   const deltas = armorMasterworkDeltas(row, plug) ?? plug?.statDeltas ?? {};
   const allowed = new Set(Object.keys(row.stats || {}));
   if (isArmorRow(row)) {
@@ -3213,6 +3295,9 @@ function normalizeArmorPieceState(piece) {
   if (!options.includes(piece.tertiary)) {
     piece.tertiary = options[0] || "";
   }
+  if (piece.focusModHash && !isNewArmorFocusPlug(armorPlugOption(piece.focusModHash))) {
+    piece.focusModHash = "";
+  }
   return piece;
 }
 
@@ -3222,7 +3307,7 @@ function armorModOptions(kind) {
     const deltas = plug.statDeltas || {};
     if (!armorStatKeys.some((key) => Number(deltas[key] || 0) !== 0)) return false;
     if (kind === "general") return /enhancements\.v2_general/i.test(identifier);
-    if (kind === "focus") return /enhancements\.artifice|armor_tiering\.plugs\.tuning\.mods/i.test(identifier);
+    if (kind === "focus") return isNewArmorFocusPlug(plug);
     return false;
   });
   const seen = new Set();
@@ -3251,13 +3336,8 @@ function armorPieceStats(piece) {
   if (config.primary) stats[config.primary] += armorTier5Values.primary;
   if (config.secondary) stats[config.secondary] += armorTier5Values.secondary;
   if (piece.tertiary) stats[piece.tertiary] += armorTier5Values.tertiary;
-  [piece.generalModHash, piece.focusModHash].forEach((hash) => {
-    const plug = armorPlugOption(hash);
-    Object.entries(plug?.statDeltas || {}).forEach(([key, value]) => {
-      if (!armorStatKeys.includes(key)) return;
-      stats[key] += Number(value || 0);
-    });
-  });
+  addArmorModStats(stats, armorPlugOption(piece.generalModHash));
+  addArmorModStats(stats, armorPlugOption(piece.focusModHash));
   return stats;
 }
 
@@ -3927,13 +4007,13 @@ function renderArmorPieceCard(setKey, slot) {
         <label class="field">
           <span>${esc(t("armorGeneralMod"))}</span>
           <select data-armor-piece-general="${esc(slot.id)}">
-            ${selectOptions(generalMods, piece.generalModHash, t("armorNoMod"), "hash", (plug) => `${plug.name} ${Object.keys(plug.statDeltas || {}).length ? `(${Object.entries(plug.statDeltas || {}).map(([key, value]) => `${statLabel(key, true)} ${signedValue(value)}`).join(" / ")})` : ""}`)}
+            ${selectOptions(generalMods, piece.generalModHash, t("armorNoMod"), "hash", armorModOptionLabel)}
           </select>
         </label>
         <label class="field">
           <span>${esc(t("armorFocusMod"))}</span>
           <select data-armor-piece-focus="${esc(slot.id)}">
-            ${selectOptions(focusMods, piece.focusModHash, t("armorNoMod"), "hash", (plug) => `${plug.name} ${Object.keys(plug.statDeltas || {}).length ? `(${Object.entries(plug.statDeltas || {}).map(([key, value]) => `${statLabel(key, true)} ${signedValue(value)}`).join(" / ")})` : ""}`)}
+            ${selectOptions(focusMods, piece.focusModHash, t("armorNoMod"), "hash", armorModOptionLabel)}
           </select>
         </label>
       </div>
@@ -3973,13 +4053,13 @@ function renderArmorBulkControls(setKey) {
         <label class="field">
           <span>${esc(t("armorGeneralMod"))}</span>
           <select data-armor-bulk-general>
-            ${selectOptions(generalMods, bulk.generalModHash, t("armorNoMod"), "hash", (plug) => `${plug.name} ${Object.keys(plug.statDeltas || {}).length ? `(${Object.entries(plug.statDeltas || {}).map(([key, value]) => `${statLabel(key, true)} ${signedValue(value)}`).join(" / ")})` : ""}`)}
+            ${selectOptions(generalMods, bulk.generalModHash, t("armorNoMod"), "hash", armorModOptionLabel)}
           </select>
         </label>
         <label class="field">
           <span>${esc(t("armorFocusMod"))}</span>
           <select data-armor-bulk-focus>
-            ${selectOptions(focusMods, bulk.focusModHash, t("armorNoMod"), "hash", (plug) => `${plug.name} ${Object.keys(plug.statDeltas || {}).length ? `(${Object.entries(plug.statDeltas || {}).map(([key, value]) => `${statLabel(key, true)} ${signedValue(value)}`).join(" / ")})` : ""}`)}
+            ${selectOptions(focusMods, bulk.focusModHash, t("armorNoMod"), "hash", armorModOptionLabel)}
           </select>
         </label>
       </div>

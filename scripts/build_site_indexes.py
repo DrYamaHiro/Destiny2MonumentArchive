@@ -1514,6 +1514,10 @@ def reference_ttk_record(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def normalized_ttk_archetype(value: str) -> str:
+    return " ".join(re.findall(r"[a-z0-9]+", (value or "").lower()))
+
+
 def reference_ttk_by_archetype() -> dict[tuple[str, str, str], dict[str, Any]]:
     path = TTK_DIR / "weaponstat_community_reference.csv"
     if not path.exists():
@@ -1535,6 +1539,10 @@ def reference_ttk_by_archetype() -> dict[tuple[str, str, str], dict[str, Any]]:
             record = reference_ttk_record(row)
             output[(family, archetype, ammo_code)] = record
             output.setdefault((family, archetype, ""), record)
+            normalized_archetype = normalized_ttk_archetype(archetype)
+            if normalized_archetype:
+                output.setdefault((family, normalized_archetype, ammo_code), record)
+                output.setdefault((family, normalized_archetype, ""), record)
     return output
 
 
@@ -1594,7 +1602,13 @@ def ttk_for_weapon(
     family = TTK_FAMILY_BY_WEAPON_TYPE.get(weapon_type_id_for(row), "")
     if family and archetype:
         ammo_code = {1: "p", 2: "s", 3: "h"}.get(int(row.get("ammoType") or 0), "")
-        record = ttk_by_archetype.get((family, archetype, ammo_code)) or ttk_by_archetype.get((family, archetype, ""))
+        normalized_archetype = normalized_ttk_archetype(archetype)
+        record = (
+            ttk_by_archetype.get((family, archetype, ammo_code))
+            or ttk_by_archetype.get((family, archetype, ""))
+            or ttk_by_archetype.get((family, normalized_archetype, ammo_code))
+            or ttk_by_archetype.get((family, normalized_archetype, ""))
+        )
         if record:
             frame_record = dict(record)
             frame_record["sourceScope"] = "frame_baseline"
