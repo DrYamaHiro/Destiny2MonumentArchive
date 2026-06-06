@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260607-build-abilities-filtered";
+const DATA_VERSION = "20260607-weapon-versions-armor-tertiary";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
@@ -19,6 +19,7 @@ const state = {
   armorBulk: {},
   classBuildWeapons: {},
   classBuildAbilities: {},
+  weaponVariantSelections: {},
 };
 
 const taxonomy = [
@@ -175,6 +176,10 @@ const text = {
     weaponSimulation: "武器シミュレーション",
     armorSimulation: "防具シミュレーション",
     weaponLoadout: "武器構成",
+    weaponVersions: "別シーズン",
+    weaponVersionsSub: "同名武器",
+    latestWeaponVersion: "最新",
+    selectedWeaponVersion: "選択中",
     armorLoadout: "防具構成",
     kineticSlot: "キネティック枠",
     energySlot: "エネルギー枠",
@@ -425,6 +430,10 @@ const text = {
     weaponSimulation: "Weapon Simulation",
     armorSimulation: "Armor Simulation",
     weaponLoadout: "Weapon Loadout",
+    weaponVersions: "Other Seasons",
+    weaponVersionsSub: "Same-name weapons",
+    latestWeaponVersion: "Latest",
+    selectedWeaponVersion: "Selected",
     armorLoadout: "Armor Loadout",
     kineticSlot: "Kinetic Slot",
     energySlot: "Energy Slot",
@@ -618,6 +627,7 @@ const boundedStats = new Set([
 ]);
 
 const armorStatKeys = ["weaponStat", "health", "classAbility", "grenade", "super", "melee"];
+const armorTertiaryStatOrder = ["health", "melee", "grenade", "super", "classAbility", "weaponStat"];
 const armorTier5Values = { primary: 30, secondary: 25, tertiary: 20 };
 const armorArchetypeStats = {
   4227065942: { primary: "super", secondary: "melee" },
@@ -1529,6 +1539,55 @@ function weaponCatalogRows() {
     ? supportRows("equipment", "weapons")
     : catalog;
   return rows.filter((row) => (row.sections || []).includes("weapons") && !row.isBuildSimulator);
+}
+
+function weaponVariantGroupKey(row) {
+  const key = armorSetNameKey(row?.name || "");
+  return key || String(row?.name || row?.hash || "").normalize("NFKC").trim().toLowerCase();
+}
+
+function compareWeaponVariantLatest(a, b) {
+  return compareNumberDesc(a.release?.seasonNumber, b.release?.seasonNumber)
+    || compareText(b.release?.releaseVersion, a.release?.releaseVersion)
+    || compareText(a.name, b.name)
+    || Number(b.hash || 0) - Number(a.hash || 0);
+}
+
+function weaponVariantsFor(row, rows = weaponCatalogRows()) {
+  const key = weaponVariantGroupKey(row);
+  if (!key) return [];
+  return rows
+    .filter((candidate) => weaponVariantGroupKey(candidate) === key)
+    .sort(compareWeaponVariantLatest);
+}
+
+function selectedWeaponVariantForGroup(groupRows) {
+  const key = weaponVariantGroupKey(groupRows[0]);
+  const selectedHash = state.weaponVariantSelections[key];
+  if (selectedHash) {
+    const selected = weaponVariantsFor(groupRows[0]).find((row) => Number(row.hash) === Number(selectedHash));
+    if (selected) return selected;
+  }
+  return [...groupRows].sort(compareWeaponVariantLatest)[0] || groupRows[0];
+}
+
+function groupWeaponRows(rows) {
+  const groups = new Map();
+  const passthrough = [];
+  rows.forEach((row) => {
+    if (!isWeaponRow(row)) {
+      passthrough.push(row);
+      return;
+    }
+    const key = weaponVariantGroupKey(row);
+    if (!key) {
+      passthrough.push(row);
+      return;
+    }
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(row);
+  });
+  return [...groups.values()].map(selectedWeaponVariantForGroup).concat(passthrough);
 }
 
 function emblemCatalogRows() {
@@ -2704,7 +2763,11 @@ function sortRows(rows) {
 }
 
 function listRows() {
-  return sortRows(applyFilters(contextRows()));
+  const filtered = applyFilters(contextRows());
+  const rows = state.group === "equipment" && state.section === "weapons"
+    ? groupWeaponRows(filtered)
+    : filtered;
+  return sortRows(rows);
 }
 
 function renderColumnHead() {
@@ -2889,8 +2952,7 @@ function armorArchetypeSelection(row) {
 function armorTertiaryOptions(row) {
   const selection = armorArchetypeSelection(row);
   if (!selection) return [];
-  const fixed = new Set([selection.config.primary, selection.config.secondary]);
-  return armorStatKeys.filter((key) => !fixed.has(key));
+  return armorTertiaryStatOrder;
 }
 
 function selectedArmorTertiary(row) {
@@ -2913,7 +2975,7 @@ function armorArchetypeDeltas(row) {
   const deltas = armorArchetypeBaseDeltas(selection.plug);
   const tertiary = selectedArmorTertiary(row);
   if (tertiary) {
-    deltas[tertiary] = armorTier5Values.tertiary;
+    deltas[tertiary] = Number(deltas[tertiary] || 0) + armorTier5Values.tertiary;
   }
   return deltas;
 }
@@ -3143,9 +3205,7 @@ function armorArchetypeOptions() {
 }
 
 function armorTertiaryOptionsForArchetype(archetypeHash) {
-  const config = armorArchetypeStats[String(archetypeHash)] || {};
-  const fixed = new Set([config.primary, config.secondary]);
-  return armorStatKeys.filter((key) => !fixed.has(key));
+  return armorTertiaryStatOrder;
 }
 
 function normalizeArmorPieceState(piece) {
@@ -3591,6 +3651,50 @@ function renderServerRequired() {
         </div>
       </section>
     </div>
+  `;
+}
+
+function weaponVersionMeta(row) {
+  return [
+    weaponSystemLabel(row),
+    compactMetaLabel(row.ammo),
+    compactMetaLabel(row.damageType),
+    compactMetaLabel(row.weaponSlot),
+  ].filter(Boolean).join(" / ");
+}
+
+function renderWeaponVersionSwitcher(row) {
+  if (!isWeaponRow(row)) return "";
+  const variants = weaponVariantsFor(row);
+  if (variants.length <= 1) return "";
+  const latestHash = variants[0]?.hash;
+  return `
+    <section class="panel weapon-version-panel">
+      <div class="panel-heading-row">
+        <div>
+          <h3>${esc(t("weaponVersions"))}</h3>
+          <p>${esc(t("weaponVersionsSub"))}</p>
+        </div>
+      </div>
+      <div class="weapon-version-list">
+        ${variants.map((variant) => {
+          const isSelected = Number(variant.hash) === Number(row.hash);
+          const isLatest = Number(variant.hash) === Number(latestHash);
+          const season = releaseSeasonLabel(variant) || releaseSourceLabel(variant) || String(variant.release?.releaseVersion || variant.hash);
+          const meta = weaponVersionMeta(variant);
+          return `
+            <button class="weapon-version-chip${isSelected ? " is-selected" : ""}" type="button" data-weapon-version="${esc(variant.hash)}" aria-pressed="${esc(String(isSelected))}" title="${esc(releaseSummary(variant, false) || season)}">
+              <span class="weapon-version-season">${esc(season)}</span>
+              ${meta ? `<span class="weapon-version-meta">${esc(meta)}</span>` : ""}
+              <span class="weapon-version-flags">
+                ${isLatest ? `<span>${esc(t("latestWeaponVersion"))}</span>` : ""}
+                ${isSelected ? `<span>${esc(t("selectedWeaponVersion"))}</span>` : ""}
+              </span>
+            </button>
+          `;
+        }).join("")}
+      </div>
+    </section>
   `;
 }
 
@@ -4600,6 +4704,7 @@ function renderDetail(row) {
   const plugBuilder = isArmorRow(row) ? "" : renderPlugBuilder(row);
   const ttkPanel = renderTtk(row);
   const metadata = [...metadataRows(row, release, plugSets), ...ttkAudit];
+  const weaponVersionSwitcher = renderWeaponVersionSwitcher(row);
 
   els.detail.innerHTML = `
     <div class="detail-shell">
@@ -4616,6 +4721,8 @@ function renderDetail(row) {
           ${row.description ? `<p class="description">${esc(row.description)}</p>` : ""}
         </div>
       </div>
+
+      ${weaponVersionSwitcher}
 
       <div class="detail-workspace${ttkPanel ? "" : " detail-workspace--no-ttk"}">
         <div class="detail-main">
@@ -4652,6 +4759,16 @@ function renderDetail(row) {
       }
       delete state.openPlugSockets[key];
       renderDetail(row);
+    });
+  });
+  els.detail.querySelectorAll("[data-weapon-version]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const hash = Number(button.dataset.weaponVersion);
+      const variant = weaponCatalogRows().find((entry) => Number(entry.hash) === hash);
+      if (!variant) return;
+      state.weaponVariantSelections[weaponVariantGroupKey(variant)] = hash;
+      state.selectedHash = hash;
+      renderList();
     });
   });
   els.detail.querySelectorAll("[data-plug-toggle]").forEach((button) => {

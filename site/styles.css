@@ -836,6 +836,95 @@ h1 {
   letter-spacing: 0;
 }
 
+.panel-heading-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+}
+
+.panel-heading-row h3 {
+  margin-bottom: 4px;
+}
+
+.panel-heading-row p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.weapon-version-panel {
+  margin-top: 14px;
+}
+
+.weapon-version-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.weapon-version-chip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 8px;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  color: var(--body);
+  background: var(--panel-alt);
+  text-align: left;
+  cursor: pointer;
+}
+
+.weapon-version-chip:hover,
+.weapon-version-chip.is-selected {
+  border-color: var(--teal);
+  background: var(--teal-soft);
+}
+
+.weapon-version-season {
+  min-width: 0;
+  color: var(--strong);
+  font-size: 13px;
+  font-weight: 900;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.weapon-version-meta {
+  grid-column: 1 / -1;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.weapon-version-flags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 4px;
+}
+
+.weapon-version-flags span {
+  border: 1px solid var(--badge-line);
+  border-radius: 999px;
+  padding: 2px 6px;
+  color: var(--badge-ink);
+  background: var(--panel);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
