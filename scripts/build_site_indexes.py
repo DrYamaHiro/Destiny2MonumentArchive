@@ -185,6 +185,12 @@ PLUG_INCLUDE_TOKENS = (
     "launcher_tube",
 )
 
+SITE_GLOBAL_PLUG_IDENTIFIERS = (
+    "armor_archetypes",
+    "core.gear_systems.armor_tiering.plugs.tuning.mods",
+    "core.gear_systems.event_gear.item_sets.selectors",
+)
+
 PLUG_GROUP_LABELS = {
     "barrel": {"en": "Barrel / Sight", "ja": "バレル / サイト"},
     "magazine": {"en": "Magazine / Battery", "ja": "マガジン / バッテリー"},
@@ -842,6 +848,11 @@ def is_relevant_plug(plug: dict[str, Any]) -> bool:
         return True
     folded = plug_search_text(plug)
     return any(token in folded for token in PLUG_INCLUDE_TOKENS)
+
+
+def is_site_global_plug(plug: dict[str, Any]) -> bool:
+    identifier = (plug.get("identifier") or "").lower()
+    return any(token in identifier for token in SITE_GLOBAL_PLUG_IDENTIFIERS)
 
 
 def plug_group_kind(options: list[dict[str, Any]]) -> str:
@@ -1877,9 +1888,15 @@ def main() -> int:
         weapons = [row for row in catalog if "weapons" in row.get("sections", [])]
         armor = [row for row in catalog if "armor" in row.get("sections", [])]
         exotic_armor = [row for row in armor if row.get("tier") in {"Exotic", "エキゾチック"}]
+        plug_option_hashes = set(used_plug_hashes)
+        plug_option_hashes.update(
+            plug_hash
+            for plug_hash, plug in plugs_by_hash.items()
+            if is_site_global_plug(plug)
+        )
         plug_options = {
             str(plug_hash): plugs_by_hash[plug_hash]
-            for plug_hash in sorted(used_plug_hashes)
+            for plug_hash in sorted(plug_option_hashes)
             if plug_hash in plugs_by_hash
         }
 

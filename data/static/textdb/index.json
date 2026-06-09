@@ -9,33 +9,35 @@
     "DestinySandboxPerkDefinition",
     "DestinyPlugSetDefinition",
     "DestinyDamageTypeDefinition",
-    "DestinyClassDefinition"
+    "DestinyClassDefinition",
+    "DestinyCollectibleDefinition",
+    "DestinySeasonDefinition"
   ],
   "counts": {
     "en": {
-      "armor": 5474,
-      "catalogItems": 26819,
+      "armor": 6029,
+      "catalogItems": 30496,
       "exoticArmor": 348,
-      "plugSets": 4397,
-      "plugs": 12120,
-      "sandboxPerks": 3681,
-      "weapons": 1837
+      "plugSets": 5054,
+      "plugs": 14018,
+      "sandboxPerks": 3879,
+      "weapons": 2207
     },
     "ja": {
-      "armor": 5474,
-      "catalogItems": 26811,
+      "armor": 6029,
+      "catalogItems": 30488,
       "exoticArmor": 348,
-      "plugSets": 4397,
-      "plugs": 12120,
-      "sandboxPerks": 3681,
-      "weapons": 1837
+      "plugSets": 5054,
+      "plugs": 14018,
+      "sandboxPerks": 3879,
+      "weapons": 2207
     }
   },
   "languages": [
     "en",
     "ja"
   ],
-  "manifestVersion": "243523.26.04.28.2000-3-bnet.64859",
+  "manifestVersion": "244019.26.05.29.1640-4-bnet.65312",
   "metadataEndpoint": "https://www.bungie.net/Platform/Destiny2/Manifest/",
   "notes": [
     "Raw component JSON is cached under data/local_cache/manifest and should not be committed.",
@@ -72,5 +74,5 @@
       "weapons.ja.json"
     ]
   },
-  "syncedAt": "2026-05-25T10:36:17+00:00"
+  "syncedAt": "2026-06-09T17:32:36+00:00"
 }

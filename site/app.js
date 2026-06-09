@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260607-balanced-armor-360-auto";
+const DATA_VERSION = "20260610-mot-970-db";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
@@ -632,11 +632,17 @@ const armorStatKeys = ["weaponStat", "health", "classAbility", "grenade", "super
 const armorTertiaryStatOrder = ["health", "melee", "grenade", "super", "classAbility", "weaponStat"];
 const armorTier5Values = { primary: 30, secondary: 25, tertiary: 20 };
 const armorArchetypeStats = {
+  1418248448: { primary: "super", secondary: "health" },
   4227065942: { primary: "super", secondary: "melee" },
   549468645: { primary: "health", secondary: "classAbility" },
+  2503381935: { primary: "health", secondary: "grenade" },
+  1687144140: { primary: "melee", secondary: "weaponStat" },
   2937665788: { primary: "grenade", secondary: "super" },
+  2222960133: { primary: "grenade", secondary: "classAbility" },
   3349393475: { primary: "melee", secondary: "health" },
   1807652646: { primary: "weaponStat", secondary: "grenade" },
+  544009373: { primary: "weaponStat", secondary: "super" },
+  351770835: { primary: "classAbility", secondary: "melee" },
   2230428468: { primary: "classAbility", secondary: "weaponStat" },
 };
 
@@ -1100,6 +1106,23 @@ function releaseLabel(release = {}) {
     .join(" ");
 }
 
+function releaseVersionNumber(value = {}) {
+  const release = value.release || value;
+  const match = String(release.releaseVersion || "").match(/v(\d+)/i);
+  return match ? Number(match[1]) : 0;
+}
+
+function releaseSortNumber(value = {}) {
+  const release = value.release || value;
+  return releaseVersionNumber(release) || Number(release.seasonNumber || 0);
+}
+
+function compareReleaseDesc(a, b) {
+  return compareNumberDesc(releaseSortNumber(a), releaseSortNumber(b))
+    || compareNumberDesc(a?.release?.seasonNumber ?? a?.seasonNumber, b?.release?.seasonNumber ?? b?.seasonNumber)
+    || compareText(b?.release?.releaseVersion ?? b?.releaseVersion, a?.release?.releaseVersion ?? a?.releaseVersion);
+}
+
 function stableNegativeHash(value) {
   let hash = 2166136261;
   String(value || "").split("").forEach((char) => {
@@ -1549,8 +1572,7 @@ function weaponVariantGroupKey(row) {
 }
 
 function compareWeaponVariantLatest(a, b) {
-  return compareNumberDesc(a.release?.seasonNumber, b.release?.seasonNumber)
-    || compareText(b.release?.releaseVersion, a.release?.releaseVersion)
+  return compareReleaseDesc(a, b)
     || compareText(a.name, b.name)
     || Number(b.hash || 0) - Number(a.hash || 0);
 }
@@ -1634,13 +1656,13 @@ function armorSetItemsSorted(items) {
     })
     .sort((a, b) => {
       const slotDiff = armorPieceSlots.findIndex((slot) => slot.id === armorSlotId(a)) - armorPieceSlots.findIndex((slot) => slot.id === armorSlotId(b));
-      return slotDiff || compareNumberDesc(a.release?.seasonNumber, b.release?.seasonNumber) || compareText(a.name, b.name) || Number(a.hash || 0) - Number(b.hash || 0);
+      return slotDiff || compareReleaseDesc(a, b) || compareText(a.name, b.name) || Number(a.hash || 0) - Number(b.hash || 0);
     });
 }
 
 function armorSetBestRelease(items) {
   return [...items]
-    .sort((a, b) => compareNumberDesc(a.release?.seasonNumber, b.release?.seasonNumber) || compareText(b.release?.releaseVersion, a.release?.releaseVersion) || compareText(a.name, b.name))[0]?.release || {};
+    .sort((a, b) => compareReleaseDesc(a, b) || compareText(a.name, b.name))[0]?.release || {};
 }
 
 function armorSetItemsBySlot(row) {
@@ -2127,7 +2149,7 @@ function armorSetRows(rows = armorCatalogRows()) {
         search: `${name} ${group.setName} ${sourceNames} ${classLabel} ${classFilterLabels.join(" ")} ${tier} ${armorSlot} ${slotCount} ${variantCount} ${releaseLabel(release)} ${hasSetBonus ? t("armorSetBonus") : t("armorLegacyNoBuild")}`.toLowerCase(),
       };
     })
-    .sort((a, b) => compareText(a.armorSetName, b.armorSetName) || armorClassOrder.indexOf(a.armorSetClassId) - armorClassOrder.indexOf(b.armorSetClassId) || compareNumberAsc(a.release?.seasonNumber, b.release?.seasonNumber));
+    .sort((a, b) => compareText(a.armorSetName, b.armorSetName) || armorClassOrder.indexOf(a.armorSetClassId) - armorClassOrder.indexOf(b.armorSetClassId) || compareNumberAsc(releaseSortNumber(a), releaseSortNumber(b)));
 }
 
 function isBuildSimulatorRow(row) {
@@ -3061,10 +3083,7 @@ function addArmorModStats(stats, plug) {
 
 function isArmorTuningAllowed(row, plug) {
   if (!isArmorRow(row) || !isArmorTuningPlug(plug)) return true;
-  const deltas = plug?.statDeltas || {};
-  if (!Object.keys(deltas).length || isBalancedArmorTuningPlug(plug)) return true;
-  const tertiary = selectedArmorTertiary(row);
-  return Boolean(tertiary && positiveArmorStatForPlug(plug) === tertiary);
+  return true;
 }
 
 function clearInvalidArmorTuningSelection(row) {

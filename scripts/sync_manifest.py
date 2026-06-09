@@ -70,7 +70,7 @@ def load_env_file(path: Path) -> None:
             os.environ[key] = value
 
 
-def request_json(url: str, api_key: str | None = None, timeout: int = 60) -> Any:
+def request_json(url: str, api_key: str | None = None, timeout: int = 60, retries: int = 3) -> Any:
     headers = {
         "Accept": "application/json",
         "User-Agent": "D2MonumentArchiveLocalDev/0.1",
@@ -79,17 +79,25 @@ def request_json(url: str, api_key: str | None = None, timeout: int = 60) -> Any
         headers["X-API-Key"] = api_key
 
     req = Request(url, headers=headers)
-    try:
-        with urlopen(req, timeout=timeout) as response:
-            return json.loads(response.read().decode("utf-8"))
-    except HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"HTTP {exc.code} for {url}: {detail[:500]}") from exc
-    except URLError as exc:
-        raise RuntimeError(f"network error for {url}: {exc}") from exc
+    for attempt in range(retries + 1):
+        try:
+            with urlopen(req, timeout=timeout) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")
+            if exc.code >= 500 and attempt < retries:
+                time.sleep(5 * (attempt + 1))
+                continue
+            raise RuntimeError(f"HTTP {exc.code} for {url}: {detail[:500]}") from exc
+        except URLError as exc:
+            if attempt < retries:
+                time.sleep(5 * (attempt + 1))
+                continue
+            raise RuntimeError(f"network error for {url}: {exc}") from exc
+    raise RuntimeError(f"request failed after retries: {url}")
 
 
-def request_bytes(url: str, api_key: str | None = None, timeout: int = 180) -> bytes:
+def request_bytes(url: str, api_key: str | None = None, timeout: int = 180, retries: int = 3) -> bytes:
     headers = {
         "Accept": "application/json",
         "User-Agent": "D2MonumentArchiveLocalDev/0.1",
@@ -98,14 +106,22 @@ def request_bytes(url: str, api_key: str | None = None, timeout: int = 180) -> b
         headers["X-API-Key"] = api_key
 
     req = Request(url, headers=headers)
-    try:
-        with urlopen(req, timeout=timeout) as response:
-            return response.read()
-    except HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"HTTP {exc.code} for {url}: {detail[:500]}") from exc
-    except URLError as exc:
-        raise RuntimeError(f"network error for {url}: {exc}") from exc
+    for attempt in range(retries + 1):
+        try:
+            with urlopen(req, timeout=timeout) as response:
+                return response.read()
+        except HTTPError as exc:
+            detail = exc.read().decode("utf-8", errors="replace")
+            if exc.code >= 500 and attempt < retries:
+                time.sleep(5 * (attempt + 1))
+                continue
+            raise RuntimeError(f"HTTP {exc.code} for {url}: {detail[:500]}") from exc
+        except URLError as exc:
+            if attempt < retries:
+                time.sleep(5 * (attempt + 1))
+                continue
+            raise RuntimeError(f"network error for {url}: {exc}") from exc
+    raise RuntimeError(f"request failed after retries: {url}")
 
 
 def write_json(path: Path, payload: Any) -> None:

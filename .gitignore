@@ -9,6 +9,7 @@
 # Local/private runtime data
 data/private_raw/
 data/local_cache/
+data/static/textdb/catalog_items.*.json
 logs/
 tmp/
 *.log
