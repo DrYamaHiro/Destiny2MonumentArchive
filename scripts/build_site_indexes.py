@@ -284,6 +284,7 @@ FRAME_ARCHETYPE_TOKENS = (
     ("mida synergy", "MIDA Synergy"),
     ("midaシナジー", "MIDA Synergy"),
     ("legacy pr-55", "Legacy PR-55 Frame"),
+    ("レガシーpr-55", "Legacy PR-55 Frame"),
     ("rapid-fire", "Rapid Fire"),
     ("rapid fire", "Rapid Fire"),
     ("速射", "Rapid Fire"),
@@ -1486,14 +1487,16 @@ def reference_ttk_record(row: dict[str, Any]) -> dict[str, Any]:
     }
     body_forgiveness_count, body_forgiveness_pct = calculate_body_forgiveness(candidate)
     source_sheet = csv_value(row, "source_sheet") or csv_value(row, "source_workbook")
-    source_id = f"WeaponStat:{source_sheet}:{csv_value(row, 'source_row')}" if csv_value(row, "source_url") else f"DrYamaHiro:{source_sheet}:{csv_value(row, 'source_row')}"
+    source_url = csv_value(row, "source_url")
+    source_prefix = "Bungie" if "bungie.net" in source_url.lower() or "bungie" in source_sheet.lower() else "WeaponStat" if source_url else "DrYamaHiro"
+    source_id = f"{source_prefix}:{source_sheet}:{csv_value(row, 'source_row')}"
     archetype_label = f"{csv_value(row, 'weapon_family')} / {csv_value(row, 'archetype')}"
     edge_notes: list[str] = []
     if csv_value(row, "optimal_ttk_ms") == "0" or csv_value(row, "body_ttk_ms") == "0":
         edge_notes.append("0ms means same-trigger/one-shot potential; do not read it as sustained-fire cadence.")
     if csv_value(row, "weapon_family") in {"Shotgun", "Shotguns", "Fusion", "Fusion Rifles"}:
         edge_notes.append("Burst, bolt, or pellet behavior needs primary-source or in-game confirmation.")
-    source_label = "WeaponStat community reference" if csv_value(row, "source_url") else "DrYamaHiro secondary reference"
+    source_label = "Bungie official patch note" if source_prefix == "Bungie" else "WeaponStat community reference" if source_url else "DrYamaHiro secondary reference"
     note = csv_value(row, "note")
     conditions = f"{archetype_label}; HP {DEFAULT_PVP_TARGET_HP}; WP {DEFAULT_WEAPON_PARAMETER}; {source_label}."
     if note:
@@ -1530,30 +1533,34 @@ def normalized_ttk_archetype(value: str) -> str:
 
 
 def reference_ttk_by_archetype() -> dict[tuple[str, str, str], dict[str, Any]]:
-    path = TTK_DIR / "weaponstat_community_reference.csv"
-    if not path.exists():
-        path = TTK_DIR / "dr_yamahiro_wp_reference.csv"
-    if not path.exists():
+    paths = [
+        TTK_DIR / "dr_yamahiro_wp_reference.csv",
+        TTK_DIR / "weaponstat_community_reference.csv",
+        TTK_DIR / "bungie_official_pvp_overrides.csv",
+    ]
+    paths = [path for path in paths if path.exists()]
+    if not paths:
         return {}
     output: dict[tuple[str, str, str], dict[str, Any]] = {}
-    with path.open("r", encoding="utf-8-sig", newline="") as handle:
-        for row in csv.DictReader(handle):
-            if path.name == "dr_yamahiro_wp_reference.csv" and csv_value(row, "source_sheet") not in {"PrimaryWeapons", "SpecialWeapons"}:
-                continue
-            family = csv_value(row, "weapon_family")
-            archetype = csv_value(row, "archetype")
-            if not family or not archetype or archetype == "Archetype":
-                continue
-            if not csv_value(row, "crit_damage") and not csv_value(row, "body_damage"):
-                continue
-            ammo_code = csv_value(row, "ammo_code")
-            record = reference_ttk_record(row)
-            output[(family, archetype, ammo_code)] = record
-            output.setdefault((family, archetype, ""), record)
-            normalized_archetype = normalized_ttk_archetype(archetype)
-            if normalized_archetype:
-                output.setdefault((family, normalized_archetype, ammo_code), record)
-                output.setdefault((family, normalized_archetype, ""), record)
+    for path in paths:
+        with path.open("r", encoding="utf-8-sig", newline="") as handle:
+            for row in csv.DictReader(handle):
+                if path.name == "dr_yamahiro_wp_reference.csv" and csv_value(row, "source_sheet") not in {"PrimaryWeapons", "SpecialWeapons"}:
+                    continue
+                family = csv_value(row, "weapon_family")
+                archetype = csv_value(row, "archetype")
+                if not family or not archetype or archetype == "Archetype":
+                    continue
+                if not csv_value(row, "crit_damage") and not csv_value(row, "body_damage"):
+                    continue
+                ammo_code = csv_value(row, "ammo_code")
+                record = reference_ttk_record(row)
+                output[(family, archetype, ammo_code)] = record
+                output[(family, archetype, "")] = record
+                normalized_archetype = normalized_ttk_archetype(archetype)
+                if normalized_archetype:
+                    output[(family, normalized_archetype, ammo_code)] = record
+                    output[(family, normalized_archetype, "")] = record
     return output
 
 

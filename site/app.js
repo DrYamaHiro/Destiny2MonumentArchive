@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260610-mot-970-db";
+const DATA_VERSION = "20260610-bungie-970-pvp-damage";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
