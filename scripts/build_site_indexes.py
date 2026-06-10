@@ -754,6 +754,7 @@ def socket_plug_hashes(
     plug_sets: dict[int, list[dict[str, Any]]],
     *,
     include_non_rollable: bool = False,
+    include_non_rollable_randomized: bool = False,
 ) -> list[int]:
     hashes: list[int] = []
 
@@ -770,7 +771,7 @@ def socket_plug_hashes(
     randomized_set = socket.get("randomizedPlugSetHash")
     if randomized_set:
         for plug in plug_sets.get(int(randomized_set), []):
-            if plug.get("currentlyCanRoll") is False and not include_non_rollable:
+            if plug.get("currentlyCanRoll") is False and not include_non_rollable and not include_non_rollable_randomized:
                 continue
             add(plug.get("hash"))
 
@@ -1164,10 +1165,16 @@ def compact_socket_entries(
 ) -> list[dict[str, Any]]:
     groups: list[dict[str, Any]] = []
     is_subclass = is_subclass_catalog_row(row)
+    is_weapon = row.get("itemType") == 3
     for socket in row.get("socketEntries") or []:
         raw_options = [
             plugs_by_hash[plug_hash]
-            for plug_hash in socket_plug_hashes(socket, plug_sets, include_non_rollable=is_subclass)
+            for plug_hash in socket_plug_hashes(
+                socket,
+                plug_sets,
+                include_non_rollable=is_subclass,
+                include_non_rollable_randomized=is_weapon,
+            )
             if plug_hash in plugs_by_hash
         ]
         if is_subclass:

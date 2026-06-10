@@ -2489,14 +2489,44 @@ function abilityMatchesClass(row, classId, kind) {
   return true;
 }
 
+function fragmentBuildSlotIds() {
+  return buildAbilitySlots.filter((slot) => slot.id.startsWith("fragment")).map((slot) => slot.id);
+}
+
+function normalizeBuildAbilitySlots(entry) {
+  const seenFragments = new Set();
+  fragmentBuildSlotIds().forEach((slotId) => {
+    const hash = Number(entry.slots?.[slotId] || 0);
+    if (!hash) return;
+    if (seenFragments.has(hash)) {
+      entry.slots[slotId] = "";
+      return;
+    }
+    seenFragments.add(hash);
+  });
+}
+
+function filterDuplicateFragmentOptions(options, classId, slotId, kind) {
+  if (kind !== "fragment") return options;
+  const entry = classBuildAbilityState(classId);
+  const selectedElsewhere = new Set(
+    fragmentBuildSlotIds()
+      .filter((fragmentSlotId) => fragmentSlotId !== slotId)
+      .map((fragmentSlotId) => Number(entry.slots?.[fragmentSlotId] || 0))
+      .filter(Boolean)
+  );
+  if (!selectedElsewhere.size) return options;
+  return options.filter((option) => !selectedElsewhere.has(Number(option.hash)));
+}
+
 function buildAbilityOptions(classId, slotId, subclass) {
   const kind = slotId.startsWith("aspect") ? "aspect" : slotId.startsWith("fragment") ? "fragment" : slotId;
   const subclassOptions = subclassAbilityOptions(subclass, kind);
-  if (subclassOptions.length) return subclassOptions;
+  if (subclassOptions.length) return filterDuplicateFragmentOptions(subclassOptions, classId, slotId, kind);
   if (kind === "transcendence") return [];
   const element = subclassElementId(subclass);
   const seen = new Set();
-  return characterAbilityRows()
+  const options = characterAbilityRows()
     .filter((row) => abilityKind(row) === kind)
     .filter((row) => abilityMatchesClass(row, classId, kind))
     .filter((row) => {
@@ -2512,6 +2542,7 @@ function buildAbilityOptions(classId, slotId, subclass) {
       return true;
     })
     .sort((a, b) => compareText(abilityBaseType(a.type), abilityBaseType(b.type)) || compareText(a.name, b.name));
+  return filterDuplicateFragmentOptions(options, classId, slotId, kind);
 }
 
 function classBuildAbilityState(classId) {
@@ -2525,6 +2556,7 @@ function classBuildAbilityState(classId) {
     entry.subclassHash = subclasses[0]?.hash || "";
     entry.slots = {};
   }
+  normalizeBuildAbilitySlots(entry);
   return entry;
 }
 
@@ -4810,7 +4842,18 @@ function bindBuildSimulatorControls(row) {
     button.addEventListener("click", () => {
       const entry = classBuildAbilityState(classId);
       const slotId = button.dataset.buildAbilityOption;
-      entry.slots[slotId] = button.dataset.abilityHash ? Number(button.dataset.abilityHash) : "";
+      const abilityHash = button.dataset.abilityHash ? Number(button.dataset.abilityHash) : "";
+      if (abilityHash && slotId.startsWith("fragment")) {
+        fragmentBuildSlotIds()
+          .filter((fragmentSlotId) => fragmentSlotId !== slotId)
+          .forEach((fragmentSlotId) => {
+            if (Number(entry.slots?.[fragmentSlotId] || 0) === Number(abilityHash)) {
+              entry.slots[fragmentSlotId] = "";
+            }
+          });
+      }
+      entry.slots[slotId] = abilityHash;
+      normalizeBuildAbilitySlots(entry);
       delete state.openAbilitySlots[abilitySlotKey(classId, slotId)];
       renderDetail(row);
     });
