@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260610-perk-fragment-fix";
+const DATA_VERSION = "20260611-responsive-density";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
@@ -3897,6 +3897,7 @@ function renderResultRow(row) {
       <span>
         <span class="row-name">${esc(row.name)}</span>
         <span class="row-sub"><span class="row-sub-base">${esc(sub)}</span>${release}</span>
+        <span class="row-mobile-meta">${esc([row.sectionLabel || sectionLabel(row.primarySection), type, detail].filter(Boolean).join(" / ") || "-")}</span>
       </span>
       <span class="row-cell">${esc(row.sectionLabel || sectionLabel(row.primarySection))}</span>
       <span class="row-cell mobile-hide">${esc(type)}</span>
@@ -5090,7 +5091,7 @@ function renderDetail(row) {
   const weaponVersionSwitcher = renderWeaponVersionSwitcher(row);
 
   els.detail.innerHTML = `
-    <div class="detail-shell">
+    <div class="detail-shell${isWeaponRow(row) ? " weapon-detail-shell" : ""}">
       <div class="detail-hero">
         ${renderIcon(row, "detail-icon")}
         <div>
