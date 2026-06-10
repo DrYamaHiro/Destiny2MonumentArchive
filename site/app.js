@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260610-season-ability-icons";
+const DATA_VERSION = "20260610-perk-fragment-fix";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
