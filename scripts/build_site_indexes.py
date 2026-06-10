@@ -190,6 +190,7 @@ SITE_GLOBAL_PLUG_IDENTIFIERS = (
     "core.gear_systems.armor_tiering.plugs.tuning.mods",
     "core.gear_systems.event_gear.item_sets.selectors",
 )
+GLOBAL_WEAPON_MOD_CACHE: dict[tuple[int, str, bool], list[dict[str, Any]]] = {}
 
 PLUG_GROUP_LABELS = {
     "barrel": {"en": "Barrel / Sight", "ja": "バレル / サイト"},
@@ -201,6 +202,14 @@ PLUG_GROUP_LABELS = {
     "armor_tuning": {"en": "Armor Tuning", "ja": "防具チューニング"},
     "armor_archetype": {"en": "Armor Archetype", "ja": "防具アーキタイプ"},
     "set_bonus": {"en": "Set Bonus", "ja": "セットボーナス"},
+    "super": {"en": "Super", "ja": "スーパースキル"},
+    "grenade": {"en": "Grenade", "ja": "グレネード"},
+    "melee": {"en": "Melee", "ja": "近接"},
+    "class_ability": {"en": "Class Ability", "ja": "クラススキル"},
+    "movement": {"en": "Movement", "ja": "移動スキル"},
+    "transcendence": {"en": "Transcendence", "ja": "トランセンデンス"},
+    "aspect": {"en": "Aspect", "ja": "特性"},
+    "fragment": {"en": "Fragment", "ja": "かけら"},
     "intrinsic": {"en": "Intrinsic", "ja": "内在特性"},
     "socket": {"en": "Socket", "ja": "ソケット"},
 }
@@ -463,7 +472,8 @@ def read_json(path: Path) -> Any:
 
 def write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n")
 
 
 def reset_catalog_shards() -> None:
@@ -739,7 +749,12 @@ def load_plug_resources(lang: str) -> tuple[dict[int, dict[str, Any]], dict[int,
     return plugs_by_hash, plug_sets
 
 
-def socket_plug_hashes(socket: dict[str, Any], plug_sets: dict[int, list[dict[str, Any]]]) -> list[int]:
+def socket_plug_hashes(
+    socket: dict[str, Any],
+    plug_sets: dict[int, list[dict[str, Any]]],
+    *,
+    include_non_rollable: bool = False,
+) -> list[int]:
     hashes: list[int] = []
 
     def add(value: Any) -> None:
@@ -755,7 +770,7 @@ def socket_plug_hashes(socket: dict[str, Any], plug_sets: dict[int, list[dict[st
     randomized_set = socket.get("randomizedPlugSetHash")
     if randomized_set:
         for plug in plug_sets.get(int(randomized_set), []):
-            if plug.get("currentlyCanRoll") is False:
+            if plug.get("currentlyCanRoll") is False and not include_non_rollable:
                 continue
             add(plug.get("hash"))
 
@@ -766,7 +781,7 @@ def socket_plug_hashes(socket: dict[str, Any], plug_sets: dict[int, list[dict[st
     reusable_set = socket.get("reusablePlugSetHash")
     if reusable_set and not reusable_hashes:
         for plug in plug_sets.get(int(reusable_set), []):
-            if plug.get("currentlyCanRoll") is False:
+            if plug.get("currentlyCanRoll") is False and not include_non_rollable:
                 continue
             add(plug.get("hash"))
     return hashes
@@ -856,10 +871,64 @@ def is_site_global_plug(plug: dict[str, Any]) -> bool:
     return any(token in identifier for token in SITE_GLOBAL_PLUG_IDENTIFIERS)
 
 
+def is_subclass_catalog_row(row: dict[str, Any]) -> bool:
+    return 50 in set(row.get("itemCategoryHashes") or [])
+
+
+def is_subclass_socket_plug(plug: dict[str, Any]) -> bool:
+    identifier = (plug.get("identifier") or "").lower()
+    category = (plug.get("category") or "").lower()
+    folded = plug_search_text(plug)
+    return (
+        ".supers" in identifier
+        or ".melee" in identifier
+        or ".grenades" in identifier
+        or ".class_abilities" in identifier
+        or ".movement" in identifier
+        or ".transcendence" in identifier
+        or ".prism_grenade" in identifier
+        or ".aspects" in identifier
+        or ".fragments" in identifier
+        or ".totems" in identifier
+        or ".trinkets" in identifier
+        or "subclass" in category
+        or "サブクラス" in category
+        or any(token in folded for token in ("super", "grenade", "melee", "aspect", "fragment", "class ability", "movement ability", "transcendence"))
+        or any(token in folded for token in ("スーパースキル", "グレネード", "近接", "特性", "かけら", "クラススキル", "移動スキル", "トランセンデンス"))
+    )
+
+
+def is_empty_subclass_socket_plug(plug: dict[str, Any]) -> bool:
+    folded = plug_search_text(plug)
+    return "empty" in folded and "socket" in folded or "空の" in folded and "ソケット" in folded
+
+
 def plug_group_kind(options: list[dict[str, Any]]) -> str:
     folded = " ".join(plug_search_text(option) for option in options)
     identifiers = " ".join((option.get("identifier") or "").lower() for option in options)
     categories = " ".join((option.get("category") or "").lower() for option in options)
+    if ".supers" in identifiers:
+        return "super"
+    if ".grenades" in identifiers:
+        return "grenade"
+    if ".melee" in identifiers:
+        return "melee"
+    if ".class_abilities" in identifiers:
+        return "class_ability"
+    if ".movement" in identifiers:
+        return "movement"
+    if ".transcendence" in identifiers:
+        return "transcendence"
+    if ".prism_grenade" in identifiers:
+        return "grenade"
+    if ".aspects" in identifiers:
+        return "aspect"
+    if ".fragments" in identifiers:
+        return "fragment"
+    if ".totems" in identifiers:
+        return "aspect"
+    if ".trinkets" in identifiers:
+        return "fragment"
     if "item_sets.selectors" in identifiers or "item_sets" in identifiers or "set bonus" in folded or "セットボーナス" in folded:
         return "set_bonus"
     if "armor_archetypes" in folded:
@@ -954,6 +1023,24 @@ def weapon_mod_fits_row(row: dict[str, Any], option: dict[str, Any]) -> bool:
     if "mod_sword" in identifier and weapon_type_id != "sword":
         return False
     return True
+
+
+def global_weapon_mod_options(row: dict[str, Any], plugs_by_hash: dict[int, dict[str, Any]]) -> list[dict[str, Any]]:
+    cache_key = (id(plugs_by_hash), weapon_type_id_for(row), is_adept_weapon(row))
+    cached = GLOBAL_WEAPON_MOD_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+
+    options = sorted(
+        [
+            option
+            for option in plugs_by_hash.values()
+            if weapon_mod_fits_row(row, option)
+        ],
+        key=lambda option: (option.get("category") or "", option.get("name") or "", int(option.get("hash") or 0)),
+    )
+    GLOBAL_WEAPON_MOD_CACHE[cache_key] = options
+    return options
 
 
 def merged_options(options: list[dict[str, Any]], additions: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -1076,24 +1163,29 @@ def compact_socket_entries(
     used_plug_hashes: set[int],
 ) -> list[dict[str, Any]]:
     groups: list[dict[str, Any]] = []
+    is_subclass = is_subclass_catalog_row(row)
     for socket in row.get("socketEntries") or []:
         raw_options = [
             plugs_by_hash[plug_hash]
-            for plug_hash in socket_plug_hashes(socket, plug_sets)
+            for plug_hash in socket_plug_hashes(socket, plug_sets, include_non_rollable=is_subclass)
             if plug_hash in plugs_by_hash
         ]
-        options = [option for option in raw_options if is_relevant_plug(option) and not is_excluded_plug(option)]
+        if is_subclass:
+            options = [
+                option
+                for option in raw_options
+                if is_subclass_socket_plug(option)
+                and not is_empty_subclass_socket_plug(option)
+                and not is_excluded_plug(option)
+            ]
+        else:
+            options = [option for option in raw_options if is_relevant_plug(option) and not is_excluded_plug(option)]
         options = [option for option in options if option.get("name")]
         if len(options) < 1:
             continue
         kind = plug_group_kind(options)
         if row.get("itemType") == 3 and kind == "mod":
-            global_weapon_mods = [
-                option
-                for option in plugs_by_hash.values()
-                if weapon_mod_fits_row(row, option)
-            ]
-            options = merged_options(options, sorted(global_weapon_mods, key=lambda option: (option.get("category") or "", option.get("name") or "", int(option.get("hash") or 0))))
+            options = merged_options(options, global_weapon_mod_options(row, plugs_by_hash))
         options = filter_socket_options(row, options, kind)
         if len(options) < 1:
             continue
@@ -1151,6 +1243,7 @@ def classify(row: dict[str, Any]) -> dict[str, Any]:
 
     is_weapon = item_type == 3
     is_armor = item_type == 2
+    is_subclass = 50 in category_hashes
     if is_weapon:
         groups.add("equipment")
         sections.add("weapons")
@@ -1159,7 +1252,7 @@ def classify(row: dict[str, Any]) -> dict[str, Any]:
         sections.add("armor")
 
     class_ids = [class_id for hash_value, class_id in CLASS_CATEGORIES.items() if hash_value in category_hashes]
-    if 50 in category_hashes:
+    if is_subclass:
         if not class_ids:
             if contains_any(type_name, ("Hunter", "ハンター")):
                 class_ids.append("hunter")
@@ -1274,6 +1367,7 @@ def classify(row: dict[str, Any]) -> dict[str, Any]:
         "primarySection": ordered_sections[0] if ordered_sections else "other",
         "isWeapon": is_weapon,
         "isArmor": is_armor,
+        "isSubclass": is_subclass,
         "classIds": class_ids,
     }
 
@@ -1652,7 +1746,7 @@ def compact_catalog_item(
     classification = classify(row)
     plug_sockets = (
         compact_socket_entries(row, lang, plugs_by_hash, plug_sets, used_plug_hashes)
-        if classification["isWeapon"] or classification["isArmor"]
+        if classification["isWeapon"] or classification["isArmor"] or classification["isSubclass"]
         else []
     )
     weapon_type = first_label(row, set(WEAPON_TYPE_CATEGORIES), row.get("itemTypeDisplayName") or "")
@@ -1750,6 +1844,7 @@ def compact_catalog_item(
         "damageTypes": damage_types,
         "damageType": damage_type,
         "armorSlot": armor_slot if classification["isArmor"] else "",
+        **({"isSubclass": True} if classification["isSubclass"] else {}),
         "stats": stats,
         "rpm": stats.get("rpm"),
         "plugSetHashes": row.get("plugSetHashes") or [],

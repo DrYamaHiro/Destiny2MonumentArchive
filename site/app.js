@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260610-bungie-970-pvp-damage";
+const DATA_VERSION = "20260610-season-ability-icons";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
@@ -19,6 +19,7 @@ const state = {
   armorBulk: {},
   classBuildWeapons: {},
   classBuildAbilities: {},
+  openAbilitySlots: {},
   weaponVariantSelections: {},
 };
 
@@ -73,11 +74,13 @@ const text = {
     sortDamage: "属性",
     sortFrame: "フレーム",
     sortWeaponSystem: "世代",
+    sortReleaseSeason: "実装シーズン",
     filterWeaponType: "武器種",
     filterAmmo: "弾薬",
     filterDamage: "属性",
     filterWeaponSlot: "スロット",
     filterWeaponSystem: "武器世代",
+    filterReleaseSeason: "実装シーズン",
     filterClass: "クラス",
     filterArmorSlot: "防具部位",
     filterRarity: "レアリティ",
@@ -156,6 +159,7 @@ const text = {
     buildMelee: "近接",
     buildClassAbility: "クラススキル",
     buildMovement: "移動",
+    buildTranscendence: "トランセンデンス",
     buildAspect1: "特性 1",
     buildAspect2: "特性 2",
     buildFragment1: "かけら 1",
@@ -165,7 +169,7 @@ const text = {
     noAbilitySelected: "未選択",
     abilityIndex: "アビリティ一覧",
     abilityIndexSub: "サブクラス・特性・かけら・スキル",
-    abilityIndexDescription: "Manifestから取得できるサブクラス関連のアビリティ、特性、かけら、スーパースキル、近接、グレネード、クラススキル、移動スキルを一覧化します。",
+    abilityIndexDescription: "Manifestから取得できるサブクラス関連のアビリティ、特性、かけら、スーパースキル、近接、グレネード、クラススキル、移動スキル、トランセンデンスを一覧化します。",
     armorSet: "防具セット",
     armorSetReadOnly: "セット閲覧",
     armorSlotPending: "部位データ未照合",
@@ -328,11 +332,13 @@ const text = {
     sortDamage: "Damage",
     sortFrame: "Frame",
     sortWeaponSystem: "Generation",
+    sortReleaseSeason: "Release season",
     filterWeaponType: "Weapon type",
     filterAmmo: "Ammo",
     filterDamage: "Damage",
     filterWeaponSlot: "Slot",
     filterWeaponSystem: "Weapon generation",
+    filterReleaseSeason: "Release season",
     filterClass: "Class",
     filterArmorSlot: "Armor slot",
     filterRarity: "Rarity",
@@ -411,6 +417,7 @@ const text = {
     buildMelee: "Melee",
     buildClassAbility: "Class Ability",
     buildMovement: "Movement",
+    buildTranscendence: "Transcendence",
     buildAspect1: "Aspect 1",
     buildAspect2: "Aspect 2",
     buildFragment1: "Fragment 1",
@@ -420,7 +427,7 @@ const text = {
     noAbilitySelected: "None",
     abilityIndex: "Ability Index",
     abilityIndexSub: "Subclasses, aspects, fragments, and abilities",
-    abilityIndexDescription: "Lists subclass-related abilities, aspects, fragments, Supers, melees, grenades, class abilities, and movement abilities available from the manifest.",
+    abilityIndexDescription: "Lists subclass-related abilities, aspects, fragments, Supers, melees, grenades, class abilities, movement abilities, and Transcendence options available from the manifest.",
     armorSet: "Armor Set",
     armorSetReadOnly: "Set Browser",
     armorSlotPending: "Slot data pending",
@@ -910,12 +917,14 @@ const els = {
   filterTertiaryLabel: document.getElementById("filterTertiaryLabel"),
   filterQuaternaryLabel: document.getElementById("filterQuaternaryLabel"),
   filterQuinaryLabel: document.getElementById("filterQuinaryLabel"),
+  filterSenaryLabel: document.getElementById("filterSenaryLabel"),
   sortLabel: document.getElementById("sortLabel"),
   primaryFilter: document.getElementById("primaryFilter"),
   secondaryFilter: document.getElementById("secondaryFilter"),
   tertiaryFilter: document.getElementById("tertiaryFilter"),
   quaternaryFilter: document.getElementById("quaternaryFilter"),
   quinaryFilter: document.getElementById("quinaryFilter"),
+  senaryFilter: document.getElementById("senaryFilter"),
   sortSelect: document.getElementById("sortSelect"),
   resultStatus: document.getElementById("resultStatus"),
   activeFilterLabel: document.getElementById("activeFilterLabel"),
@@ -930,6 +939,7 @@ const filterControls = [
   { label: els.filterTertiaryLabel, select: els.tertiaryFilter },
   { label: els.filterQuaternaryLabel, select: els.quaternaryFilter },
   { label: els.filterQuinaryLabel, select: els.quinaryFilter },
+  { label: els.filterSenaryLabel, select: els.senaryFilter },
 ];
 
 function t(key) {
@@ -1084,6 +1094,11 @@ function releaseListLabel(row) {
   if (source && !/コレクションから再入手|Collections/i.test(source)) return source;
   if (releaseIcon(row)) return t("releaseInline");
   return "";
+}
+
+function releaseFilterLabel(row) {
+  const release = row?.release || {};
+  return releaseSeasonLabel(row) || (release.releaseVersion ? String(release.releaseVersion).toUpperCase() : "");
 }
 
 function renderReleaseInline(row) {
@@ -2218,7 +2233,123 @@ function isCharacterAbilityType(row) {
   return english.test(base) || japanese.test(base);
 }
 
+function abilityKindForSocket(socket) {
+  const kind = socket?.kind || "";
+  if (kind === "class_ability") return "classAbility";
+  if (["super", "grenade", "melee", "movement", "transcendence", "aspect", "fragment"].includes(kind)) return kind;
+  const value = `${socket?.label || ""} ${socket?.plugSetHash || ""}`.toLowerCase();
+  if (/super|スーパー/.test(value)) return "super";
+  if (/grenade|グレネード/.test(value)) return "grenade";
+  if (/melee|近接/.test(value)) return "melee";
+  if (/class ability|クラススキル/.test(value)) return "classAbility";
+  if (/movement|移動/.test(value)) return "movement";
+  if (/transcendence|トランセンデンス/.test(value)) return "transcendence";
+  if (/aspect|特性/.test(value)) return "aspect";
+  if (/fragment|かけら/.test(value)) return "fragment";
+  return "";
+}
+
+function abilityKindLabel(kind) {
+  return {
+    super: t("buildSuper"),
+    grenade: t("buildGrenade"),
+    melee: t("buildMelee"),
+    classAbility: t("buildClassAbility"),
+    movement: t("buildMovement"),
+    transcendence: t("buildTranscendence"),
+    aspect: state.lang === "ja" ? "特性" : "Aspect",
+    fragment: state.lang === "ja" ? "かけら" : "Fragment",
+  }[kind] || kind;
+}
+
+function isEmptyAbilityPlug(plug) {
+  const value = `${plug?.name || ""} ${plug?.type || ""} ${plug?.description || ""}`.toLowerCase();
+  return /empty .*socket|空の.*ソケット|未選択/.test(value);
+}
+
+function subclassAbilityOptions(subclass, kind) {
+  const seen = new Set();
+  return (subclass?.plugSockets || [])
+    .filter((socket) => abilityKindForSocket(socket) === kind)
+    .flatMap((socket) => plugOptionsFor(subclass, socket))
+    .filter((plug) => plug?.name && !isEmptyAbilityPlug(plug))
+    .filter((plug) => {
+      const key = String(plug.hash || plug.name);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => compareText(a.name, b.name));
+}
+
+function aggregateAbilityRowsFromSubclasses() {
+  const rows = new Map();
+  buildSimulatorClassOrder.forEach((classId) => {
+    buildSubclassRows(classId).forEach((subclass) => {
+      (subclass.plugSockets || []).forEach((socket) => {
+        const kind = abilityKindForSocket(socket);
+        if (!kind) return;
+        plugOptionsFor(subclass, socket)
+          .filter((plug) => plug?.name && !isEmptyAbilityPlug(plug))
+          .forEach((plug) => {
+            const key = String(plug.hash || "");
+            if (!key) return;
+            if (!rows.has(key)) {
+              rows.set(key, {
+                hash: plug.hash,
+                name: plug.name,
+                description: plug.description || "",
+                icon: plug.icon || "",
+                type: abilityKindLabel(kind),
+                bucket: "",
+                tier: "",
+                itemType: "ability",
+                groups: ["character"],
+                sections: ["abilities"],
+                primaryGroup: "character",
+                primarySection: "abilities",
+                sectionLabel: sectionLabel("abilities"),
+                classIds: [],
+                classFilterLabels: [],
+                categories: [t("abilityIndex"), abilityKindLabel(kind)],
+                sourceSubclasses: [],
+                abilityKinds: new Set(),
+                searchParts: new Set([plug.name, plug.description, plug.category, plug.identifier, abilityKindLabel(kind)]),
+              });
+            }
+            const row = rows.get(key);
+            if (!row.classIds.includes(classId)) row.classIds.push(classId);
+            const classLabel = classLabelForId(classId);
+            if (classLabel && !row.classFilterLabels.includes(classLabel)) row.classFilterLabels.push(classLabel);
+            row.abilityKinds.add(kind);
+            if (subclass.name && !row.sourceSubclasses.includes(subclass.name)) row.sourceSubclasses.push(subclass.name);
+            row.searchParts.add(subclass.name);
+            row.searchParts.add(subclass.type);
+            row.searchParts.add(subclass.class);
+            row.searchParts.add(releaseFilterLabel(subclass));
+            if (!row.release || releaseSortNumber(subclass) > releaseSortNumber(row)) row.release = subclass.release || {};
+          });
+      });
+    });
+  });
+  return [...rows.values()].map((row) => {
+    row.abilityKind = row.abilityKinds.size === 1 ? [...row.abilityKinds][0] : "";
+    row.class = classLabelsForIds(row.classIds);
+    row.bucket = row.sourceSubclasses.slice(0, 3).join(" / ");
+    row.tier = row.sourceSubclasses.length > 3 ? `+${row.sourceSubclasses.length - 3}` : "";
+    row.categories = [...row.categories, row.class, ...row.sourceSubclasses].filter(Boolean);
+    row.search = [...row.searchParts].filter(Boolean).join(" ").toLowerCase();
+    delete row.abilityKinds;
+    delete row.searchParts;
+    return row;
+  });
+}
+
 function characterAbilityRows() {
+  const subclassRows = aggregateAbilityRowsFromSubclasses();
+  if (subclassRows.length) {
+    return subclassRows.sort((a, b) => compareText(a.type, b.type) || compareText(a.class, b.class) || compareText(a.name, b.name));
+  }
   const seen = new Set();
   return [...supportRows("mods", "perks"), ...supportRows("mods", "traits")]
     .filter(isCharacterAbilityType)
@@ -2248,6 +2379,7 @@ const buildAbilitySlots = [
   { id: "melee", labelKey: "buildMelee" },
   { id: "classAbility", labelKey: "buildClassAbility" },
   { id: "movement", labelKey: "buildMovement" },
+  { id: "transcendence", labelKey: "buildTranscendence", optional: true },
   { id: "aspect1", labelKey: "buildAspect1" },
   { id: "aspect2", labelKey: "buildAspect2" },
   { id: "fragment1", labelKey: "buildFragment1" },
@@ -2295,6 +2427,7 @@ function subclassElementId(row) {
 }
 
 function abilityKind(row) {
+  if (row?.abilityKind) return row.abilityKind;
   const type = abilityBaseType(row.type);
   if (/アスペクト|Aspect/i.test(type) || /^(アーク|ソーラー|ボイド|ステイシス|ストランド)特性/u.test(type) || /^(Arc|Solar|Void|Stasis|Strand) (Trait|Aspect)$/i.test(type)) return "aspect";
   if (/かけら|Fragment/i.test(type)) return "fragment";
@@ -2303,6 +2436,7 @@ function abilityKind(row) {
   if (/スーパー|Super/i.test(type)) return "super";
   if (/クラススキル|Class Ability/i.test(type)) return "classAbility";
   if (/移動|Movement/i.test(type)) return "movement";
+  if (/トランセンデンス|Transcendence/i.test(type)) return "transcendence";
   return "";
 }
 
@@ -2357,6 +2491,9 @@ function abilityMatchesClass(row, classId, kind) {
 
 function buildAbilityOptions(classId, slotId, subclass) {
   const kind = slotId.startsWith("aspect") ? "aspect" : slotId.startsWith("fragment") ? "fragment" : slotId;
+  const subclassOptions = subclassAbilityOptions(subclass, kind);
+  if (subclassOptions.length) return subclassOptions;
+  if (kind === "transcendence") return [];
   const element = subclassElementId(subclass);
   const seen = new Set();
   return characterAbilityRows()
@@ -2400,7 +2537,7 @@ function selectedBuildAbility(classId, slotId) {
   const entry = classBuildAbilityState(classId);
   const hash = entry.slots?.[slotId];
   if (!hash) return null;
-  return characterAbilityRows().find((row) => Number(row.hash) === Number(hash)) || null;
+  return buildAbilityOptions(classId, slotId, selectedBuildSubclass(classId)).find((row) => Number(row.hash) === Number(hash)) || null;
 }
 
 function contextRows() {
@@ -2415,6 +2552,7 @@ function valueFor(row, key) {
   if (key === "section") return row.sectionLabel || sectionLabel(row.primarySection);
   if (key === "group") return groupLabel(row.primaryGroup);
   if (key === "weaponSystem") return weaponSystemLabel(row);
+  if (key === "releaseSeason") return releaseFilterLabel(row);
   return row[key] || "";
 }
 
@@ -2429,6 +2567,17 @@ function distinct(rows, key) {
     const ordered = weaponGenerationOrder.map((generation) => t("weaponSystemLabels")[generation]).filter(Boolean);
     return ordered.filter((value) => rows.some((row) => valueFor(row, key) === value));
   }
+  if (key === "releaseSeason") {
+    const values = new Map();
+    rows.forEach((row) => {
+      const value = releaseFilterLabel(row);
+      if (!value || values.has(value)) return;
+      values.set(value, releaseSortNumber(row));
+    });
+    return [...values.entries()]
+      .sort((a, b) => compareNumberDesc(a[1], b[1]) || compareText(a[0], b[0]))
+      .map(([value]) => value);
+  }
   return [...new Set(rows.flatMap((row) => filterValuesFor(row, key)).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b)));
 }
 
@@ -2440,6 +2589,7 @@ function filterDefinitions() {
       ["damageType", t("filterDamage")],
       ["weaponSlot", t("filterWeaponSlot")],
       ["weaponSystem", t("filterWeaponSystem")],
+      ["releaseSeason", t("filterReleaseSeason")],
     ];
   }
   if (state.section === "armor" || (state.group !== "character" && ["hunter", "warlock", "titan"].includes(state.section))) {
@@ -2448,6 +2598,7 @@ function filterDefinitions() {
       ["armorSlot", t("filterArmorSlot")],
       ["tier", t("filterRarity")],
       ["type", t("type")],
+      ["releaseSeason", t("filterReleaseSeason")],
     ];
   }
   if (state.group === "character") {
@@ -2456,6 +2607,7 @@ function filterDefinitions() {
       ["class", t("filterClass")],
       ["bucket", t("filterBucket")],
       ["tier", t("filterRarity")],
+      ["releaseSeason", t("filterReleaseSeason")],
     ];
   }
   return [
@@ -2463,6 +2615,7 @@ function filterDefinitions() {
     ["type", t("type")],
     ["bucket", t("filterBucket")],
     ["tier", t("filterRarity")],
+    ["releaseSeason", t("filterReleaseSeason")],
   ];
 }
 
@@ -2481,6 +2634,7 @@ function sortOptions() {
       ["damageType", t("sortDamage")],
       ["weaponFrame", t("sortFrame")],
       ["weaponSystem", t("sortWeaponSystem")],
+      ["releaseSeason", t("sortReleaseSeason")],
       ["rpm", t("sortRpm")],
       ["range", t("sortRange")],
       ["impact", t("sortImpact")],
@@ -2492,10 +2646,11 @@ function sortOptions() {
       ["class", t("filterClass")],
       ["armorSlot", t("filterArmorSlot")],
       ["tier", t("filterRarity")],
+      ["releaseSeason", t("sortReleaseSeason")],
       ["type", t("sortType")],
     ];
   }
-  return base;
+  return [...base, ["releaseSeason", t("sortReleaseSeason")]];
 }
 
 function setLanguage(lang) {
@@ -2777,6 +2932,9 @@ function sortRows(rows) {
     }
     if (sort === "weaponSystem") {
       return weaponSystemRank(a) - weaponSystemRank(b) || compareText(a.weaponType, b.weaponType) || fallback;
+    }
+    if (sort === "releaseSeason") {
+      return compareReleaseDesc(a, b) || fallback;
     }
     if (["section", "type", "class", "armorSlot", "tier"].includes(sort)) {
       return compareText(valueFor(a, sort), valueFor(b, sort)) || fallback;
@@ -4409,20 +4567,76 @@ function renderBuildWeaponsPanel(row) {
   `;
 }
 
+function abilitySlotKey(classId, slotId) {
+  return `${classId}:${slotId}`;
+}
+
+function abilitySlotOpen(classId, slotId) {
+  return Boolean(state.openAbilitySlots[abilitySlotKey(classId, slotId)]);
+}
+
+function renderAbilityChoiceIcon(option, className = "build-ability-icon") {
+  return renderPlugIcon(option, className, " ");
+}
+
+function renderBuildSubclassSelector(classId, subclasses, selectedHash) {
+  const selected = subclasses.find((option) => Number(option.hash) === Number(selectedHash)) || subclasses[0] || null;
+  const isOpen = abilitySlotOpen(classId, "subclass");
+  return `
+    <div class="field build-ability-field build-ability-field--subclass">
+      <span>${esc(t("buildSubclass"))}</span>
+      <button class="build-ability-toggle" type="button" data-build-subclass-toggle aria-expanded="${esc(String(isOpen))}">
+        ${selected ? renderIcon(selected, "build-ability-icon") : `<span class="build-ability-icon placeholder-icon"></span>`}
+        <span class="build-ability-toggle-copy">
+          <strong>${esc(selected?.name || t("noAbilitySelected"))}</strong>
+          <span>${esc(selected ? [selected.class, releaseFilterLabel(selected)].filter(Boolean).join(" / ") : t("noAbilitySelected"))}</span>
+        </span>
+      </button>
+      ${isOpen ? `
+        <div class="build-ability-option-grid">
+          ${subclasses.map((option) => `
+            <button class="build-ability-option${Number(option.hash) === Number(selected?.hash) ? " is-selected" : ""}" type="button" data-build-subclass-option="${esc(option.hash)}" title="${esc(option.name)}" aria-pressed="${esc(String(Number(option.hash) === Number(selected?.hash)))}">
+              ${renderIcon(option, "build-ability-option-icon")}
+              <span>${esc(option.name)}</span>
+            </button>
+          `).join("")}
+        </div>
+      ` : ""}
+    </div>
+  `;
+}
+
 function renderBuildAbilitySelector(classId, slot, subclass) {
   const entry = classBuildAbilityState(classId);
   const options = buildAbilityOptions(classId, slot.id, subclass);
   const selected = entry.slots?.[slot.id] || "";
+  const selectedOption = options.find((option) => Number(option.hash) === Number(selected)) || null;
+  const isOpen = abilitySlotOpen(classId, slot.id);
   return `
-    <label class="field build-ability-field">
+    <div class="field build-ability-field">
       <span>${esc(t(slot.labelKey))}</span>
-      <select data-build-ability-slot="${esc(slot.id)}">
-        <option value="">${esc(t("noAbilitySelected"))}</option>
-        ${options
-          .map((option) => `<option value="${esc(option.hash)}"${Number(selected) === Number(option.hash) ? " selected" : ""}>${esc(option.name)}</option>`)
-          .join("")}
-      </select>
-    </label>
+      <button class="build-ability-toggle" type="button" data-build-ability-toggle="${esc(slot.id)}" aria-expanded="${esc(String(isOpen))}">
+        ${selectedOption ? renderAbilityChoiceIcon(selectedOption) : `<span class="build-ability-icon placeholder-icon"></span>`}
+        <span class="build-ability-toggle-copy">
+          <strong>${esc(selectedOption?.name || t("noAbilitySelected"))}</strong>
+          <span>${esc(options.length ? `${number(options.length)} ${t("results")}` : t("noPlugOptions"))}</span>
+        </span>
+      </button>
+      ${isOpen ? `
+        <div class="build-ability-option-grid">
+          <button class="build-ability-option build-ability-option--clear${selected ? "" : " is-selected"}" type="button" data-build-ability-option="${esc(slot.id)}" data-ability-hash="" aria-pressed="${esc(String(!selected))}">
+            <span class="build-ability-option-icon placeholder-icon"></span>
+            <span>${esc(t("noAbilitySelected"))}</span>
+          </button>
+          ${options.map((option) => `
+            <button class="build-ability-option${Number(selected) === Number(option.hash) ? " is-selected" : ""}" type="button" data-build-ability-option="${esc(slot.id)}" data-ability-hash="${esc(option.hash)}" title="${esc(option.name)}" aria-pressed="${esc(String(Number(selected) === Number(option.hash)))}">
+              ${renderAbilityChoiceIcon(option, "build-ability-option-icon")}
+              <span>${esc(option.name)}</span>
+            </button>
+          `).join("")}
+        </div>
+      ` : ""}
+    </div>
   `;
 }
 
@@ -4431,24 +4645,18 @@ function renderBuildAbilityPanel(row) {
   const entry = classBuildAbilityState(classId);
   const subclasses = buildSubclassRows(classId);
   const subclass = selectedBuildSubclass(classId);
+  const visibleAbilitySlots = buildAbilitySlots.filter((slot) => !slot.optional || buildAbilityOptions(classId, slot.id, subclass).length);
   const selectedRows = [
     subclass,
-    ...buildAbilitySlots.map((slot) => selectedBuildAbility(classId, slot.id)),
+    ...visibleAbilitySlots.map((slot) => selectedBuildAbility(classId, slot.id)),
   ].filter(Boolean);
   return `
     <section class="panel build-sim-panel build-skill-panel">
       <h3>${esc(t("buildSkillConfig"))}</h3>
       ${renderBuildClassSwitcher(classId)}
       <div class="build-skill-grid">
-        <label class="field build-ability-field build-ability-field--subclass">
-          <span>${esc(t("buildSubclass"))}</span>
-          <select data-build-subclass>
-            ${subclasses
-              .map((option) => `<option value="${esc(option.hash)}"${Number(entry.subclassHash) === Number(option.hash) ? " selected" : ""}>${esc(option.name)}</option>`)
-              .join("")}
-          </select>
-        </label>
-        ${buildAbilitySlots.map((slot) => renderBuildAbilitySelector(classId, slot, subclass)).join("")}
+        ${renderBuildSubclassSelector(classId, subclasses, entry.subclassHash)}
+        ${visibleAbilitySlots.map((slot) => renderBuildAbilitySelector(classId, slot, subclass)).join("")}
       </div>
       ${selectedRows.length ? `<div class="build-skill-summary">${selectedRows.map((selected) => `<span class="badge">${esc(selected.name)}</span>`).join("")}</div>` : ""}
     </section>
@@ -4576,6 +4784,37 @@ function bindBuildSimulatorControls(row) {
       renderList();
     });
   });
+  els.detail.querySelector("[data-build-subclass-toggle]")?.addEventListener("click", () => {
+    const key = abilitySlotKey(classId, "subclass");
+    state.openAbilitySlots[key] = !state.openAbilitySlots[key];
+    renderDetail(row);
+  });
+  els.detail.querySelectorAll("[data-build-subclass-option]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const entry = classBuildAbilityState(classId);
+      entry.subclassHash = button.dataset.buildSubclassOption ? Number(button.dataset.buildSubclassOption) : "";
+      entry.slots = {};
+      delete state.openAbilitySlots[abilitySlotKey(classId, "subclass")];
+      renderDetail(row);
+    });
+  });
+  els.detail.querySelectorAll("[data-build-ability-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const slotId = button.dataset.buildAbilityToggle;
+      const key = abilitySlotKey(classId, slotId);
+      state.openAbilitySlots[key] = !state.openAbilitySlots[key];
+      renderDetail(row);
+    });
+  });
+  els.detail.querySelectorAll("[data-build-ability-option]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const entry = classBuildAbilityState(classId);
+      const slotId = button.dataset.buildAbilityOption;
+      entry.slots[slotId] = button.dataset.abilityHash ? Number(button.dataset.abilityHash) : "";
+      delete state.openAbilitySlots[abilitySlotKey(classId, slotId)];
+      renderDetail(row);
+    });
+  });
   els.detail.querySelector("[data-build-subclass]")?.addEventListener("change", (event) => {
     const entry = classBuildAbilityState(classId);
     entry.subclassHash = event.target.value ? Number(event.target.value) : "";
@@ -4607,6 +4846,7 @@ function renderAbilityDetail(row) {
     [t("category"), `${groupLabel(row.primaryGroup)} / ${row.sectionLabel || sectionLabel(row.primarySection)}`],
     [t("type"), row.type],
     [t("class"), row.class],
+    [t("buildSubclass"), row.sourceSubclasses],
     [t("bucket"), row.bucket],
     [t("rarity"), row.tier],
   ];
@@ -4630,6 +4870,7 @@ function renderAbilityDetail(row) {
         ${renderKv([
           [t("type"), row.type],
           [t("class"), row.class],
+          [t("buildSubclass"), row.sourceSubclasses],
           [t("category"), row.categories],
         ])}
       </section>
