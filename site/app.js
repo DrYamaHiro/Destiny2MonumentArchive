@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260611-responsive-density";
+const DATA_VERSION = "20260611-stat-pvp-balance";
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
