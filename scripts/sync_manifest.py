@@ -302,6 +302,7 @@ def compact_item_base(
         "name": shown["name"],
         "description": shown["description"],
         "icon": shown["icon"],
+        "isHolofoil": bool(item.get("isHolofoil")),
         "iconWatermark": item.get("iconWatermark") or "",
         "iconWatermarkShelved": item.get("iconWatermarkShelved") or "",
         "displayVersionWatermarkIcons": item.get("displayVersionWatermarkIcons") or [],

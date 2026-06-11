@@ -58,6 +58,22 @@ RELEASE_SEASON_BY_VERSION = {
     "v950": 29,
 }
 
+FINAL_RELEASE_VERSIONS = {"v950", "v960", "v970"}
+FINAL_RELEASE_LABELS = {
+    "en": "Monument of Triumph",
+    "ja": "勝利の記念碑",
+}
+SEASON_NAME_OVERRIDES = {
+    "en": {
+        27: "Episode: Reclamation",
+        28: "Episode: Renegades",
+    },
+    "ja": {
+        27: "エピソード：奪還",
+        28: "エピソード：反逆",
+    },
+}
+
 YEAR1_RELEASE_VERSION_MAX = 320
 DEEPSIGHT_SOCKET_TYPE_HASH = 1085237186
 ENHANCEMENT_SOCKET_TYPE_HASH = 4251072212
@@ -525,7 +541,7 @@ def load_season_names(lang: str) -> dict[int, str]:
     return output
 
 
-def release_trait_info(item: dict[str, Any], season_names: dict[int, str]) -> dict[str, Any]:
+def release_trait_info(item: dict[str, Any], season_names: dict[int, str], lang: str) -> dict[str, Any]:
     trait_ids = [str(trait_id) for trait_id in item.get("traitIds") or []]
     release_trait = next((trait_id for trait_id in trait_ids if trait_id.startswith("releases.")), "")
     version = ""
@@ -535,11 +551,23 @@ def release_trait_info(item: dict[str, Any], season_names: dict[int, str]) -> di
         if match:
             version = match.group(1)
             season_number = RELEASE_SEASON_BY_VERSION.get(version)
+    if version in FINAL_RELEASE_VERSIONS:
+        season_number = None
+        season_name = FINAL_RELEASE_LABELS.get(lang, FINAL_RELEASE_LABELS["en"])
+    elif season_number:
+        season_name = (
+            SEASON_NAME_OVERRIDES.get(lang, {}).get(int(season_number))
+            or SEASON_NAME_OVERRIDES["en"].get(int(season_number))
+            or season_names.get(int(season_number))
+            or ""
+        )
+    else:
+        season_name = ""
     return {
         "releaseTraitId": release_trait,
         "releaseVersion": version,
         "seasonNumber": season_number,
-        "seasonName": season_names.get(int(season_number)) if season_number else "",
+        "seasonName": season_name,
     }
 
 
@@ -559,7 +587,7 @@ def load_release_lookup(lang: str) -> dict[int, dict[str, Any]]:
         collectible = collectibles.get(str(collectible_hash)) if collectible_hash else {}
         source_string = (collectible or {}).get("sourceString") or item.get("displaySource") or ""
         source_hash = (collectible or {}).get("sourceHash") or ""
-        release_trait = release_trait_info(item, season_names)
+        release_trait = release_trait_info(item, season_names, lang)
         if (
             not icon_watermark
             and not icon_watermark_shelved
@@ -1814,6 +1842,7 @@ def compact_catalog_item(
         "name": row.get("name") or "",
         "description": clean_text(row.get("description")),
         "icon": icon_url(row.get("icon")),
+        "isHolofoil": bool(row.get("isHolofoil")),
         "type": row.get("itemTypeDisplayName") or section_label,
         "bucket": row.get("bucketName") or "",
         "tier": row.get("tierTypeName") or "",

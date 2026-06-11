@@ -1,5 +1,22 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260611-stat-pvp-balance";
+const DATA_VERSION = "20260611-release-normalization";
+
+const finalReleaseVersions = new Set(["v950", "v960", "v970"]);
+const finalReleaseSeasonNumbers = new Set([29]);
+const finalReleaseLabels = {
+  ja: "勝利の記念碑",
+  en: "Monument of Triumph",
+};
+const seasonNameOverrides = {
+  ja: {
+    27: "エピソード：奪還",
+    28: "エピソード：反逆",
+  },
+  en: {
+    27: "Episode: Reclamation",
+    28: "Episode: Renegades",
+  },
+};
 
 const state = {
   lang: localStorage.getItem("d2ma-lang") || "ja",
@@ -181,10 +198,12 @@ const text = {
     weaponSimulation: "武器シミュレーション",
     armorSimulation: "防具シミュレーション",
     weaponLoadout: "武器構成",
-    weaponVersions: "別シーズン",
-    weaponVersionsSub: "同名武器",
+    weaponVersions: "別バージョン",
+    weaponVersionsSub: "同名武器 / ホロフォイル候補",
     latestWeaponVersion: "最新",
     selectedWeaponVersion: "選択中",
+    holofoilVersion: "ホロフォイル",
+    holofoilCandidate: "ホロフォイル候補",
     armorLoadout: "防具構成",
     kineticSlot: "キネティック枠",
     energySlot: "エネルギー枠",
@@ -439,10 +458,12 @@ const text = {
     weaponSimulation: "Weapon Simulation",
     armorSimulation: "Armor Simulation",
     weaponLoadout: "Weapon Loadout",
-    weaponVersions: "Other Seasons",
-    weaponVersionsSub: "Same-name weapons",
+    weaponVersions: "Versions",
+    weaponVersionsSub: "Same-name weapons / holofoil candidates",
     latestWeaponVersion: "Latest",
     selectedWeaponVersion: "Selected",
+    holofoilVersion: "Holofoil",
+    holofoilCandidate: "Holofoil candidate",
     armorLoadout: "Armor Loadout",
     kineticSlot: "Kinetic Slot",
     energySlot: "Energy Slot",
@@ -1069,8 +1090,30 @@ function releaseIcon(row) {
   return release.watermarkIcon || release.watermarkShelvedIcon || release.versionWatermarkIcons?.[0] || "";
 }
 
+function releaseVersionKey(release = {}) {
+  return String(release.releaseVersion || "").trim().toLowerCase();
+}
+
+function isFinalRelease(release = {}) {
+  return finalReleaseVersions.has(releaseVersionKey(release))
+    || finalReleaseSeasonNumbers.has(Number(release.seasonNumber || 0));
+}
+
+function finalReleaseLabel() {
+  return finalReleaseLabels[state.lang] || finalReleaseLabels.en;
+}
+
+function seasonNameOverride(seasonNumber) {
+  return seasonNameOverrides[state.lang]?.[Number(seasonNumber)]
+    || seasonNameOverrides.en?.[Number(seasonNumber)]
+    || "";
+}
+
 function releaseSeasonLabel(row) {
   const release = row.release || {};
+  if (isFinalRelease(release)) return finalReleaseLabel();
+  const override = seasonNameOverride(release.seasonNumber);
+  if (release.seasonNumber && override) return `S${release.seasonNumber} ${override}`;
   if (release.seasonNumber && release.seasonName) return `S${release.seasonNumber} ${release.seasonName}`;
   if (release.seasonNumber) return `S${release.seasonNumber}`;
   return release.releaseVersion ? release.releaseVersion.toUpperCase() : "";
@@ -1099,6 +1142,38 @@ function releaseListLabel(row) {
 function releaseFilterLabel(row) {
   const release = row?.release || {};
   return releaseSeasonLabel(row) || (release.releaseVersion ? String(release.releaseVersion).toUpperCase() : "");
+}
+
+function releaseIdentityKey(row) {
+  const release = row?.release || {};
+  if (isFinalRelease(release)) return "final";
+  if (release.seasonNumber) return `s${release.seasonNumber}`;
+  return releaseVersionKey(release) || "unknown";
+}
+
+function releaseSearchText(row) {
+  const release = row?.release || {};
+  const override = seasonNameOverride(release.seasonNumber);
+  const finalRelease = isFinalRelease(release);
+  return [
+    releaseSeasonLabel(row),
+    releaseFilterLabel(row),
+    release.releaseVersion,
+    !override && !finalRelease ? release.seasonName : "",
+    override,
+    finalRelease ? finalReleaseLabel() : "",
+  ].filter(Boolean).join(" ").toLowerCase();
+}
+
+function normalizedRowSearchText(row) {
+  let search = String(row?.search || "").toLowerCase();
+  const release = row?.release || {};
+  if (!isFinalRelease(release) && seasonNameOverride(release.seasonNumber)) {
+    Object.values(finalReleaseLabels).forEach((label) => {
+      search = search.replaceAll(String(label).toLowerCase(), "");
+    });
+  }
+  return `${search} ${releaseSearchText(row)}`;
 }
 
 function renderReleaseInline(row) {
@@ -2603,8 +2678,8 @@ function distinct(rows, key) {
     const values = new Map();
     rows.forEach((row) => {
       const value = releaseFilterLabel(row);
-      if (!value || values.has(value)) return;
-      values.set(value, releaseSortNumber(row));
+      if (!value) return;
+      values.set(value, Math.max(values.get(value) || 0, releaseSortNumber(row)));
     });
     return [...values.entries()]
       .sort((a, b) => compareNumberDesc(a[1], b[1]) || compareText(a[0], b[0]))
@@ -2863,7 +2938,7 @@ function updateControls() {
 function applyFilters(rows) {
   const query = els.searchInput.value.trim().toLowerCase();
   return rows
-    .filter((row) => !query || row.search.includes(query) || String(row.hash).includes(query))
+    .filter((row) => !query || normalizedRowSearchText(row).includes(query) || String(row.hash).includes(query))
     .filter((row) => filterControls.every(({ select }) => {
       const key = select.dataset.key;
       if (!key || !select.value) return true;
@@ -3953,6 +4028,16 @@ function weaponVersionMeta(row) {
   ].filter(Boolean).join(" / ");
 }
 
+function weaponHolofoilCandidateLabel(row, variants) {
+  if (row.isHolofoil) return t("holofoilVersion");
+  const sameRelease = variants
+    .filter((variant) => releaseIdentityKey(variant) === releaseIdentityKey(row))
+    .sort(compareWeaponVariantLatest);
+  if (sameRelease.length <= 1) return "";
+  const index = sameRelease.findIndex((variant) => Number(variant.hash) === Number(row.hash));
+  return `${t("holofoilCandidate")} ${Math.max(1, index + 1)}/${sameRelease.length}`;
+}
+
 function renderWeaponVersionSwitcher(row) {
   if (!isWeaponRow(row)) return "";
   const variants = weaponVariantsFor(row);
@@ -3972,11 +4057,13 @@ function renderWeaponVersionSwitcher(row) {
           const isLatest = Number(variant.hash) === Number(latestHash);
           const season = releaseSeasonLabel(variant) || releaseSourceLabel(variant) || String(variant.release?.releaseVersion || variant.hash);
           const meta = weaponVersionMeta(variant);
+          const holofoilCandidate = weaponHolofoilCandidateLabel(variant, variants);
           return `
             <button class="weapon-version-chip${isSelected ? " is-selected" : ""}" type="button" data-weapon-version="${esc(variant.hash)}" aria-pressed="${esc(String(isSelected))}" title="${esc(releaseSummary(variant, false) || season)}">
               <span class="weapon-version-season">${esc(season)}</span>
               ${meta ? `<span class="weapon-version-meta">${esc(meta)}</span>` : ""}
               <span class="weapon-version-flags">
+                ${holofoilCandidate ? `<span>${esc(holofoilCandidate)}</span>` : ""}
                 ${isLatest ? `<span>${esc(t("latestWeaponVersion"))}</span>` : ""}
                 ${isSelected ? `<span>${esc(t("selectedWeaponVersion"))}</span>` : ""}
               </span>
