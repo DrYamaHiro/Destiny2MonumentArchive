@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260611-release-normalization";
+const DATA_VERSION = "20260611-release-panel";
 
 const finalReleaseVersions = new Set(["v950", "v960", "v970"]);
 const finalReleaseSeasonNumbers = new Set([29]);
@@ -200,6 +200,8 @@ const text = {
     weaponLoadout: "武器構成",
     weaponVersions: "別バージョン",
     weaponVersionsSub: "同名武器 / ホロフォイル候補",
+    weaponReleasePanel: "登場シーズン",
+    weaponReleasePanelSub: "この武器が追加された時期",
     latestWeaponVersion: "最新",
     selectedWeaponVersion: "選択中",
     holofoilVersion: "ホロフォイル",
@@ -460,6 +462,8 @@ const text = {
     weaponLoadout: "Weapon Loadout",
     weaponVersions: "Versions",
     weaponVersionsSub: "Same-name weapons / holofoil candidates",
+    weaponReleasePanel: "Release Season",
+    weaponReleasePanelSub: "When this weapon entered the game",
     latestWeaponVersion: "Latest",
     selectedWeaponVersion: "Selected",
     holofoilVersion: "Holofoil",
@@ -4041,30 +4045,31 @@ function weaponHolofoilCandidateLabel(row, variants) {
 function renderWeaponVersionSwitcher(row) {
   if (!isWeaponRow(row)) return "";
   const variants = weaponVariantsFor(row);
-  if (variants.length <= 1) return "";
+  const hasAlternates = variants.length > 1;
+  const panelRows = variants.length ? variants : [row];
   const latestHash = variants[0]?.hash;
   return `
     <section class="panel weapon-version-panel">
       <div class="panel-heading-row">
         <div>
-          <h3>${esc(t("weaponVersions"))}</h3>
-          <p>${esc(t("weaponVersionsSub"))}</p>
+          <h3>${esc(hasAlternates ? t("weaponVersions") : t("weaponReleasePanel"))}</h3>
+          <p>${esc(hasAlternates ? t("weaponVersionsSub") : t("weaponReleasePanelSub"))}</p>
         </div>
       </div>
       <div class="weapon-version-list">
-        ${variants.map((variant) => {
+        ${panelRows.map((variant) => {
           const isSelected = Number(variant.hash) === Number(row.hash);
           const isLatest = Number(variant.hash) === Number(latestHash);
           const season = releaseSeasonLabel(variant) || releaseSourceLabel(variant) || String(variant.release?.releaseVersion || variant.hash);
           const meta = weaponVersionMeta(variant);
-          const holofoilCandidate = weaponHolofoilCandidateLabel(variant, variants);
+          const holofoilCandidate = hasAlternates ? weaponHolofoilCandidateLabel(variant, variants) : "";
           return `
             <button class="weapon-version-chip${isSelected ? " is-selected" : ""}" type="button" data-weapon-version="${esc(variant.hash)}" aria-pressed="${esc(String(isSelected))}" title="${esc(releaseSummary(variant, false) || season)}">
               <span class="weapon-version-season">${esc(season)}</span>
               ${meta ? `<span class="weapon-version-meta">${esc(meta)}</span>` : ""}
               <span class="weapon-version-flags">
                 ${holofoilCandidate ? `<span>${esc(holofoilCandidate)}</span>` : ""}
-                ${isLatest ? `<span>${esc(t("latestWeaponVersion"))}</span>` : ""}
+                ${hasAlternates && isLatest ? `<span>${esc(t("latestWeaponVersion"))}</span>` : ""}
                 ${isSelected ? `<span>${esc(t("selectedWeaponVersion"))}</span>` : ""}
               </span>
             </button>
