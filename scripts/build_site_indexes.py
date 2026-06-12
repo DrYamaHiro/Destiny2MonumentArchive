@@ -81,22 +81,22 @@ WEAPON_TIERING_SOCKET_TYPE_HASHES = {939327520, 1680508191, 2433793611}
 
 WEAPON_GENERATION_LABELS = {
     "en": {
-        "year1_fixed": "Fixed roll",
+        "year1_fixed": "Early weapon",
         "year2_random": "Random roll",
         "craftable": "Craftable",
         "enhanceable": "Enhanceable",
         "new_tiered": "New / tiered",
-        "fixed_exotic": "Exotic / fixed roll",
-        "fixed_legacy": "Legacy fixed roll",
+        "fixed_exotic": "Exotic",
+        "fixed_legacy": "Ritual / rare etc.",
     },
     "ja": {
-        "year1_fixed": "固定パーク",
-        "year2_random": "ランダムパーク",
+        "year1_fixed": "初期仕様",
+        "year2_random": "ランダムロール",
         "craftable": "クラフト武器",
         "enhanceable": "強化武器",
         "new_tiered": "新武器 / Tier付き",
-        "fixed_exotic": "エキゾチック / 固定パーク",
-        "fixed_legacy": "固定ロール / 儀式・レア等",
+        "fixed_exotic": "エキゾチック",
+        "fixed_legacy": "儀式・レア等",
     },
 }
 

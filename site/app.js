@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260612-close-perk-choices";
+const DATA_VERSION = "20260613-roll-labels";
 
 const finalReleaseVersions = new Set(["v950", "v960", "v970"]);
 const finalReleaseSeasonNumbers = new Set([29]);
@@ -222,13 +222,13 @@ const text = {
     weaponFrame: "フレーム",
     weaponArchetype: "アーキタイプ",
     weaponSystemLabels: {
-      year1_fixed: "固定パーク",
-      year2_random: "ランダムパーク",
+      year1_fixed: "初期仕様",
+      year2_random: "ランダムロール",
       craftable: "クラフト武器",
       enhanceable: "強化武器",
       new_tiered: "新武器 / Tier付き",
-      fixed_exotic: "エキゾチック / 固定パーク",
-      fixed_legacy: "固定ロール / 儀式・レア等",
+      fixed_exotic: "エキゾチック",
+      fixed_legacy: "儀式・レア等",
       new: "新武器 / Tier付き",
       legacy: "旧武器",
     },
@@ -484,13 +484,13 @@ const text = {
     weaponFrame: "Frame",
     weaponArchetype: "Archetype",
     weaponSystemLabels: {
-      year1_fixed: "Fixed roll",
+      year1_fixed: "Early weapon",
       year2_random: "Random roll",
       craftable: "Craftable",
       enhanceable: "Enhanceable",
       new_tiered: "New / tiered",
-      fixed_exotic: "Exotic / fixed roll",
-      fixed_legacy: "Legacy fixed roll",
+      fixed_exotic: "Exotic",
+      fixed_legacy: "Ritual / rare etc.",
       new: "New / tiered",
       legacy: "Legacy",
     },
