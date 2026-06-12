@@ -2996,6 +2996,30 @@ h1 {
     font-size: 8px;
   }
 
+  .weapon-detail-shell .plug-field {
+    position: relative;
+  }
+
+  .weapon-detail-shell .plug-field.is-open {
+    z-index: 25;
+  }
+
+  .weapon-detail-shell .plug-field.is-open .plug-option-grid {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    z-index: 30;
+    max-height: min(52vh, 420px);
+    overflow: auto;
+    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.2);
+  }
+
+  .weapon-detail-shell .plug-field.is-open-up .plug-option-grid {
+    top: auto;
+    bottom: calc(100% + 5px);
+  }
+
   .plug-toggle-action {
     display: none;
   }

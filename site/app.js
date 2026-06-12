@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260612-mobile-perk-scroll";
+const DATA_VERSION = "20260612-close-perk-choices";
 
 const finalReleaseVersions = new Set(["v950", "v960", "v970"]);
 const finalReleaseSeasonNumbers = new Set([29]);
@@ -30,6 +30,7 @@ const state = {
   manualArmor: {},
   armorTertiary: {},
   openPlugSockets: {},
+  openPlugDirections: {},
   armorSetPieces: {},
   armorSetExotics: {},
   armorSetBonuses: {},
@@ -3781,17 +3782,19 @@ function renderSocketSelectors(row, sockets) {
     <div class="plug-grid">
       ${sockets
         .map((socket) => {
-          const selectedHash = state.selectedPlugs[selectionKey(row, socket)] || "";
+          const key = selectionKey(row, socket);
+          const selectedHash = state.selectedPlugs[key] || "";
           const options = plugOptionsFor(row, socket);
           if (!options.length) return "";
           const isOpen = plugFieldOpen(row, socket);
+          const directionClass = isOpen && state.openPlugDirections[key] === "up" ? " is-open-up" : "";
           const summary = selectedPlugSummary(row, socket, options);
           const toggleLabel = isOpen ? t("closeChoices") : t("openChoices");
           const tertiarySelector = socket.kind === "armor_archetype" ? renderArmorTertiarySelector(row) : "";
           const fixedOnly = options.length === 1;
           const fixedHash = fixedOnly ? options[0].hash : "";
           return `
-            <div class="plug-field${isOpen ? " is-open" : ""}">
+            <div class="plug-field${isOpen ? " is-open" : ""}${directionClass}">
               <button class="plug-toggle" type="button" data-plug-toggle data-socket-index="${esc(socket.index)}" aria-expanded="${esc(String(isOpen))}">
                 ${summary.plug ? renderPlugIcon(summary.plug, "plug-toggle-icon") : `<span class="plug-toggle-icon plug-toggle-icon--empty">OFF</span>`}
                 <span class="plug-toggle-main">
@@ -3947,12 +3950,62 @@ function renderList() {
   renderDetail(visible.find((row) => row.hash === state.selectedHash));
 }
 
-function captureDetailViewport() {
-  return {
+function selectorAttr(value) {
+  return String(value ?? "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function plugToggleSelector(socketIndex, scopeSelector = "") {
+  return `${scopeSelector}[data-plug-toggle][data-socket-index="${selectorAttr(socketIndex)}"]`;
+}
+
+function plugMenuDirection(button) {
+  const top = button?.getBoundingClientRect?.().top || 0;
+  return top > (window.innerHeight || 720) * 0.55 ? "up" : "down";
+}
+
+function setPlugSocketOpen(key, open, button) {
+  if (open) {
+    state.openPlugSockets[key] = true;
+    state.openPlugDirections[key] = plugMenuDirection(button);
+  } else {
+    delete state.openPlugSockets[key];
+    delete state.openPlugDirections[key];
+  }
+}
+
+function captureDetailViewport(anchorSelector = "") {
+  const snapshot = {
     windowX: window.scrollX || 0,
     windowY: window.scrollY || 0,
     detailScrollTop: els.detail?.scrollTop || 0,
   };
+  const anchor = anchorSelector ? els.detail?.querySelector(anchorSelector) : null;
+  if (anchor) {
+    const rect = anchor.getBoundingClientRect();
+    const minTop = 80;
+    const maxTop = Math.max(minTop, (window.innerHeight || 720) - 160);
+    snapshot.anchor = {
+      selector: anchorSelector,
+      top: Math.min(Math.max(rect.top, minTop), maxTop),
+    };
+  }
+  return snapshot;
+}
+
+function restoreDetailAnchor(snapshot) {
+  if (!snapshot?.anchor) return;
+  const anchor = els.detail?.querySelector(snapshot.anchor.selector);
+  if (!anchor) return;
+  const adjust = () => anchor.getBoundingClientRect().top - snapshot.anchor.top;
+  let delta = adjust();
+  if (Math.abs(delta) <= 0.5) return;
+  if (els.detail && els.detail.scrollHeight > els.detail.clientHeight + 1) {
+    els.detail.scrollTop += delta;
+    delta = adjust();
+  }
+  if (Math.abs(delta) > 0.5) {
+    window.scrollBy(0, delta);
+  }
 }
 
 function restoreDetailViewport(snapshot) {
@@ -3960,6 +4013,7 @@ function restoreDetailViewport(snapshot) {
   const restore = () => {
     if (els.detail) els.detail.scrollTop = snapshot.detailScrollTop;
     window.scrollTo(snapshot.windowX, snapshot.windowY);
+    restoreDetailAnchor(snapshot);
   };
   requestAnimationFrame(() => {
     restore();
@@ -3970,6 +4024,12 @@ function restoreDetailViewport(snapshot) {
 
 function rerenderDetailPreservingViewport(row) {
   const snapshot = captureDetailViewport();
+  renderDetail(row);
+  restoreDetailViewport(snapshot);
+}
+
+function rerenderDetailPreservingAnchor(row, anchorSelector) {
+  const snapshot = captureDetailViewport(anchorSelector);
   renderDetail(row);
   restoreDetailViewport(snapshot);
 }
@@ -4909,8 +4969,10 @@ function bindBuildWeaponPlugControls(buildRow) {
       } else {
         delete state.selectedPlugs[key];
       }
-      state.openPlugSockets[key] = true;
-      rerenderDetailPreservingViewport(buildRow);
+      delete state.openPlugSockets[key];
+      delete state.openPlugDirections[key];
+      const scopeSelector = `[data-build-weapon-card][data-build-weapon-hash="${selectorAttr(card?.dataset.buildWeaponHash)}"] `;
+      rerenderDetailPreservingAnchor(buildRow, plugToggleSelector(socket.index, scopeSelector));
     });
   });
   els.detail.querySelectorAll("[data-build-weapon-card] [data-plug-toggle]").forEach((button) => {
@@ -4920,7 +4982,7 @@ function bindBuildWeaponPlugControls(buildRow) {
       const socket = (weapon?.plugSockets || []).find((entry) => String(entry.index) === String(button.dataset.socketIndex));
       if (!weapon || !socket) return;
       const key = selectionKey(weapon, socket);
-      state.openPlugSockets[key] = !state.openPlugSockets[key];
+      setPlugSocketOpen(key, !state.openPlugSockets[key], button);
       rerenderDetailPreservingViewport(buildRow);
     });
   });
@@ -5260,12 +5322,9 @@ function renderDetail(row) {
         state.openPlugSockets[tertiarySelectionKey(row)] = Boolean(button.dataset.plugHash);
         clearInvalidArmorTuningSelection(row);
       }
-      if (isWeaponRow(row)) {
-        state.openPlugSockets[key] = true;
-      } else {
-        delete state.openPlugSockets[key];
-      }
-      rerenderDetailPreservingViewport(row);
+      delete state.openPlugSockets[key];
+      delete state.openPlugDirections[key];
+      rerenderDetailPreservingAnchor(row, plugToggleSelector(socket.index));
     });
   });
   els.detail.querySelectorAll("[data-weapon-version]").forEach((button) => {
@@ -5283,7 +5342,7 @@ function renderDetail(row) {
       const socket = (row.plugSockets || []).find((entry) => String(entry.index) === String(button.dataset.socketIndex));
       if (!socket) return;
       const key = selectionKey(row, socket);
-      state.openPlugSockets[key] = !state.openPlugSockets[key];
+      setPlugSocketOpen(key, !state.openPlugSockets[key], button);
       rerenderDetailPreservingViewport(row);
     });
   });
