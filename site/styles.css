@@ -110,6 +110,7 @@ select {
 
 button {
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .topbar {
@@ -839,16 +840,20 @@ h1 {
 }
 
 .weapon-detail-shell .detail-workspace {
-  grid-template-columns: minmax(340px, 1fr) minmax(320px, 1fr);
+  grid-template-columns: minmax(430px, 1.16fr) minmax(300px, 0.84fr);
   gap: 14px;
 }
 
 .weapon-detail-shell .detail-main {
-  display: contents;
+  display: grid;
+  grid-column: 1;
+  grid-row: 1;
+  gap: 14px;
+  min-width: 0;
 }
 
 .weapon-detail-shell .detail-builder {
-  grid-column: 1 / -1;
+  grid-column: auto;
 }
 
 .weapon-detail-shell .detail-side {
@@ -2605,9 +2610,20 @@ h1 {
     margin-bottom: 10px;
   }
 
+  .weapon-detail-shell .detail-hero {
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 8px;
+    margin-bottom: 7px;
+  }
+
   .detail-icon {
     width: 64px;
     height: 64px;
+  }
+
+  .weapon-detail-shell .detail-icon {
+    width: 48px;
+    height: 48px;
   }
 
   .column-head,
@@ -2680,6 +2696,36 @@ h1 {
     font-size: 20px;
   }
 
+  .weapon-detail-shell .detail-panel h2,
+  .weapon-detail-shell h2 {
+    font-size: 17px;
+    line-height: 1.14;
+  }
+
+  .weapon-detail-shell .weapon-version-panel {
+    margin-top: 7px;
+  }
+
+  .weapon-detail-shell .weapon-version-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+    margin-top: 6px;
+  }
+
+  .weapon-detail-shell .weapon-version-chip {
+    gap: 2px 5px;
+    padding: 6px;
+  }
+
+  .weapon-detail-shell .weapon-version-season {
+    font-size: 10px;
+  }
+
+  .weapon-detail-shell .weapon-version-meta,
+  .weapon-detail-shell .weapon-version-flags span {
+    font-size: 8px;
+  }
+
   .stat-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 7px 10px;
@@ -2693,15 +2739,37 @@ h1 {
     padding: 10px;
   }
 
+  .weapon-detail-shell .panel,
+  .weapon-detail-shell .plug-builder {
+    padding: 8px;
+  }
+
+  .weapon-detail-shell .detail-workspace {
+    gap: 8px;
+    margin-top: 8px;
+  }
+
   .panel h3 {
     margin-bottom: 8px;
     font-size: 14px;
+  }
+
+  .weapon-detail-shell .panel h3,
+  .weapon-detail-shell .plug-builder h3 {
+    margin-bottom: 6px;
+    font-size: 12px;
   }
 
   .description {
     margin-top: 7px;
     font-size: 12px;
     line-height: 1.35;
+  }
+
+  .weapon-detail-shell .description {
+    margin-top: 5px;
+    font-size: 10px;
+    line-height: 1.25;
   }
 
   .badge-line {
@@ -2714,14 +2782,35 @@ h1 {
     font-size: 10px;
   }
 
+  .weapon-detail-shell .badge-line {
+    gap: 3px;
+    margin-top: 4px;
+  }
+
+  .weapon-detail-shell .badge {
+    padding: 1px 5px;
+    font-size: 9px;
+    line-height: 1.35;
+  }
+
   .frame-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 5px;
     margin-bottom: 9px;
   }
 
+  .weapon-detail-shell .frame-summary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+
   .frame-chip {
     padding: 6px 7px;
+  }
+
+  .weapon-detail-shell .frame-chip {
+    padding: 4px 5px;
   }
 
   .frame-chip span {
@@ -2733,10 +2822,25 @@ h1 {
     font-size: 11px;
   }
 
+  .weapon-detail-shell .frame-chip strong {
+    font-size: 10px;
+  }
+
   .stat-row {
     min-height: 36px;
     gap: 3px;
     font-size: 11px;
+  }
+
+  .weapon-detail-shell .stat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px 7px;
+  }
+
+  .weapon-detail-shell .stat-row {
+    min-height: 31px;
+    gap: 2px;
+    font-size: 10px;
   }
 
   .stat-head {
@@ -2755,6 +2859,18 @@ h1 {
     font-size: 8px;
   }
 
+  .weapon-detail-shell .stat-meter {
+    grid-template-rows: 9px 8px;
+  }
+
+  .weapon-detail-shell .bar {
+    height: 9px;
+  }
+
+  .weapon-detail-shell .stat-scale {
+    font-size: 7px;
+  }
+
   .manual-stat {
     grid-template-columns: 1fr;
   }
@@ -2765,8 +2881,19 @@ h1 {
     margin: 7px 0;
   }
 
+  .weapon-detail-shell .metric-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    margin: 5px 0;
+  }
+
   .metric-card {
     padding: 6px;
+  }
+
+  .weapon-detail-shell .metric-card {
+    padding: 5px;
+    border-radius: 6px;
   }
 
   .metric-card span {
@@ -2774,9 +2901,20 @@ h1 {
     font-size: 9px;
   }
 
+  .weapon-detail-shell .metric-card span {
+    min-height: 19px;
+    font-size: 8px;
+    line-height: 1.18;
+  }
+
   .metric-card strong {
     margin-top: 3px;
     font-size: 14px;
+  }
+
+  .weapon-detail-shell .metric-card strong {
+    margin-top: 2px;
+    font-size: 12px;
   }
 
   .kv {
@@ -2796,6 +2934,10 @@ h1 {
   .plug-builder,
   .plug-builder--embedded {
     gap: 8px;
+  }
+
+  .weapon-detail-shell .plug-builder {
+    gap: 6px;
   }
 
   .plug-builder--embedded {
@@ -2818,10 +2960,22 @@ h1 {
     padding: 5px 6px;
   }
 
+  .weapon-detail-shell .plug-toggle {
+    min-height: 38px;
+    gap: 5px;
+    padding: 4px 5px;
+  }
+
   .plug-toggle .plug-icon-wrap,
   .plug-toggle-icon {
     width: 28px;
     height: 28px;
+  }
+
+  .weapon-detail-shell .plug-toggle .plug-icon-wrap,
+  .weapon-detail-shell .plug-toggle-icon {
+    width: 26px;
+    height: 26px;
   }
 
   .plug-toggle-main strong {
@@ -2831,6 +2985,15 @@ h1 {
   .plug-toggle-main > span,
   .plug-field-sub {
     font-size: 9px;
+  }
+
+  .weapon-detail-shell .plug-toggle-main strong {
+    font-size: 9px;
+  }
+
+  .weapon-detail-shell .plug-toggle-main > span,
+  .weapon-detail-shell .plug-field-sub {
+    font-size: 8px;
   }
 
   .plug-toggle-action {
@@ -2848,15 +3011,30 @@ h1 {
     padding: 5px 3px;
   }
 
+  .weapon-detail-shell .plug-option {
+    min-height: 58px;
+    padding: 4px 2px;
+  }
+
   .plug-option .plug-icon-wrap,
   .plug-option-icon {
     width: 28px;
     height: 28px;
   }
 
+  .weapon-detail-shell .plug-option .plug-icon-wrap,
+  .weapon-detail-shell .plug-option-icon {
+    width: 25px;
+    height: 25px;
+  }
+
   .plug-option-name {
     font-size: 9px;
     line-height: 1.12;
+  }
+
+  .weapon-detail-shell .plug-option-name {
+    font-size: 8px;
   }
 
   .armor-piece-controls,

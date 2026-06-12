@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260611-release-panel";
+const DATA_VERSION = "20260612-mobile-perk-scroll";
 
 const finalReleaseVersions = new Set(["v950", "v960", "v970"]);
 const finalReleaseSeasonNumbers = new Set([29]);
@@ -3947,6 +3947,33 @@ function renderList() {
   renderDetail(visible.find((row) => row.hash === state.selectedHash));
 }
 
+function captureDetailViewport() {
+  return {
+    windowX: window.scrollX || 0,
+    windowY: window.scrollY || 0,
+    detailScrollTop: els.detail?.scrollTop || 0,
+  };
+}
+
+function restoreDetailViewport(snapshot) {
+  if (!snapshot) return;
+  const restore = () => {
+    if (els.detail) els.detail.scrollTop = snapshot.detailScrollTop;
+    window.scrollTo(snapshot.windowX, snapshot.windowY);
+  };
+  requestAnimationFrame(() => {
+    restore();
+    requestAnimationFrame(restore);
+    setTimeout(restore, 80);
+  });
+}
+
+function rerenderDetailPreservingViewport(row) {
+  const snapshot = captureDetailViewport();
+  renderDetail(row);
+  restoreDetailViewport(snapshot);
+}
+
 function renderIcon(row, className) {
   if (!row.icon) return `<span class="${className} placeholder-icon"></span>`;
   return `<img class="${className}" src="${esc(row.icon)}" alt="">`;
@@ -4882,8 +4909,8 @@ function bindBuildWeaponPlugControls(buildRow) {
       } else {
         delete state.selectedPlugs[key];
       }
-      delete state.openPlugSockets[key];
-      renderDetail(buildRow);
+      state.openPlugSockets[key] = true;
+      rerenderDetailPreservingViewport(buildRow);
     });
   });
   els.detail.querySelectorAll("[data-build-weapon-card] [data-plug-toggle]").forEach((button) => {
@@ -4894,7 +4921,7 @@ function bindBuildWeaponPlugControls(buildRow) {
       if (!weapon || !socket) return;
       const key = selectionKey(weapon, socket);
       state.openPlugSockets[key] = !state.openPlugSockets[key];
-      renderDetail(buildRow);
+      rerenderDetailPreservingViewport(buildRow);
     });
   });
 }
@@ -4912,7 +4939,7 @@ function bindBuildSimulatorControls(row) {
   els.detail.querySelector("[data-build-subclass-toggle]")?.addEventListener("click", () => {
     const key = abilitySlotKey(classId, "subclass");
     state.openAbilitySlots[key] = !state.openAbilitySlots[key];
-    renderDetail(row);
+    rerenderDetailPreservingViewport(row);
   });
   els.detail.querySelectorAll("[data-build-subclass-option]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -4920,7 +4947,7 @@ function bindBuildSimulatorControls(row) {
       entry.subclassHash = button.dataset.buildSubclassOption ? Number(button.dataset.buildSubclassOption) : "";
       entry.slots = {};
       delete state.openAbilitySlots[abilitySlotKey(classId, "subclass")];
-      renderDetail(row);
+      rerenderDetailPreservingViewport(row);
     });
   });
   els.detail.querySelectorAll("[data-build-ability-toggle]").forEach((button) => {
@@ -4928,7 +4955,7 @@ function bindBuildSimulatorControls(row) {
       const slotId = button.dataset.buildAbilityToggle;
       const key = abilitySlotKey(classId, slotId);
       state.openAbilitySlots[key] = !state.openAbilitySlots[key];
-      renderDetail(row);
+      rerenderDetailPreservingViewport(row);
     });
   });
   els.detail.querySelectorAll("[data-build-ability-option]").forEach((button) => {
@@ -4948,27 +4975,27 @@ function bindBuildSimulatorControls(row) {
       entry.slots[slotId] = abilityHash;
       normalizeBuildAbilitySlots(entry);
       delete state.openAbilitySlots[abilitySlotKey(classId, slotId)];
-      renderDetail(row);
+      rerenderDetailPreservingViewport(row);
     });
   });
   els.detail.querySelector("[data-build-subclass]")?.addEventListener("change", (event) => {
     const entry = classBuildAbilityState(classId);
     entry.subclassHash = event.target.value ? Number(event.target.value) : "";
     entry.slots = {};
-    renderDetail(row);
+    rerenderDetailPreservingViewport(row);
   });
   els.detail.querySelectorAll("[data-build-ability-slot]").forEach((select) => {
     select.addEventListener("change", () => {
       const entry = classBuildAbilityState(classId);
       entry.slots[select.dataset.buildAbilitySlot] = select.value ? Number(select.value) : "";
-      renderDetail(row);
+      rerenderDetailPreservingViewport(row);
     });
   });
   els.detail.querySelectorAll("[data-build-weapon-slot]").forEach((select) => {
     select.addEventListener("change", () => {
       const key = classBuildWeaponKey(classId, select.dataset.buildWeaponSlot);
       state.classBuildWeapons[key] = select.value ? Number(select.value) : "";
-      renderDetail(row);
+      rerenderDetailPreservingViewport(row);
     });
   });
   bindBuildWeaponPlugControls(row);
@@ -5068,73 +5095,73 @@ function bindArmorSetControls(row, setKey, classId) {
       const piece = armorSetPieceState(setKey, slotId);
       piece.archetypeHash = Number(select.value || defaultArmorArchetypeHash);
       normalizeArmorPieceState(piece);
-      renderDetail(row);
+      rerenderDetailPreservingViewport(row);
     });
   });
   els.detail.querySelectorAll("[data-armor-piece-tertiary]").forEach((select) => {
     select.addEventListener("change", () => {
       armorSetPieceState(setKey, select.dataset.armorPieceTertiary).tertiary = select.value;
-      renderDetail(row);
+      rerenderDetailPreservingViewport(row);
     });
   });
   els.detail.querySelectorAll("[data-armor-piece-general]").forEach((select) => {
     select.addEventListener("change", () => {
       armorSetPieceState(setKey, select.dataset.armorPieceGeneral).generalModHash = select.value;
-      renderDetail(row);
+      rerenderDetailPreservingViewport(row);
     });
   });
   els.detail.querySelectorAll("[data-armor-piece-focus]").forEach((select) => {
     select.addEventListener("change", () => {
       armorSetPieceState(setKey, select.dataset.armorPieceFocus).focusModHash = select.value;
-      renderDetail(row);
+      rerenderDetailPreservingViewport(row);
     });
   });
   els.detail.querySelector("[data-armor-bulk-archetype]")?.addEventListener("change", (event) => {
     const bulk = armorBulkState(setKey);
     bulk.archetypeHash = Number(event.target.value || defaultArmorArchetypeHash);
     normalizeArmorPieceState(bulk);
-    renderDetail(row);
+    rerenderDetailPreservingViewport(row);
   });
   els.detail.querySelector("[data-armor-bulk-tertiary]")?.addEventListener("change", (event) => {
     armorBulkState(setKey).tertiary = event.target.value;
-    renderDetail(row);
+    rerenderDetailPreservingViewport(row);
   });
   els.detail.querySelector("[data-armor-bulk-general]")?.addEventListener("change", (event) => {
     armorBulkState(setKey).generalModHash = event.target.value;
-    renderDetail(row);
+    rerenderDetailPreservingViewport(row);
   });
   els.detail.querySelector("[data-armor-bulk-focus]")?.addEventListener("change", (event) => {
     armorBulkState(setKey).focusModHash = event.target.value;
-    renderDetail(row);
+    rerenderDetailPreservingViewport(row);
   });
   els.detail.querySelector("[data-armor-bulk-apply]")?.addEventListener("click", () => {
     applyArmorBulkState(setKey);
-    renderDetail(row);
+    rerenderDetailPreservingViewport(row);
   });
   els.detail.querySelector("[data-armor-exotic-slot]")?.addEventListener("change", (event) => {
     const exotic = armorSetExoticState(setKey);
     exotic.slot = event.target.value;
     exotic.hash = "";
-    renderDetail(row);
+    rerenderDetailPreservingViewport(row);
   });
   els.detail.querySelector("[data-armor-exotic]")?.addEventListener("change", (event) => {
     armorSetExoticState(setKey).hash = event.target.value;
-    renderDetail(row);
+    rerenderDetailPreservingViewport(row);
   });
   els.detail.querySelectorAll("[data-armor-bonus-mode]").forEach((button) => {
     button.addEventListener("click", () => {
       const bonus = armorSetBonusState(setKey);
       bonus.mode = button.dataset.armorBonusMode || "none";
-      renderDetail(row);
+      rerenderDetailPreservingViewport(row);
     });
   });
   els.detail.querySelector("[data-armor-bonus-primary]")?.addEventListener("change", (event) => {
     armorSetBonusState(setKey).primaryHash = event.target.value;
-    renderDetail(row);
+    rerenderDetailPreservingViewport(row);
   });
   els.detail.querySelector("[data-armor-bonus-secondary]")?.addEventListener("change", (event) => {
     armorSetBonusState(setKey).secondaryHash = event.target.value;
-    renderDetail(row);
+    rerenderDetailPreservingViewport(row);
   });
 }
 
@@ -5233,8 +5260,12 @@ function renderDetail(row) {
         state.openPlugSockets[tertiarySelectionKey(row)] = Boolean(button.dataset.plugHash);
         clearInvalidArmorTuningSelection(row);
       }
-      delete state.openPlugSockets[key];
-      renderDetail(row);
+      if (isWeaponRow(row)) {
+        state.openPlugSockets[key] = true;
+      } else {
+        delete state.openPlugSockets[key];
+      }
+      rerenderDetailPreservingViewport(row);
     });
   });
   els.detail.querySelectorAll("[data-weapon-version]").forEach((button) => {
@@ -5253,14 +5284,14 @@ function renderDetail(row) {
       if (!socket) return;
       const key = selectionKey(row, socket);
       state.openPlugSockets[key] = !state.openPlugSockets[key];
-      renderDetail(row);
+      rerenderDetailPreservingViewport(row);
     });
   });
   els.detail.querySelectorAll("[data-armor-tertiary-toggle]").forEach((button) => {
     button.addEventListener("click", () => {
       const key = tertiarySelectionKey(row);
       state.openPlugSockets[key] = !state.openPlugSockets[key];
-      renderDetail(row);
+      rerenderDetailPreservingViewport(row);
     });
   });
   els.detail.querySelectorAll("[data-armor-tertiary]").forEach((button) => {
@@ -5270,7 +5301,7 @@ function renderDetail(row) {
       state.armorTertiary[armorTertiaryStateKey(row)] = key;
       delete state.openPlugSockets[tertiarySelectionKey(row)];
       clearInvalidArmorTuningSelection(row);
-      renderDetail(row);
+      rerenderDetailPreservingViewport(row);
     });
   });
   els.detail.querySelectorAll("[data-armor-stat]").forEach((input) => {
@@ -5281,7 +5312,7 @@ function renderDetail(row) {
         state.manualArmor[row.hash] = manualArmorValues(row);
       }
       state.manualArmor[row.hash][key] = Number(input.value || 0);
-      renderDetail(row);
+      rerenderDetailPreservingViewport(row);
     });
   });
 }
