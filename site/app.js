@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260613-armor-icon-controls";
+const DATA_VERSION = "20260614-armor-mod-slots-v2";
 
 const finalReleaseVersions = new Set(["v950", "v960", "v970"]);
 const finalReleaseSeasonNumbers = new Set([29]);
@@ -3320,12 +3320,7 @@ function isArmorStatTradeoffPlug(plug) {
 
 function isNewArmorFocusPlug(plug) {
   if (!/core\.gear_systems\.armor_tiering\.plugs\.tuning\.mods/i.test(plug?.identifier || "")) return false;
-  return isArmorStatTradeoffPlug(plug);
-}
-
-function isNewArmorGeneralPlug(plug) {
-  if (!/core\.gear_systems\.armor_tiering\.plugs\.tuning\.mods/i.test(plug?.identifier || "")) return false;
-  return isBalancedArmorTuningPlug(plug);
+  return isBalancedArmorTuningPlug(plug) || isArmorStatTradeoffPlug(plug);
 }
 
 function balancedArmorTuningMagnitude(plug) {
@@ -3353,6 +3348,7 @@ function armorModDeltaSummary(plug) {
 }
 
 function armorModOptionLabel(plug) {
+  if (plug?.syntheticArmorMod) return plug.name || "";
   const summary = armorModDeltaSummary(plug);
   return `${plug.name}${summary ? ` (${summary})` : ""}`;
 }
@@ -3585,6 +3581,49 @@ function armorPlugOption(hash) {
   return hash ? (langData().plugOptions || {})[String(hash)] || null : null;
 }
 
+function armorGeneralModHash(statKey, value) {
+  return `virtual:armor:general:${statKey}:${value}`;
+}
+
+function armorGeneralModName(statKey, value) {
+  const label = statLabel(statKey, true);
+  if (Number(value) === 5) {
+    return state.lang === "ja" ? `${label} +5 マイナー` : `${label} +5 Minor`;
+  }
+  return `${label} +${value}`;
+}
+
+function armorGeneralModOption(statKey, value) {
+  return {
+    hash: armorGeneralModHash(statKey, value),
+    name: armorGeneralModName(statKey, value),
+    category: state.lang === "ja" ? "一般アーマー改造パーツ" : "General Armor Mod",
+    identifier: "d2ma.virtual.armor.general.mods",
+    syntheticArmorMod: true,
+    statDeltas: { [statKey]: Number(value) },
+  };
+}
+
+function armorGeneralModOptions() {
+  return armorTertiaryStatOrder.flatMap((statKey) => [
+    armorGeneralModOption(statKey, 10),
+    armorGeneralModOption(statKey, 5),
+  ]);
+}
+
+function syntheticArmorGeneralModOption(hash) {
+  const match = String(hash || "").match(/^virtual:armor:general:([A-Za-z]+):(\d+)$/);
+  if (!match) return null;
+  const [, statKey, value] = match;
+  if (!armorStatKeys.includes(statKey)) return null;
+  if (![5, 10].includes(Number(value))) return null;
+  return armorGeneralModOption(statKey, Number(value));
+}
+
+function armorModPlug(hash) {
+  return armorPlugOption(hash) || syntheticArmorGeneralModOption(hash);
+}
+
 function armorArchetypeOptions() {
   return Object.keys(armorArchetypeStats)
     .map((hash) => armorPlugOption(hash) || { hash, name: String(hash), statDeltas: {} })
@@ -3602,20 +3641,20 @@ function normalizeArmorPieceState(piece) {
   if (!options.includes(piece.tertiary)) {
     piece.tertiary = options[0] || "";
   }
-  if (piece.generalModHash && !isNewArmorGeneralPlug(armorPlugOption(piece.generalModHash))) {
+  if (piece.generalModHash && !syntheticArmorGeneralModOption(piece.generalModHash)) {
     piece.generalModHash = "";
   }
-  if (piece.focusModHash && !isNewArmorFocusPlug(armorPlugOption(piece.focusModHash))) {
+  if (piece.focusModHash && !isNewArmorFocusPlug(armorModPlug(piece.focusModHash))) {
     piece.focusModHash = "";
   }
   return piece;
 }
 
 function armorModOptions(kind) {
+  if (kind === "general") return armorGeneralModOptions();
   const plugs = Object.values(langData().plugOptions || {}).filter((plug) => {
     const deltas = plug.statDeltas || {};
     if (!armorStatKeys.some((key) => Number(deltas[key] || 0) !== 0)) return false;
-    if (kind === "general") return isNewArmorGeneralPlug(plug);
     if (kind === "focus") return isNewArmorFocusPlug(plug);
     return false;
   });
@@ -3645,8 +3684,8 @@ function armorPieceStats(piece) {
   if (config.primary) stats[config.primary] += armorTier5Values.primary;
   if (config.secondary) stats[config.secondary] += armorTier5Values.secondary;
   if (piece.tertiary) stats[piece.tertiary] += armorTier5Values.tertiary;
-  addArmorModStats(stats, armorPlugOption(piece.generalModHash));
-  addArmorModStats(stats, armorPlugOption(piece.focusModHash));
+  addArmorModStats(stats, armorModPlug(piece.generalModHash));
+  addArmorModStats(stats, armorModPlug(piece.focusModHash));
   return stats;
 }
 
