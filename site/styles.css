@@ -1632,6 +1632,113 @@ h1 {
   gap: 10px;
 }
 
+.armor-choice-field {
+  position: relative;
+}
+
+.armor-choice-toggle,
+.armor-choice-option {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  min-width: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--strong);
+  background: var(--panel);
+}
+
+.armor-choice-toggle {
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 6px;
+  min-height: 36px;
+  padding: 4px 6px;
+}
+
+.armor-choice-toggle:hover,
+.armor-choice-option:hover,
+.armor-choice-toggle:focus-visible,
+.armor-choice-option:focus-visible,
+.armor-choice-option.is-selected {
+  border-color: var(--teal);
+  background: var(--teal-soft);
+  outline: none;
+}
+
+.armor-choice-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--option-line);
+  border-radius: 7px;
+  object-fit: cover;
+  color: #ffffff;
+  background: #172033;
+  font-size: 8px;
+  font-weight: 1000;
+  line-height: 1;
+  filter: contrast(1.14) saturate(1.16) brightness(1.04);
+}
+
+.armor-choice-icon--stat {
+  color: #20364f;
+  background: linear-gradient(135deg, #fff7cc, #e8f1fb);
+  filter: none;
+}
+
+.armor-choice-pair {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+.armor-choice-pair span {
+  border: 1px solid var(--badge-line);
+  border-radius: 999px;
+  padding: 1px 4px;
+  color: var(--badge-ink);
+  background: var(--panel-alt);
+  font-size: 9px;
+  font-weight: 1000;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.armor-choice-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  z-index: 40;
+  display: grid;
+  width: min(260px, calc(100vw - 24px));
+  max-height: min(48vh, 360px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px;
+  background: var(--panel);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.2);
+}
+
+.armor-choice-menu--archetype {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.armor-choice-menu--stat {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.armor-choice-option {
+  gap: 3px;
+  min-height: 54px;
+  padding: 5px 3px;
+}
+
 .armor-config-grid--two {
   grid-template-columns: 1fr;
 }
@@ -1937,6 +2044,7 @@ h1 {
   align-content: start;
   gap: 8px;
   padding: 8px;
+  overflow: visible;
 }
 
 .build-sim-armor .armor-piece-controls,
@@ -1950,7 +2058,8 @@ h1 {
 }
 
 .build-sim-armor .armor-piece-head h4 {
-  font-size: 12px;
+  font-size: 11px;
+  white-space: nowrap;
 }
 
 .build-sim-armor .armor-piece-head span {
@@ -1963,10 +2072,54 @@ h1 {
   font-size: 10px;
 }
 
+.build-sim-armor .field > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .build-sim-armor .field select {
   min-height: 29px;
   padding: 4px 5px;
-  font-size: 11px;
+  font-size: 10px;
+}
+
+.build-sim-armor .armor-choice-toggle {
+  grid-template-columns: 24px minmax(0, 1fr);
+  min-height: 31px;
+  gap: 4px;
+  padding: 3px 4px;
+}
+
+.build-sim-armor .armor-choice-icon {
+  width: 23px;
+  height: 23px;
+  border-radius: 6px;
+  font-size: 7px;
+}
+
+.build-sim-armor .armor-choice-pair {
+  gap: 2px;
+}
+
+.build-sim-armor .armor-choice-pair span {
+  padding: 1px 3px;
+  font-size: 7px;
+}
+
+.build-sim-armor .armor-choice-menu {
+  width: min(220px, calc(100vw - 24px));
+}
+
+.build-sim-armor .armor-piece-card:nth-child(n+4) .armor-choice-menu {
+  right: 0;
+  left: auto;
+}
+
+.build-sim-armor .armor-choice-option {
+  min-height: 47px;
+  padding: 4px 2px;
 }
 
 .build-sim-armor .armor-piece-stats {

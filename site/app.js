@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260613-roll-labels";
+const DATA_VERSION = "20260613-armor-icon-controls";
 
 const finalReleaseVersions = new Set(["v950", "v960", "v970"]);
 const finalReleaseSeasonNumbers = new Set([29]);
@@ -31,6 +31,7 @@ const state = {
   armorTertiary: {},
   openPlugSockets: {},
   openPlugDirections: {},
+  openArmorChoice: "",
   armorSetPieces: {},
   armorSetExotics: {},
   armorSetBonuses: {},
@@ -133,9 +134,14 @@ const text = {
     armorPieceConfig: "5部位設定",
     armorSetTotals: "パラメータ合計",
     armorArchetype: "アーキタイプ",
+    armorArchetypeShort: "型",
     armorGeneralMod: "一般Mod",
+    armorGeneralModShort: "一般",
     armorFocusMod: "特化Mod",
+    armorFocusModShort: "特化",
     armorNoMod: "Modなし",
+    armorNoModShort: "なし",
+    armorTertiaryShort: "固有",
     armorLowestThreeStats: "低い3ステータス",
     armorExotic: "エキゾチック防具",
     armorExoticSlot: "エキゾ枠",
@@ -395,9 +401,14 @@ const text = {
     armorPieceConfig: "Five-piece setup",
     armorSetTotals: "Stat Totals",
     armorArchetype: "Archetype",
+    armorArchetypeShort: "Type",
     armorGeneralMod: "General Mod",
+    armorGeneralModShort: "Gen",
     armorFocusMod: "Focus Mod",
+    armorFocusModShort: "Focus",
     armorNoMod: "No mod",
+    armorNoModShort: "None",
+    armorTertiaryShort: "Tert.",
     armorLowestThreeStats: "Lowest 3 stats",
     armorExotic: "Exotic Armor",
     armorExoticSlot: "Exotic slot",
@@ -3246,7 +3257,7 @@ function armorArchetypeSelection(row) {
 function armorTertiaryOptions(row) {
   const selection = armorArchetypeSelection(row);
   if (!selection) return [];
-  return armorTertiaryStatOrder;
+  return armorTertiaryOptionsForArchetype(selection.plug.hash);
 }
 
 function selectedArmorTertiary(row) {
@@ -3309,7 +3320,12 @@ function isArmorStatTradeoffPlug(plug) {
 
 function isNewArmorFocusPlug(plug) {
   if (!/core\.gear_systems\.armor_tiering\.plugs\.tuning\.mods/i.test(plug?.identifier || "")) return false;
-  return isBalancedArmorTuningPlug(plug) || isArmorStatTradeoffPlug(plug);
+  return isArmorStatTradeoffPlug(plug);
+}
+
+function isNewArmorGeneralPlug(plug) {
+  if (!/core\.gear_systems\.armor_tiering\.plugs\.tuning\.mods/i.test(plug?.identifier || "")) return false;
+  return isBalancedArmorTuningPlug(plug);
 }
 
 function balancedArmorTuningMagnitude(plug) {
@@ -3576,13 +3592,18 @@ function armorArchetypeOptions() {
 }
 
 function armorTertiaryOptionsForArchetype(archetypeHash) {
-  return armorTertiaryStatOrder;
+  const config = armorArchetypeStats[String(archetypeHash)] || {};
+  const blocked = new Set([config.primary, config.secondary].filter(Boolean));
+  return armorTertiaryStatOrder.filter((key) => !blocked.has(key));
 }
 
 function normalizeArmorPieceState(piece) {
   const options = armorTertiaryOptionsForArchetype(piece.archetypeHash);
   if (!options.includes(piece.tertiary)) {
     piece.tertiary = options[0] || "";
+  }
+  if (piece.generalModHash && !isNewArmorGeneralPlug(armorPlugOption(piece.generalModHash))) {
+    piece.generalModHash = "";
   }
   if (piece.focusModHash && !isNewArmorFocusPlug(armorPlugOption(piece.focusModHash))) {
     piece.focusModHash = "";
@@ -3592,10 +3613,9 @@ function normalizeArmorPieceState(piece) {
 
 function armorModOptions(kind) {
   const plugs = Object.values(langData().plugOptions || {}).filter((plug) => {
-    const identifier = String(plug.identifier || "");
     const deltas = plug.statDeltas || {};
     if (!armorStatKeys.some((key) => Number(deltas[key] || 0) !== 0)) return false;
-    if (kind === "general") return /enhancements\.v2_general/i.test(identifier);
+    if (kind === "general") return isNewArmorGeneralPlug(plug);
     if (kind === "focus") return isNewArmorFocusPlug(plug);
     return false;
   });
@@ -4363,6 +4383,95 @@ function renderArmorSetStats(totals) {
   `;
 }
 
+function armorChoiceKey(setKey, slotId, kind) {
+  return `${armorSetKey(setKey)}:${slotId}:${kind}`;
+}
+
+function armorArchetypeStatPair(hash) {
+  const config = armorArchetypeStats[String(hash)] || {};
+  return [config.primary, config.secondary].filter(Boolean);
+}
+
+function renderArmorArchetypeIcon(option, className = "armor-choice-icon") {
+  return option?.icon
+    ? `<img class="${className}" src="${esc(option.icon)}" alt="">`
+    : `<span class="${className} placeholder-icon">${esc((option?.name || "?").slice(0, 1))}</span>`;
+}
+
+function renderArmorStatGlyph(key, className = "armor-choice-icon armor-choice-icon--stat") {
+  return `<span class="${className}">${esc(armorStatAbbrevLabels[key] || statLabel(key, true))}</span>`;
+}
+
+function renderArmorArchetypeSelector(setKey, slot, piece) {
+  const selected = armorPlugOption(piece.archetypeHash) || { hash: piece.archetypeHash, name: String(piece.archetypeHash), icon: "" };
+  const choiceKey = armorChoiceKey(setKey, slot.id, "archetype");
+  const isOpen = state.openArmorChoice === choiceKey;
+  const selectedPair = armorArchetypeStatPair(selected.hash);
+  const selectedLabel = `${selected.name} ${selectedPair.map((key) => statLabel(key, true)).join(" / ")}`.trim();
+  return `
+    <div class="field armor-choice-field">
+      <span title="${esc(t("armorArchetype"))}">${esc(t("armorArchetypeShort"))}</span>
+      <button class="armor-choice-toggle" type="button" data-armor-choice-toggle="${esc(choiceKey)}" aria-expanded="${esc(String(isOpen))}" aria-label="${esc(selectedLabel)}" title="${esc(selectedLabel)}">
+        ${renderArmorArchetypeIcon(selected)}
+        <span class="armor-choice-pair">
+          ${selectedPair.map((key) => `<span>${esc(armorStatAbbrevLabels[key] || statLabel(key, true))}</span>`).join("")}
+        </span>
+      </button>
+      ${
+        isOpen
+          ? `<div class="armor-choice-menu armor-choice-menu--archetype" role="listbox" aria-label="${esc(t("armorArchetype"))}">
+              ${armorArchetypeOptions()
+                .map((option) => {
+                  const pair = armorArchetypeStatPair(option.hash);
+                  const isSelected = Number(piece.archetypeHash) === Number(option.hash);
+                  const label = `${option.name} ${pair.map((key) => statLabel(key, true)).join(" / ")}`;
+                  return `
+                    <button class="armor-choice-option${isSelected ? " is-selected" : ""}" type="button" data-armor-piece-archetype-button="${esc(slot.id)}" data-archetype-hash="${esc(option.hash)}" aria-label="${esc(label)}" title="${esc(label)}" aria-pressed="${esc(String(isSelected))}">
+                      ${renderArmorArchetypeIcon(option)}
+                      <span class="armor-choice-pair">${pair.map((key) => `<span>${esc(armorStatAbbrevLabels[key] || statLabel(key, true))}</span>`).join("")}</span>
+                    </button>
+                  `;
+                })
+                .join("")}
+            </div>`
+          : ""
+      }
+    </div>
+  `;
+}
+
+function renderArmorTertiarySelectorForPiece(setKey, slot, piece, tertiaryOptions) {
+  const choiceKey = armorChoiceKey(setKey, slot.id, "tertiary");
+  const isOpen = state.openArmorChoice === choiceKey;
+  const selected = piece.tertiary || tertiaryOptions[0] || "";
+  return `
+    <div class="field armor-choice-field">
+      <span title="${esc(t("armorTertiary"))}">${esc(t("armorTertiaryShort"))}</span>
+      <button class="armor-choice-toggle armor-choice-toggle--stat" type="button" data-armor-choice-toggle="${esc(choiceKey)}" aria-expanded="${esc(String(isOpen))}" title="${esc(selected ? `${statLabel(selected, true)} +${armorTier5Values.tertiary}` : t("armorNoMod"))}">
+        ${selected ? renderArmorStatGlyph(selected) : `<span class="armor-choice-icon placeholder-icon">-</span>`}
+        <span class="armor-choice-pair"><span>+${esc(armorTier5Values.tertiary)}</span></span>
+      </button>
+      ${
+        isOpen
+          ? `<div class="armor-choice-menu armor-choice-menu--stat" role="listbox" aria-label="${esc(t("armorTertiary"))}">
+              ${tertiaryOptions
+                .map((key) => {
+                  const isSelected = selected === key;
+                  return `
+                    <button class="armor-choice-option${isSelected ? " is-selected" : ""}" type="button" data-armor-piece-tertiary-button="${esc(slot.id)}" data-tertiary-stat="${esc(key)}" title="${esc(`${statLabel(key, true)} +${armorTier5Values.tertiary}`)}" aria-pressed="${esc(String(isSelected))}">
+                      ${renderArmorStatGlyph(key)}
+                      <span class="armor-choice-pair"><span>+${esc(armorTier5Values.tertiary)}</span></span>
+                    </button>
+                  `;
+                })
+                .join("")}
+            </div>`
+          : ""
+      }
+    </div>
+  `;
+}
+
 function renderArmorPieceCard(setKey, slot) {
   const piece = normalizeArmorPieceState(armorSetPieceState(setKey, slot.id));
   const archetype = armorPlugOption(piece.archetypeHash);
@@ -4370,39 +4479,27 @@ function renderArmorPieceCard(setKey, slot) {
   const tertiaryOptions = armorTertiaryOptionsForArchetype(piece.archetypeHash);
   const generalMods = armorModOptions("general");
   const focusMods = armorModOptions("focus");
+  const slotLabel = armorSlotLabel(slot.id);
+  const slotShort = armorSlotGlyphLabels[slot.id]?.[state.lang] || slotLabel;
   return `
     <section class="armor-piece-card">
       <div class="armor-piece-head">
-        <h4>${esc(armorSlotLabel(slot.id))}</h4>
+        <h4 title="${esc(slotLabel)}">${esc(slotShort)}</h4>
         <span>${esc(archetype?.name || "")}</span>
       </div>
       <div class="armor-piece-controls">
+        ${renderArmorArchetypeSelector(setKey, slot, piece)}
+        ${renderArmorTertiarySelectorForPiece(setKey, slot, piece, tertiaryOptions)}
         <label class="field">
-          <span>${esc(t("armorArchetype"))}</span>
-          <select data-armor-piece-archetype="${esc(slot.id)}">
-            ${armorArchetypeOptions()
-              .map((option) => `<option value="${esc(option.hash)}"${Number(piece.archetypeHash) === Number(option.hash) ? " selected" : ""}>${esc(option.name)}</option>`)
-              .join("")}
-          </select>
-        </label>
-        <label class="field">
-          <span>${esc(t("armorTertiary"))}</span>
-          <select data-armor-piece-tertiary="${esc(slot.id)}">
-            ${tertiaryOptions
-              .map((key) => `<option value="${esc(key)}"${piece.tertiary === key ? " selected" : ""}>${esc(statLabel(key, true))}</option>`)
-              .join("")}
-          </select>
-        </label>
-        <label class="field">
-          <span>${esc(t("armorGeneralMod"))}</span>
+          <span title="${esc(t("armorGeneralMod"))}">${esc(t("armorGeneralModShort"))}</span>
           <select data-armor-piece-general="${esc(slot.id)}">
-            ${selectOptions(generalMods, piece.generalModHash, t("armorNoMod"), "hash", armorModOptionLabel)}
+            ${selectOptions(generalMods, piece.generalModHash, t("armorNoModShort"), "hash", armorModOptionLabel)}
           </select>
         </label>
         <label class="field">
-          <span>${esc(t("armorFocusMod"))}</span>
+          <span title="${esc(t("armorFocusMod"))}">${esc(t("armorFocusModShort"))}</span>
           <select data-armor-piece-focus="${esc(slot.id)}">
-            ${selectOptions(focusMods, piece.focusModHash, t("armorNoMod"), "hash", armorModOptionLabel)}
+            ${selectOptions(focusMods, piece.focusModHash, t("armorNoModShort"), "hash", armorModOptionLabel)}
           </select>
         </label>
       </div>
@@ -5151,11 +5248,37 @@ function bindArmorSetControls(row, setKey, classId) {
       if (item) renderDetail(item);
     });
   });
+  els.detail.querySelectorAll("[data-armor-choice-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const key = button.dataset.armorChoiceToggle || "";
+      state.openArmorChoice = state.openArmorChoice === key ? "" : key;
+      rerenderDetailPreservingViewport(row);
+    });
+  });
+  els.detail.querySelectorAll("[data-armor-piece-archetype-button]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const piece = armorSetPieceState(setKey, button.dataset.armorPieceArchetypeButton);
+      piece.archetypeHash = Number(button.dataset.archetypeHash || defaultArmorArchetypeHash);
+      state.openArmorChoice = "";
+      normalizeArmorPieceState(piece);
+      rerenderDetailPreservingViewport(row);
+    });
+  });
+  els.detail.querySelectorAll("[data-armor-piece-tertiary-button]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const piece = armorSetPieceState(setKey, button.dataset.armorPieceTertiaryButton);
+      piece.tertiary = button.dataset.tertiaryStat || "";
+      state.openArmorChoice = "";
+      normalizeArmorPieceState(piece);
+      rerenderDetailPreservingViewport(row);
+    });
+  });
   els.detail.querySelectorAll("[data-armor-piece-archetype]").forEach((select) => {
     select.addEventListener("change", () => {
       const slotId = select.dataset.armorPieceArchetype;
       const piece = armorSetPieceState(setKey, slotId);
       piece.archetypeHash = Number(select.value || defaultArmorArchetypeHash);
+      state.openArmorChoice = "";
       normalizeArmorPieceState(piece);
       rerenderDetailPreservingViewport(row);
     });
@@ -5163,6 +5286,7 @@ function bindArmorSetControls(row, setKey, classId) {
   els.detail.querySelectorAll("[data-armor-piece-tertiary]").forEach((select) => {
     select.addEventListener("change", () => {
       armorSetPieceState(setKey, select.dataset.armorPieceTertiary).tertiary = select.value;
+      state.openArmorChoice = "";
       rerenderDetailPreservingViewport(row);
     });
   });
