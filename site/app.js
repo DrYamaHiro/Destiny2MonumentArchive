@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260614-armor-mod-slots-v2";
+const DATA_VERSION = "20260614-armor-mod-icons";
 
 const finalReleaseVersions = new Set(["v950", "v960", "v970"]);
 const finalReleaseSeasonNumbers = new Set([29]);
@@ -739,6 +739,20 @@ const armorStatAbbrevLabels = {
   grenade: "GRN",
   super: "SUP",
   melee: "MEL",
+};
+const armorGeneralModIcons = {
+  "health:10": "https://www.bungie.net/common/destiny2_content/icons/c1328c7351bc775eb277454c393ac858.png",
+  "health:5": "https://www.bungie.net/common/destiny2_content/icons/85f956602980f8fd2480a9908029256c.png",
+  "melee:10": "https://www.bungie.net/common/destiny2_content/icons/66714f030b79a1517c657f1378216cca.png",
+  "melee:5": "https://www.bungie.net/common/destiny2_content/icons/6b45221fccade87ee39f3a03efc6e9b9.png",
+  "grenade:10": "https://www.bungie.net/common/destiny2_content/icons/774854aa449ce8053f708b88d10d35c5.png",
+  "grenade:5": "https://www.bungie.net/common/destiny2_content/icons/e8b5cabcee36d609239a508097ac5773.png",
+  "super:10": "https://www.bungie.net/common/destiny2_content/icons/acccc4fe0cd51007278f1559065e0b12.png",
+  "super:5": "https://www.bungie.net/common/destiny2_content/icons/77a99f4c2306652ec53324600f2d7f62.png",
+  "classAbility:10": "https://www.bungie.net/common/destiny2_content/icons/033f50a1d44a2cef3727b8aa98d9cd83.png",
+  "classAbility:5": "https://www.bungie.net/common/destiny2_content/icons/234a96c207a03c8f3bf213e7447f78d4.png",
+  "weaponStat:10": "https://www.bungie.net/common/destiny2_content/icons/4f970366cc18cab100e849926a927b6f.png",
+  "weaponStat:5": "https://www.bungie.net/common/destiny2_content/icons/e82d4e305e0023d2db21339f10bba477.png",
 };
 
 const enhancedBadgeCache = new Map();
@@ -3600,6 +3614,7 @@ function armorGeneralModOption(statKey, value) {
     category: state.lang === "ja" ? "一般アーマー改造パーツ" : "General Armor Mod",
     identifier: "d2ma.virtual.armor.general.mods",
     syntheticArmorMod: true,
+    icon: armorGeneralModIcons[`${statKey}:${Number(value)}`] || "",
     statDeltas: { [statKey]: Number(value) },
   };
 }
@@ -4441,6 +4456,91 @@ function renderArmorStatGlyph(key, className = "armor-choice-icon armor-choice-i
   return `<span class="${className}">${esc(armorStatAbbrevLabels[key] || statLabel(key, true))}</span>`;
 }
 
+function armorModValue(option) {
+  return String(option?.hash ?? "");
+}
+
+function armorModOptionForHash(kind, hash) {
+  const value = String(hash || "");
+  if (!value) return null;
+  return armorModOptions(kind).find((option) => armorModValue(option) === value) || armorModPlug(value);
+}
+
+function armorModStatEntries(option) {
+  return Object.entries(option?.statDeltas || {})
+    .filter(([key, value]) => armorStatKeys.includes(key) && Number(value || 0) !== 0)
+    .map(([key, value]) => [key, Number(value || 0)])
+    .sort((a, b) => Math.sign(b[1]) - Math.sign(a[1]) || armorTertiaryStatOrder.indexOf(a[0]) - armorTertiaryStatOrder.indexOf(b[0]));
+}
+
+function armorModChipLabels(option) {
+  if (!option) return [t("armorNoModShort")];
+  if (isBalancedArmorTuningPlug(option)) return ["BAL", signedValue(balancedArmorTuningMagnitude(option))];
+  const entries = armorModStatEntries(option);
+  if (!entries.length) return [(option.name || "?").slice(0, 3).toUpperCase()];
+  if (option.syntheticArmorMod) {
+    const [key, value] = entries[0];
+    return [armorStatAbbrevLabels[key] || statLabel(key, true), signedValue(value)];
+  }
+  return entries.slice(0, 2).map(([key, value]) => {
+    const label = armorStatAbbrevLabels[key] || statLabel(key, true);
+    return `${value > 0 ? "+" : "-"}${label}`;
+  });
+}
+
+function armorModChoiceLabel(option) {
+  return option ? armorModOptionLabel(option) : t("armorNoModShort");
+}
+
+function renderArmorModIcon(option, className = "armor-choice-icon") {
+  if (!option) return `<span class="${className} armor-choice-icon--empty">-</span>`;
+  if (option.icon) return `<img class="${className}" src="${esc(option.icon)}" alt="">`;
+  const statKey = armorModStatEntries(option)[0]?.[0] || "";
+  return statKey
+    ? renderArmorStatGlyph(statKey, `${className} armor-choice-icon--stat`)
+    : `<span class="${className} placeholder-icon">${esc((option.name || "?").slice(0, 1))}</span>`;
+}
+
+function renderArmorModSelector(setKey, slot, kind, selectedHash, options) {
+  const selected = armorModOptionForHash(kind, selectedHash);
+  const choiceKey = armorChoiceKey(setKey, slot.id, kind);
+  const isOpen = state.openArmorChoice === choiceKey;
+  const labelKey = kind === "general" ? "armorGeneralMod" : "armorFocusMod";
+  const shortLabelKey = kind === "general" ? "armorGeneralModShort" : "armorFocusModShort";
+  const selectedLabel = armorModChoiceLabel(selected);
+  const allOptions = [null, ...options];
+  return `
+    <div class="field armor-choice-field">
+      <span title="${esc(t(labelKey))}">${esc(t(shortLabelKey))}</span>
+      <button class="armor-choice-toggle armor-choice-toggle--mod" type="button" data-armor-choice-toggle="${esc(choiceKey)}" aria-expanded="${esc(String(isOpen))}" aria-label="${esc(selectedLabel)}" title="${esc(selectedLabel)}">
+        ${renderArmorModIcon(selected)}
+        <span class="armor-choice-pair">
+          ${armorModChipLabels(selected).map((label) => `<span>${esc(label)}</span>`).join("")}
+        </span>
+      </button>
+      ${
+        isOpen
+          ? `<div class="armor-choice-menu armor-choice-menu--mod" role="listbox" aria-label="${esc(t(labelKey))}">
+              ${allOptions
+                .map((option) => {
+                  const value = armorModValue(option);
+                  const isSelected = String(selectedHash || "") === value;
+                  const label = armorModChoiceLabel(option);
+                  return `
+                    <button class="armor-choice-option${isSelected ? " is-selected" : ""}" type="button" data-armor-piece-mod-button="${esc(slot.id)}" data-mod-kind="${esc(kind)}" data-mod-hash="${esc(value)}" aria-label="${esc(label)}" title="${esc(label)}" aria-pressed="${esc(String(isSelected))}">
+                      ${renderArmorModIcon(option)}
+                      <span class="armor-choice-pair">${armorModChipLabels(option).map((chip) => `<span>${esc(chip)}</span>`).join("")}</span>
+                    </button>
+                  `;
+                })
+                .join("")}
+            </div>`
+          : ""
+      }
+    </div>
+  `;
+}
+
 function renderArmorArchetypeSelector(setKey, slot, piece) {
   const selected = armorPlugOption(piece.archetypeHash) || { hash: piece.archetypeHash, name: String(piece.archetypeHash), icon: "" };
   const choiceKey = armorChoiceKey(setKey, slot.id, "archetype");
@@ -4529,18 +4629,8 @@ function renderArmorPieceCard(setKey, slot) {
       <div class="armor-piece-controls">
         ${renderArmorArchetypeSelector(setKey, slot, piece)}
         ${renderArmorTertiarySelectorForPiece(setKey, slot, piece, tertiaryOptions)}
-        <label class="field">
-          <span title="${esc(t("armorGeneralMod"))}">${esc(t("armorGeneralModShort"))}</span>
-          <select data-armor-piece-general="${esc(slot.id)}">
-            ${selectOptions(generalMods, piece.generalModHash, t("armorNoModShort"), "hash", armorModOptionLabel)}
-          </select>
-        </label>
-        <label class="field">
-          <span title="${esc(t("armorFocusMod"))}">${esc(t("armorFocusModShort"))}</span>
-          <select data-armor-piece-focus="${esc(slot.id)}">
-            ${selectOptions(focusMods, piece.focusModHash, t("armorNoModShort"), "hash", armorModOptionLabel)}
-          </select>
-        </label>
+        ${renderArmorModSelector(setKey, slot, "general", piece.generalModHash, generalMods)}
+        ${renderArmorModSelector(setKey, slot, "focus", piece.focusModHash, focusMods)}
       </div>
       <div class="armor-piece-stats">${statSummaryLine(pieceStats)}</div>
     </section>
@@ -5307,6 +5397,20 @@ function bindArmorSetControls(row, setKey, classId) {
     button.addEventListener("click", () => {
       const piece = armorSetPieceState(setKey, button.dataset.armorPieceTertiaryButton);
       piece.tertiary = button.dataset.tertiaryStat || "";
+      state.openArmorChoice = "";
+      normalizeArmorPieceState(piece);
+      rerenderDetailPreservingViewport(row);
+    });
+  });
+  els.detail.querySelectorAll("[data-armor-piece-mod-button]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const piece = armorSetPieceState(setKey, button.dataset.armorPieceModButton);
+      const kind = button.dataset.modKind || "";
+      if (kind === "general") {
+        piece.generalModHash = button.dataset.modHash || "";
+      } else if (kind === "focus") {
+        piece.focusModHash = button.dataset.modHash || "";
+      }
       state.openArmorChoice = "";
       normalizeArmorPieceState(piece);
       rerenderDetailPreservingViewport(row);
