@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260617-single-weapon-mod";
+const DATA_VERSION = "20260617-compact-weapon-utility";
 
 const finalReleaseVersions = new Set(["v950", "v960", "v970"]);
 const finalReleaseSeasonNumbers = new Set([29]);
@@ -4126,9 +4126,12 @@ function renderSocketSelectors(row, sockets) {
           const tertiarySelector = socket.kind === "armor_archetype" ? renderArmorTertiarySelector(row) : "";
           const fixedOnly = options.length === 1;
           const fixedHash = fixedOnly ? options[0].hash : "";
+          const compactWeaponUtility = isWeaponRow(row) && ["mod", "masterwork"].includes(socket.kind);
+          const compactLabel = socket.kind === "masterwork" ? "MW" : socket.label || "Mod";
+          const toggleTitle = [socket.label, summary.name].filter(Boolean).join(": ");
           return `
-            <div class="plug-field${isOpen ? " is-open" : ""}${directionClass}">
-              <button class="plug-toggle" type="button" data-plug-toggle data-socket-index="${esc(socket.index)}" aria-expanded="${esc(String(isOpen))}">
+            <div class="plug-field${compactWeaponUtility ? " plug-field--weapon-utility" : ""}${isOpen ? " is-open" : ""}${directionClass}"${compactWeaponUtility ? ` data-compact-label="${escAttr(compactLabel)}"` : ""}>
+              <button class="plug-toggle" type="button" data-plug-toggle data-socket-index="${esc(socket.index)}" aria-expanded="${esc(String(isOpen))}" title="${escAttr(toggleTitle)}">
                 ${summary.plug ? renderPlugIcon(summary.plug, "plug-toggle-icon") : `<span class="plug-toggle-icon plug-toggle-icon--empty">OFF</span>`}
                 <span class="plug-toggle-main">
                   <strong>${esc(socket.label)}</strong>

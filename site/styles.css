@@ -1569,12 +1569,83 @@ h1 {
 }
 
 .weapon-utility-selectors .plug-grid {
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 8px;
 }
 
-.weapon-utility-selectors .plug-toggle {
-  min-height: 48px;
+.weapon-utility-selectors .plug-field--weapon-utility {
+  justify-items: center;
+  gap: 4px;
+}
+
+.weapon-utility-selectors .plug-field--weapon-utility::before {
+  content: attr(data-compact-label);
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 1000;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.weapon-utility-selectors .plug-field--weapon-utility .plug-toggle {
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  gap: 0;
+  border-radius: 7px;
+  padding: 3px;
+  text-align: center;
+}
+
+.weapon-utility-selectors .plug-field--weapon-utility .plug-toggle-main,
+.weapon-utility-selectors .plug-field--weapon-utility .plug-toggle-action {
+  display: none;
+}
+
+.weapon-utility-selectors .plug-field--weapon-utility .plug-toggle .plug-icon-wrap,
+.weapon-utility-selectors .plug-field--weapon-utility .plug-toggle-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.weapon-utility-selectors .plug-field--weapon-utility .plug-toggle-icon--empty {
+  font-size: 9px;
+}
+
+.weapon-utility-selectors .plug-field--weapon-utility .plug-option-grid {
+  grid-template-columns: repeat(auto-fill, 28px);
+  justify-self: stretch;
+  width: 100%;
+  justify-content: center;
+  align-content: start;
+  gap: 5px;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.weapon-utility-selectors .plug-field--weapon-utility .plug-option {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  gap: 0;
+  border-radius: 7px;
+  padding: 3px;
+}
+
+.weapon-utility-selectors .plug-field--weapon-utility .plug-option .plug-icon-wrap,
+.weapon-utility-selectors .plug-field--weapon-utility .plug-option-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.weapon-utility-selectors .plug-field--weapon-utility .plug-option-name {
+  display: none;
 }
 
 .weapon-utility-selectors .plug-field.is-open .plug-option-grid {
@@ -3456,6 +3527,48 @@ h1 {
   .weapon-detail-shell .weapon-utility-selectors .plug-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
+  }
+
+  .weapon-detail-shell .weapon-utility-selectors .plug-field--weapon-utility::before {
+    font-size: 7px;
+  }
+
+  .weapon-detail-shell .weapon-utility-selectors .plug-field--weapon-utility .plug-toggle {
+    width: 24px;
+    height: 24px;
+    min-height: 24px;
+    border-radius: 6px;
+    padding: 2px;
+  }
+
+  .weapon-detail-shell .weapon-utility-selectors .plug-field--weapon-utility .plug-toggle .plug-icon-wrap,
+  .weapon-detail-shell .weapon-utility-selectors .plug-field--weapon-utility .plug-toggle-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .weapon-detail-shell .weapon-utility-selectors .plug-field--weapon-utility .plug-toggle-icon--empty {
+    font-size: 8px;
+  }
+
+  .weapon-detail-shell .weapon-utility-selectors .plug-field--weapon-utility .plug-option-grid {
+    grid-template-columns: repeat(auto-fill, 24px);
+    gap: 4px;
+    padding: 3px;
+  }
+
+  .weapon-detail-shell .weapon-utility-selectors .plug-field--weapon-utility .plug-option {
+    width: 24px;
+    height: 24px;
+    min-height: 24px;
+    border-radius: 6px;
+    padding: 2px;
+  }
+
+  .weapon-detail-shell .weapon-utility-selectors .plug-field--weapon-utility .plug-option .plug-icon-wrap,
+  .weapon-detail-shell .weapon-utility-selectors .plug-field--weapon-utility .plug-option-icon {
+    width: 24px;
+    height: 24px;
   }
 
   .weapon-detail-shell .weapon-utility-selectors .plug-field.is-open .plug-option-grid {
