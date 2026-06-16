@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260616-split-enhanced-perks";
+const DATA_VERSION = "20260617-paired-enhanced-perks";
 
 const finalReleaseVersions = new Set(["v950", "v960", "v970"]);
 const finalReleaseSeasonNumbers = new Set([29]);
@@ -3238,6 +3238,7 @@ function dedupePlugOptions(socket, plugs) {
   const seen = new Set();
   return plugs.filter((plug) => {
     const key = [
+      isEnhancedPlug(plug) ? "enhanced" : "normal",
       plug.name || "",
       plug.description || "",
       plug.icon || "",
@@ -3961,16 +3962,40 @@ function renderWeaponPerkOption(row, socket, plug, activeHash) {
   `;
 }
 
-function renderWeaponPerkOptionLane(row, socket, plugs, activeHash, label) {
-  if (!plugs.length) return "";
-  return `
-    <div class="weapon-perk-lane">
-      <span class="weapon-perk-lane-title">${esc(label)}</span>
-      <div class="weapon-perk-lane-icons">
-        ${plugs.map((plug) => renderWeaponPerkOption(row, socket, plug, activeHash)).join("")}
-      </div>
-    </div>
-  `;
+function weaponPerkPairKey(plug) {
+  return [
+    enhancedBaseText(plug?.name),
+    enhancedBaseText(plug?.category),
+    plug?.identifier || "",
+  ].join("|");
+}
+
+function pairWeaponPerkOptions(options) {
+  const enhancedByKey = new Map();
+  options.filter(isEnhancedPlug).forEach((plug) => {
+    const key = weaponPerkPairKey(plug);
+    if (!enhancedByKey.has(key)) enhancedByKey.set(key, []);
+    enhancedByKey.get(key).push(plug);
+  });
+
+  const usedEnhanced = new Set();
+  const pairs = [];
+  options.filter((plug) => !isEnhancedPlug(plug)).forEach((plug) => {
+    const key = weaponPerkPairKey(plug);
+    const match = (enhancedByKey.get(key) || []).find((candidate) => !usedEnhanced.has(String(candidate.hash))) || null;
+    if (match) usedEnhanced.add(String(match.hash));
+    pairs.push({ normal: plug, enhanced: match });
+  });
+
+  options.filter(isEnhancedPlug).forEach((plug) => {
+    const hash = String(plug.hash);
+    if (!usedEnhanced.has(hash)) pairs.push({ normal: null, enhanced: plug });
+  });
+  return pairs;
+}
+
+function renderWeaponPerkEmptySlot() {
+  return `<span class="weapon-perk-empty-slot" aria-hidden="true"></span>`;
 }
 
 function renderWeaponPerkOptions(row, entry, options, activeHash) {
@@ -3984,10 +4009,17 @@ function renderWeaponPerkOptions(row, entry, options, activeHash) {
       </div>
     `;
   }
+  const pairs = pairWeaponPerkOptions(options);
   return `
     <div class="weapon-perk-options weapon-perk-options--split" role="listbox" aria-label="${esc(label)}">
-      ${renderWeaponPerkOptionLane(row, entry.socket, normal, activeHash, t("weaponPerkNormal"))}
-      ${renderWeaponPerkOptionLane(row, entry.socket, enhanced, activeHash, t("weaponPerkEnhanced"))}
+      <span class="weapon-perk-pair-label">${esc(t("weaponPerkNormal"))}</span>
+      <span class="weapon-perk-pair-label">${esc(t("weaponPerkEnhanced"))}</span>
+      ${pairs
+        .map((pair) => `
+          ${pair.normal ? renderWeaponPerkOption(row, entry.socket, pair.normal, activeHash) : renderWeaponPerkEmptySlot()}
+          ${pair.enhanced ? renderWeaponPerkOption(row, entry.socket, pair.enhanced, activeHash) : renderWeaponPerkEmptySlot()}
+        `)
+        .join("")}
     </div>
   `;
 }
