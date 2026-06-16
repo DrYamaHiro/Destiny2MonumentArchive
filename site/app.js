@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260616-weapon-perk-icons";
+const DATA_VERSION = "20260616-weapon-mod-mw-toggle";
 
 const finalReleaseVersions = new Set(["v950", "v960", "v970"]);
 const finalReleaseSeasonNumbers = new Set([29]);
@@ -3319,6 +3319,13 @@ function selectedOrDefaultPlugFor(row, socket, options = plugOptionsFor(row, soc
   return selectedPlugFor(row, socket) || defaultWeaponPerkPlugFor(row, socket, options);
 }
 
+function weaponUtilitySockets(row) {
+  if (!isWeaponRow(row)) return [];
+  return (row.plugSockets || [])
+    .filter((socket) => ["mod", "masterwork"].includes(socket.kind))
+    .filter((socket) => plugOptionsFor(row, socket).length);
+}
+
 function selectedPlugsFor(row) {
   return (row.plugSockets || [])
     .map((socket) => {
@@ -3952,27 +3959,33 @@ function renderWeaponPerkOption(row, socket, plug, activeHash) {
 
 function renderWeaponPerkBuilder(row, embedded = false) {
   const columns = weaponPerkColumns(row);
-  if (!columns.length) return "";
+  const utilitySockets = weaponUtilitySockets(row);
+  if (!columns.length && !utilitySockets.length) return "";
   return `
     <section class="${embedded ? "plug-builder plug-builder--embedded weapon-perk-builder" : "panel plug-builder weapon-perk-builder"}">
       <h3>${esc(t("weaponPerks"))}</h3>
-      <div class="weapon-perk-grid">
-        ${columns
-          .map((entry) => {
-            const options = plugOptionsFor(row, entry.socket);
-            const selected = selectedOrDefaultPlugFor(row, entry.socket, options);
-            const activeHash = selected?.hash || "";
-            return `
-              <div class="weapon-perk-column">
-                <h4 class="weapon-perk-column-title">${esc(weaponPerkColumnLabel(entry, options))}</h4>
-                <div class="weapon-perk-options" role="listbox" aria-label="${esc(weaponPerkColumnLabel(entry, options))}">
-                  ${options.map((plug) => renderWeaponPerkOption(row, entry.socket, plug, activeHash)).join("")}
-                </div>
-              </div>
-            `;
-          })
-          .join("")}
-      </div>
+      ${
+        columns.length
+          ? `<div class="weapon-perk-grid">
+              ${columns
+                .map((entry) => {
+                  const options = plugOptionsFor(row, entry.socket);
+                  const selected = selectedOrDefaultPlugFor(row, entry.socket, options);
+                  const activeHash = selected?.hash || "";
+                  return `
+                    <div class="weapon-perk-column">
+                      <h4 class="weapon-perk-column-title">${esc(weaponPerkColumnLabel(entry, options))}</h4>
+                      <div class="weapon-perk-options" role="listbox" aria-label="${esc(weaponPerkColumnLabel(entry, options))}">
+                        ${options.map((plug) => renderWeaponPerkOption(row, entry.socket, plug, activeHash)).join("")}
+                      </div>
+                    </div>
+                  `;
+                })
+                .join("")}
+            </div>`
+          : ""
+      }
+      ${utilitySockets.length ? `<div class="weapon-utility-selectors">${renderSocketSelectors(row, utilitySockets)}</div>` : ""}
     </section>
   `;
 }
@@ -5342,7 +5355,10 @@ function bindBuildWeaponPlugControls(buildRow) {
       delete state.openPlugSockets[key];
       delete state.openPlugDirections[key];
       const scopeSelector = `[data-build-weapon-card][data-build-weapon-hash="${selectorAttr(card?.dataset.buildWeaponHash)}"] `;
-      rerenderDetailPreservingAnchor(buildRow, plugButtonSelector(socket.index, button.dataset.plugHash, scopeSelector));
+      const anchorSelector = isWeaponPerkChoiceSocket(weapon, socket)
+        ? plugButtonSelector(socket.index, button.dataset.plugHash, scopeSelector)
+        : plugToggleSelector(socket.index, scopeSelector);
+      rerenderDetailPreservingAnchor(buildRow, anchorSelector);
     });
   });
   els.detail.querySelectorAll("[data-build-weapon-card] [data-plug-toggle]").forEach((button) => {
@@ -5735,7 +5751,7 @@ function renderDetail(row) {
       }
       delete state.openPlugSockets[key];
       delete state.openPlugDirections[key];
-      const anchorSelector = isWeaponRow(row)
+      const anchorSelector = isWeaponRow(row) && isWeaponPerkChoiceSocket(row, socket)
         ? plugButtonSelector(socket.index, button.dataset.plugHash)
         : plugToggleSelector(socket.index);
       rerenderDetailPreservingAnchor(row, anchorSelector);

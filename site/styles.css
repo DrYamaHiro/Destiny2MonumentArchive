@@ -1537,6 +1537,25 @@ h1 {
   }
 }
 
+.weapon-utility-selectors {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.weapon-utility-selectors .plug-grid {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 8px;
+}
+
+.weapon-utility-selectors .plug-toggle {
+  min-height: 48px;
+}
+
+.weapon-utility-selectors .plug-field.is-open .plug-option-grid {
+  max-height: min(46vh, 360px);
+  overflow: auto;
+}
+
 .plug-option--stat {
   min-height: 78px;
 }
@@ -3384,6 +3403,19 @@ h1 {
 
   .weapon-detail-shell .weapon-perk-icon {
     border-radius: 5px;
+  }
+
+  .weapon-detail-shell .weapon-utility-selectors {
+    padding-top: 8px;
+  }
+
+  .weapon-detail-shell .weapon-utility-selectors .plug-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .weapon-detail-shell .weapon-utility-selectors .plug-field.is-open .plug-option-grid {
+    max-height: min(54vh, 380px);
   }
 
   .armor-piece-controls,
