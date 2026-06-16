@@ -1447,13 +1447,13 @@ h1 {
 
 .weapon-perk-options {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(32px, 1fr));
+  grid-template-columns: repeat(auto-fill, 28px);
   gap: 5px;
+  justify-content: center;
   align-content: start;
   min-width: 0;
-  max-height: 212px;
-  overflow: auto;
-  scrollbar-gutter: stable;
+  max-height: none;
+  overflow: visible;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 5px;
@@ -1465,8 +1465,8 @@ h1 {
   display: grid;
   place-items: center;
   min-width: 0;
-  min-height: 32px;
-  aspect-ratio: 1;
+  width: 28px;
+  height: 28px;
   border: 1px solid var(--line-strong);
   border-radius: 7px;
   padding: 3px;
@@ -1490,8 +1490,8 @@ h1 {
 
 .weapon-perk-button .plug-icon-wrap,
 .weapon-perk-icon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
 }
 
 .weapon-perk-icon {
@@ -3382,15 +3382,18 @@ h1 {
   }
 
   .weapon-detail-shell .weapon-perk-options {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, 24px);
     gap: 4px;
-    max-height: 156px;
+    justify-content: center;
+    max-height: none;
+    overflow: visible;
     padding: 3px;
     border-radius: 6px;
   }
 
   .weapon-detail-shell .weapon-perk-button {
-    min-height: 28px;
+    width: 24px;
+    height: 24px;
     border-radius: 6px;
     padding: 2px;
   }
