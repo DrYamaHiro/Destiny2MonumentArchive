@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260614-armor-mod-icons";
+const DATA_VERSION = "20260616-weapon-perk-icons";
 
 const finalReleaseVersions = new Set(["v950", "v960", "v970"]);
 const finalReleaseSeasonNumbers = new Set([29]);
@@ -120,6 +120,13 @@ const text = {
     categories: "カテゴリ",
     plugSets: "Plug sets",
     perksMods: "パーク / Mod",
+    weaponPerks: "パーク",
+    weaponPerkBarrelScope: "バレル / スコープ",
+    weaponPerkMagazine: "マガジン",
+    weaponPerkColumn3: "3列目",
+    weaponPerkColumn4: "4列目",
+    weaponPerkOrigin: "起源特性",
+    weaponPerkSelected: "選択中",
     selectPlug: "未選択（基準値）",
     enhancedPlug: "強化",
     selectedEffects: "選択中の効果",
@@ -387,6 +394,13 @@ const text = {
     categories: "Categories",
     plugSets: "Plug sets",
     perksMods: "Perks / Mods",
+    weaponPerks: "Perks",
+    weaponPerkBarrelScope: "Barrel / Scope",
+    weaponPerkMagazine: "Magazine",
+    weaponPerkColumn3: "Column 3",
+    weaponPerkColumn4: "Column 4",
+    weaponPerkOrigin: "Origin Trait",
+    weaponPerkSelected: "Selected",
     selectPlug: "No selection (base)",
     enhancedPlug: "Enhanced",
     selectedEffects: "Selected effects",
@@ -1022,6 +1036,10 @@ function esc(value) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
+}
+
+function escAttr(value) {
+  return esc(value).replace(/\r?\n/g, "&#10;");
 }
 
 function number(value) {
@@ -3237,14 +3255,77 @@ function plugOptionsFor(row, socket) {
   return dedupePlugOptions(socket, plugs);
 }
 
+function plugHashPresent(value) {
+  return value !== undefined && value !== null && value !== "";
+}
+
+function initialPlugFor(socket, options = []) {
+  if (!plugHashPresent(socket?.initialPlugHash)) return null;
+  return options.find((plug) => Number(plug.hash) === Number(socket.initialPlugHash)) || null;
+}
+
 function selectedPlugFor(row, socket) {
   const hash = state.selectedPlugs[selectionKey(row, socket)];
   if (!hash) return null;
   return (langData().plugOptions || {})[String(hash)] || null;
 }
 
+function normalizePlugCategory(value) {
+  return String(value || "")
+    .replace(/^Enhanced\s+/i, "")
+    .replace(/^強化版\s*/u, "")
+    .replace(/^強化型\s*/u, "")
+    .replace(/^強化\s*/u, "")
+    .trim();
+}
+
+function isGenericSocketLabel(value) {
+  return /^(socket|ソケット)$/iu.test(String(value || "").trim());
+}
+
+function weaponPerkColumns(row) {
+  if (!isWeaponRow(row)) return [];
+  const sockets = (row.plugSockets || []).filter((socket) => plugOptionsFor(row, socket).length);
+  const baseSockets = sockets.filter((socket) => !["intrinsic", "trait", "origin", "mod", "masterwork"].includes(socket.kind));
+  const firstSocket = baseSockets.find((socket) => socket.kind === "barrel")
+    || baseSockets.find((socket) => socket.kind === "socket")
+    || null;
+  const secondSocket = baseSockets.find((socket) => socket !== firstSocket && socket.kind === "magazine")
+    || baseSockets.find((socket) => socket !== firstSocket && socket.kind === "socket")
+    || null;
+  const traitSockets = sockets.filter((socket) => socket.kind === "trait").slice(0, 2);
+  const originSocket = sockets.find((socket) => socket.kind === "origin") || null;
+  return [
+    { id: "barrel", fallback: t("weaponPerkBarrelScope"), socket: firstSocket },
+    { id: "magazine", fallback: t("weaponPerkMagazine"), socket: secondSocket },
+    { id: "trait3", fallback: t("weaponPerkColumn3"), socket: traitSockets[0] || null },
+    { id: "trait4", fallback: t("weaponPerkColumn4"), socket: traitSockets[1] || null },
+    { id: "origin", fallback: t("weaponPerkOrigin"), socket: originSocket },
+  ].filter((entry) => entry.socket);
+}
+
+function isWeaponPerkChoiceSocket(row, socket) {
+  if (!isWeaponRow(row) || !socket) return false;
+  const index = String(socket.index);
+  return weaponPerkColumns(row).some((entry) => String(entry.socket.index) === index);
+}
+
+function defaultWeaponPerkPlugFor(row, socket, options = plugOptionsFor(row, socket)) {
+  if (!isWeaponPerkChoiceSocket(row, socket)) return null;
+  return initialPlugFor(socket, options) || fixedPlugFor(row, socket, options) || options[0] || null;
+}
+
+function selectedOrDefaultPlugFor(row, socket, options = plugOptionsFor(row, socket)) {
+  return selectedPlugFor(row, socket) || defaultWeaponPerkPlugFor(row, socket, options);
+}
+
 function selectedPlugsFor(row) {
-  return (row.plugSockets || []).map((socket) => selectedPlugFor(row, socket) || fixedPlugFor(row, socket)).filter(Boolean);
+  return (row.plugSockets || [])
+    .map((socket) => {
+      const options = plugOptionsFor(row, socket);
+      return selectedPlugFor(row, socket) || fixedPlugFor(row, socket, options) || defaultWeaponPerkPlugFor(row, socket, options);
+    })
+    .filter(Boolean);
 }
 
 function armorArchetypeSocket(row) {
@@ -3838,7 +3919,66 @@ function plugOptionLabel(row, plug) {
   return deltaText ? `${plug.name} (${deltaText})` : plug.name;
 }
 
+function plugTooltipText(row, plug) {
+  const deltaText = Object.entries(displayStatDeltas(row, plug))
+    .filter(([, value]) => Number(value || 0) !== 0)
+    .map(([key, value]) => `${statLabel(key, isArmorRow(row))} ${signedValue(value)}`)
+    .join(" / ");
+  return [
+    plug.name,
+    plug.category,
+    plug.description,
+    deltaText ? `${t("stats")}: ${deltaText}` : "",
+  ].filter(Boolean).join("\n");
+}
+
+function weaponPerkColumnLabel(entry, options) {
+  const label = String(entry.socket?.label || "").trim();
+  if (label && !isGenericSocketLabel(label)) return label;
+  const categories = [...new Set(options.map((plug) => normalizePlugCategory(plug.category)).filter(Boolean))];
+  if (categories.length && categories.length <= 2) return categories.join(" / ");
+  return categories[0] || entry.fallback;
+}
+
+function renderWeaponPerkOption(row, socket, plug, activeHash) {
+  const isSelected = Number(activeHash) === Number(plug.hash);
+  const tooltip = plugTooltipText(row, plug);
+  return `
+    <button class="weapon-perk-button${isSelected ? " is-selected" : ""}" type="button" data-plug-button data-socket-index="${esc(socket.index)}" data-plug-hash="${esc(plug.hash)}" title="${escAttr(tooltip)}" data-tooltip="${escAttr(tooltip)}" aria-label="${esc(plug.name)}" aria-pressed="${esc(String(isSelected))}">
+      ${renderPlugIcon(plug, "weapon-perk-icon")}
+    </button>
+  `;
+}
+
+function renderWeaponPerkBuilder(row, embedded = false) {
+  const columns = weaponPerkColumns(row);
+  if (!columns.length) return "";
+  return `
+    <section class="${embedded ? "plug-builder plug-builder--embedded weapon-perk-builder" : "panel plug-builder weapon-perk-builder"}">
+      <h3>${esc(t("weaponPerks"))}</h3>
+      <div class="weapon-perk-grid">
+        ${columns
+          .map((entry) => {
+            const options = plugOptionsFor(row, entry.socket);
+            const selected = selectedOrDefaultPlugFor(row, entry.socket, options);
+            const activeHash = selected?.hash || "";
+            return `
+              <div class="weapon-perk-column">
+                <h4 class="weapon-perk-column-title">${esc(weaponPerkColumnLabel(entry, options))}</h4>
+                <div class="weapon-perk-options" role="listbox" aria-label="${esc(weaponPerkColumnLabel(entry, options))}">
+                  ${options.map((plug) => renderWeaponPerkOption(row, entry.socket, plug, activeHash)).join("")}
+                </div>
+              </div>
+            `;
+          })
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
 function renderPlugBuilder(row, embedded = false) {
+  if (isWeaponRow(row)) return renderWeaponPerkBuilder(row, embedded);
   const sockets = row.plugSockets || [];
   const manualArmor = renderManualArmorTuning(row);
   if (!sockets.length && !manualArmor) return "";
@@ -3945,9 +4085,9 @@ function renderArmorTertiarySelector(row) {
 
 function renderPlugOption(row, socket, plug, selectedHash, fixedHash = "") {
   const isSelected = Number(selectedHash) === Number(plug.hash) || (!selectedHash && Number(fixedHash) === Number(plug.hash));
-  const title = plugOptionLabel(row, plug);
+  const title = plugTooltipText(row, plug) || plugOptionLabel(row, plug);
   return `
-    <button class="plug-option${isSelected ? " is-selected" : ""}" type="button" data-plug-button data-socket-index="${esc(socket.index)}" data-plug-hash="${esc(plug.hash)}" title="${esc(title)}" aria-pressed="${esc(String(isSelected))}">
+    <button class="plug-option${isSelected ? " is-selected" : ""}" type="button" data-plug-button data-socket-index="${esc(socket.index)}" data-plug-hash="${esc(plug.hash)}" title="${escAttr(title)}" aria-pressed="${esc(String(isSelected))}">
       ${renderPlugIcon(plug, "plug-option-icon")}
       <span class="plug-option-name">${esc(plug.name)}</span>
     </button>
@@ -4030,6 +4170,10 @@ function selectorAttr(value) {
 
 function plugToggleSelector(socketIndex, scopeSelector = "") {
   return `${scopeSelector}[data-plug-toggle][data-socket-index="${selectorAttr(socketIndex)}"]`;
+}
+
+function plugButtonSelector(socketIndex, plugHash, scopeSelector = "") {
+  return `${scopeSelector}[data-plug-button][data-socket-index="${selectorAttr(socketIndex)}"][data-plug-hash="${selectorAttr(plugHash)}"]`;
 }
 
 function plugMenuDirection(button) {
@@ -5198,7 +5342,7 @@ function bindBuildWeaponPlugControls(buildRow) {
       delete state.openPlugSockets[key];
       delete state.openPlugDirections[key];
       const scopeSelector = `[data-build-weapon-card][data-build-weapon-hash="${selectorAttr(card?.dataset.buildWeaponHash)}"] `;
-      rerenderDetailPreservingAnchor(buildRow, plugToggleSelector(socket.index, scopeSelector));
+      rerenderDetailPreservingAnchor(buildRow, plugButtonSelector(socket.index, button.dataset.plugHash, scopeSelector));
     });
   });
   els.detail.querySelectorAll("[data-build-weapon-card] [data-plug-toggle]").forEach((button) => {
@@ -5591,7 +5735,10 @@ function renderDetail(row) {
       }
       delete state.openPlugSockets[key];
       delete state.openPlugDirections[key];
-      rerenderDetailPreservingAnchor(row, plugToggleSelector(socket.index));
+      const anchorSelector = isWeaponRow(row)
+        ? plugButtonSelector(socket.index, button.dataset.plugHash)
+        : plugToggleSelector(socket.index);
+      rerenderDetailPreservingAnchor(row, anchorSelector);
     });
   });
   els.detail.querySelectorAll("[data-weapon-version]").forEach((button) => {
