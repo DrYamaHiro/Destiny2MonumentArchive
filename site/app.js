@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260617-paired-enhanced-perks";
+const DATA_VERSION = "20260617-single-weapon-mod";
 
 const finalReleaseVersions = new Set(["v950", "v960", "v970"]);
 const finalReleaseSeasonNumbers = new Set([29]);
@@ -3324,11 +3324,52 @@ function selectedOrDefaultPlugFor(row, socket, options = plugOptionsFor(row, soc
   return selectedPlugFor(row, socket) || defaultWeaponPerkPlugFor(row, socket, options);
 }
 
+function isWeaponModUtilityPlug(plug) {
+  const identifier = `${plug?.identifier || ""}`;
+  const textValue = `${plug?.category || ""} ${plug?.name || ""}`;
+  if (/weapon_tiering\.plugs\.mods\.enhancers/i.test(identifier)) return false;
+  if (/crafting\.plugs\.weapons\.mods\.(extractors|memories)/i.test(identifier)) return false;
+  return /weapon\.mod_/i.test(identifier) || /武器.*改造パーツ/.test(textValue);
+}
+
+function mergedWeaponModSocket(row) {
+  const modSockets = (row.plugSockets || [])
+    .filter((socket) => socket.kind === "mod")
+    .filter((socket) => (socket.plugHashes || []).length);
+  if (!modSockets.length) return null;
+
+  const plugOptions = langData().plugOptions || {};
+  const seen = new Set();
+  const plugHashes = [];
+  modSockets.forEach((socket) => {
+    (socket.plugHashes || []).forEach((hash) => {
+      const plug = plugOptions[String(hash)];
+      if (!isWeaponModUtilityPlug(plug)) return;
+      const key = String(hash);
+      if (seen.has(key)) return;
+      seen.add(key);
+      plugHashes.push(hash);
+    });
+  });
+  if (!plugHashes.length) return null;
+
+  const baseSocket = modSockets.find((socket) => plugHashes.some((hash) => Number(hash) === Number(socket.initialPlugHash)))
+    || modSockets.find((socket) => (socket.plugHashes || []).some((hash) => seen.has(String(hash))))
+    || modSockets[0];
+  return {
+    ...baseSocket,
+    label: baseSocket.label || "Mod",
+    plugHashes,
+  };
+}
+
 function weaponUtilitySockets(row) {
   if (!isWeaponRow(row)) return [];
-  return (row.plugSockets || [])
-    .filter((socket) => ["mod", "masterwork"].includes(socket.kind))
+  const modSocket = mergedWeaponModSocket(row);
+  const masterworkSockets = (row.plugSockets || [])
+    .filter((socket) => socket.kind === "masterwork")
     .filter((socket) => plugOptionsFor(row, socket).length);
+  return [modSocket, ...masterworkSockets].filter(Boolean);
 }
 
 function selectedPlugsFor(row) {
