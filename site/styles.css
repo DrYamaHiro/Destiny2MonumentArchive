@@ -1452,8 +1452,8 @@ h1 {
   justify-content: center;
   align-content: start;
   min-width: 0;
-  max-height: none;
-  overflow: visible;
+  max-height: none !important;
+  overflow: visible !important;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 5px;
@@ -1552,8 +1552,8 @@ h1 {
 }
 
 .weapon-utility-selectors .plug-field.is-open .plug-option-grid {
-  max-height: min(46vh, 360px);
-  overflow: auto;
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 .plug-option--stat {
@@ -3385,8 +3385,8 @@ h1 {
     grid-template-columns: repeat(auto-fill, 24px);
     gap: 4px;
     justify-content: center;
-    max-height: none;
-    overflow: visible;
+    max-height: none !important;
+    overflow: visible !important;
     padding: 3px;
     border-radius: 6px;
   }
@@ -3418,7 +3418,15 @@ h1 {
   }
 
   .weapon-detail-shell .weapon-utility-selectors .plug-field.is-open .plug-option-grid {
-    max-height: min(54vh, 380px);
+    position: static;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    z-index: auto;
+    max-height: none !important;
+    overflow: visible !important;
+    box-shadow: none;
   }
 
   .armor-piece-controls,

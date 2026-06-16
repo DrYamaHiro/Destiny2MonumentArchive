@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260616-expanded-perk-grid";
+const DATA_VERSION = "20260616-no-internal-plug-scroll";
 
 const finalReleaseVersions = new Set(["v950", "v960", "v970"]);
 const finalReleaseSeasonNumbers = new Set([29]);
