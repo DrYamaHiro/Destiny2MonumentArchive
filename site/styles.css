@@ -1578,6 +1578,10 @@ h1 {
   gap: 4px;
 }
 
+.weapon-utility-selectors .plug-field--weapon-utility.is-open {
+  grid-column: 1 / -1;
+}
+
 .weapon-utility-selectors .plug-field--weapon-utility::before {
   content: attr(data-compact-label);
   color: var(--muted);
@@ -1638,6 +1642,10 @@ h1 {
   padding: 3px;
 }
 
+.weapon-utility-selectors .plug-field--weapon-utility .plug-option.is-selected {
+  box-shadow: inset 0 0 0 2px rgba(214, 161, 61, 0.34);
+}
+
 .weapon-utility-selectors .plug-field--weapon-utility .plug-option .plug-icon-wrap,
 .weapon-utility-selectors .plug-field--weapon-utility .plug-option-icon {
   width: 28px;
@@ -1648,9 +1656,102 @@ h1 {
   display: none;
 }
 
+.weapon-mod-option-grid {
+  grid-template-columns: repeat(2, 28px) !important;
+  justify-self: center !important;
+  overflow: hidden !important;
+  width: auto !important;
+}
+
+.weapon-mod-clear-row {
+  display: grid;
+  grid-column: 1 / -1;
+  place-items: center;
+}
+
+.weapon-mod-lane-label {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 1000;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.weapon-utility-empty-slot {
+  display: block;
+  width: 28px;
+  height: 28px;
+  border: 1px dashed var(--line);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--panel) 54%, transparent);
+  opacity: 0.42;
+}
+
+.weapon-masterwork-grid {
+  grid-template-columns: 1fr !important;
+  justify-self: stretch;
+  width: 100%;
+  gap: 6px;
+}
+
+.weapon-masterwork-clear-row {
+  display: grid;
+  place-items: center;
+}
+
+.weapon-masterwork-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 6px;
+  align-items: start;
+  min-width: 0;
+}
+
+.weapon-masterwork-stat {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 1000;
+  line-height: 28px;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.weapon-masterwork-levels {
+  display: grid;
+  grid-template-columns: repeat(10, 28px);
+  gap: 3px;
+  justify-content: center;
+  align-items: start;
+  min-width: 0;
+}
+
+.weapon-masterwork-level-cell {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  min-width: 0;
+  min-height: 28px;
+}
+
+.weapon-masterwork-token {
+  color: var(--strong);
+  font-size: 8px;
+  font-weight: 1000;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .weapon-utility-selectors .plug-field.is-open .plug-option-grid {
   max-height: none !important;
   overflow: visible !important;
+}
+
+.weapon-utility-selectors .plug-field.is-open .weapon-mod-option-grid {
+  overflow: hidden !important;
 }
 
 .plug-option--stat {
@@ -3557,6 +3658,48 @@ h1 {
     padding: 3px;
   }
 
+  .weapon-detail-shell .weapon-mod-option-grid {
+    grid-template-columns: repeat(2, 24px) !important;
+  }
+
+  .weapon-detail-shell .weapon-mod-lane-label {
+    font-size: 7px;
+  }
+
+  .weapon-detail-shell .weapon-utility-empty-slot {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+  }
+
+  .weapon-detail-shell .weapon-masterwork-grid {
+    gap: 5px;
+  }
+
+  .weapon-detail-shell .weapon-masterwork-row {
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .weapon-detail-shell .weapon-masterwork-stat {
+    font-size: 7px;
+    line-height: 24px;
+  }
+
+  .weapon-detail-shell .weapon-masterwork-levels {
+    grid-template-columns: repeat(10, 24px);
+    gap: 2px;
+  }
+
+  .weapon-detail-shell .weapon-masterwork-level-cell {
+    min-height: 24px;
+    gap: 2px;
+  }
+
+  .weapon-detail-shell .weapon-masterwork-token {
+    font-size: 7px;
+  }
+
   .weapon-detail-shell .weapon-utility-selectors .plug-field--weapon-utility .plug-option {
     width: 24px;
     height: 24px;
@@ -3581,6 +3724,10 @@ h1 {
     max-height: none !important;
     overflow: visible !important;
     box-shadow: none;
+  }
+
+  .weapon-detail-shell .weapon-utility-selectors .plug-field.is-open .weapon-mod-option-grid {
+    overflow: hidden !important;
   }
 
   .armor-piece-controls,

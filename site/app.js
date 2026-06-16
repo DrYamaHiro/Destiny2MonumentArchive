@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260617-compact-weapon-utility";
+const DATA_VERSION = "20260617-mod-mw-structured";
 
 const finalReleaseVersions = new Set(["v950", "v960", "v970"]);
 const finalReleaseSeasonNumbers = new Set([29]);
@@ -4035,8 +4035,40 @@ function pairWeaponPerkOptions(options) {
   return pairs;
 }
 
+function weaponModPairKey(plug) {
+  return enhancedBaseText(plug?.name);
+}
+
+function pairWeaponModOptions(options) {
+  const enhancedByKey = new Map();
+  options.filter(isEnhancedPlug).forEach((plug) => {
+    const key = weaponModPairKey(plug);
+    if (!enhancedByKey.has(key)) enhancedByKey.set(key, []);
+    enhancedByKey.get(key).push(plug);
+  });
+
+  const usedEnhanced = new Set();
+  const pairs = [];
+  options.filter((plug) => !isEnhancedPlug(plug)).forEach((plug) => {
+    const key = weaponModPairKey(plug);
+    const match = (enhancedByKey.get(key) || []).find((candidate) => !usedEnhanced.has(String(candidate.hash))) || null;
+    if (match) usedEnhanced.add(String(match.hash));
+    pairs.push({ normal: plug, enhanced: match });
+  });
+
+  options.filter(isEnhancedPlug).forEach((plug) => {
+    const hash = String(plug.hash);
+    if (!usedEnhanced.has(hash)) pairs.push({ normal: null, enhanced: plug });
+  });
+  return pairs;
+}
+
 function renderWeaponPerkEmptySlot() {
   return `<span class="weapon-perk-empty-slot" aria-hidden="true"></span>`;
+}
+
+function renderWeaponUtilityEmptySlot() {
+  return `<span class="weapon-utility-empty-slot" aria-hidden="true"></span>`;
 }
 
 function renderWeaponPerkOptions(row, entry, options, activeHash) {
@@ -4110,6 +4142,167 @@ function renderPlugBuilder(row, embedded = false) {
   `;
 }
 
+function renderClearPlugOption(socket, selectedHash) {
+  return `
+    <button class="plug-option plug-option--clear${selectedHash ? "" : " is-selected"}" type="button" data-plug-button data-socket-index="${esc(socket.index)}" data-plug-hash="" title="${esc(t("selectPlug"))}" aria-pressed="${esc(String(!selectedHash))}">
+      <span class="plug-option-icon">OFF</span>
+      <span class="plug-option-name">${esc(t("selectPlug"))}</span>
+    </button>
+  `;
+}
+
+function renderWeaponModOptionGrid(row, socket, options, selectedHash, fixedHash) {
+  const pairs = pairWeaponModOptions(options);
+  return `
+    <div class="plug-option-grid weapon-mod-option-grid" role="listbox" aria-label="${esc(socket.label)}">
+      <div class="weapon-mod-clear-row">${renderClearPlugOption(socket, selectedHash)}</div>
+      <span class="weapon-mod-lane-label">${esc(t("weaponPerkNormal"))}</span>
+      <span class="weapon-mod-lane-label">${esc(t("weaponPerkEnhanced"))}</span>
+      ${pairs
+        .map((pair) => `
+          ${pair.normal ? renderPlugOption(row, socket, pair.normal, selectedHash, fixedHash) : renderWeaponUtilityEmptySlot()}
+          ${pair.enhanced ? renderPlugOption(row, socket, pair.enhanced, selectedHash, fixedHash) : renderWeaponUtilityEmptySlot()}
+        `)
+        .join("")}
+    </div>
+  `;
+}
+
+function masterworkStatKey(plug) {
+  const identifier = `${plug?.identifier || ""}`;
+  const match = identifier.match(/masterworks\.stat\.([a-zA-Z]+)/i);
+  if (match?.[1]) return match[1];
+  const entries = Object.entries(plug?.statDeltas || {})
+    .filter(([, value]) => Number(value || 0) > 0)
+    .sort((a, b) => Number(b[1] || 0) - Number(a[1] || 0));
+  return entries[0]?.[0] || "masterwork";
+}
+
+function masterworkLevel(plug, statKey) {
+  const name = `${plug?.name || ""}`;
+  const match = name.match(/(?:レベル|Level)\s*(\d+)/i);
+  if (match?.[1]) return Math.max(1, Math.min(10, Number(match[1])));
+  const value = Number(plug?.statDeltas?.[statKey] || 0);
+  if (value > 0) return Math.max(1, Math.min(10, Math.round(value)));
+  return 10;
+}
+
+function masterworkLevelLabel(plug, level) {
+  if (level < 10) return String(level);
+  const name = `${plug?.name || ""}`;
+  if (/Tier|連動/i.test(name)) return "10T";
+  if (/\+3|全体/.test(name)) return "10+";
+  return "10";
+}
+
+function masterworkStatShortLabel(key) {
+  const ja = {
+    handling: "ハン",
+    range: "射程",
+    reload: "リロ",
+    stability: "安定",
+    accuracy: "精度",
+    blastRadius: "爆発",
+    velocity: "速度",
+    chargeTime: "CT",
+    drawTime: "DT",
+  };
+  const en = {
+    handling: "HND",
+    range: "RNG",
+    reload: "RLD",
+    stability: "STB",
+    accuracy: "ACC",
+    blastRadius: "BLR",
+    velocity: "VEL",
+    chargeTime: "CT",
+    drawTime: "DT",
+  };
+  return (state.lang === "ja" ? ja : en)[key] || statLabel(key);
+}
+
+function masterworkGroups(options) {
+  const order = ["range", "stability", "handling", "reload", "accuracy", "blastRadius", "velocity", "chargeTime", "drawTime"];
+  const groups = new Map();
+  options.forEach((plug) => {
+    const key = masterworkStatKey(plug);
+    if (!groups.has(key)) {
+      groups.set(key, { key, levels: new Map() });
+    }
+    const level = masterworkLevel(plug, key);
+    if (!groups.get(key).levels.has(level)) groups.get(key).levels.set(level, []);
+    groups.get(key).levels.get(level).push(plug);
+  });
+  return [...groups.values()].sort((a, b) => {
+    const left = order.indexOf(a.key);
+    const right = order.indexOf(b.key);
+    if (left !== -1 || right !== -1) return (left === -1 ? 99 : left) - (right === -1 ? 99 : right);
+    return statLabel(a.key).localeCompare(statLabel(b.key));
+  });
+}
+
+function renderMasterworkOption(row, socket, plug, selectedHash, fixedHash, level) {
+  const isSelected = Number(selectedHash) === Number(plug.hash) || (!selectedHash && Number(fixedHash) === Number(plug.hash));
+  const title = plugTooltipText(row, plug) || plugOptionLabel(row, plug);
+  return `
+    <button class="plug-option weapon-masterwork-option${isSelected ? " is-selected" : ""}" type="button" data-plug-button data-socket-index="${esc(socket.index)}" data-plug-hash="${esc(plug.hash)}" title="${escAttr(title)}" aria-label="${escAttr(plug.name)}" aria-pressed="${esc(String(isSelected))}">
+      <span class="weapon-masterwork-token">${esc(masterworkLevelLabel(plug, level))}</span>
+    </button>
+  `;
+}
+
+function renderWeaponMasterworkOptionGrid(row, socket, options, selectedHash, fixedHash) {
+  const groups = masterworkGroups(options);
+  if (!groups.length) {
+    return `
+      <div class="plug-option-grid" role="listbox" aria-label="${esc(socket.label)}">
+        ${renderClearPlugOption(socket, selectedHash)}
+        ${options.map((plug) => renderPlugOption(row, socket, plug, selectedHash, fixedHash)).join("")}
+      </div>
+    `;
+  }
+  return `
+    <div class="plug-option-grid weapon-masterwork-grid" role="listbox" aria-label="${esc(socket.label)}">
+      <div class="weapon-masterwork-clear-row">${renderClearPlugOption(socket, selectedHash)}</div>
+      ${groups
+        .map((group) => `
+          <div class="weapon-masterwork-row">
+            <span class="weapon-masterwork-stat" title="${escAttr(statLabel(group.key))}">${esc(masterworkStatShortLabel(group.key))}</span>
+            <div class="weapon-masterwork-levels">
+              ${Array.from({ length: 10 }, (_, index) => {
+                const level = index + 1;
+                const plugs = group.levels.get(level) || [];
+                return `
+                  <div class="weapon-masterwork-level-cell" data-level="${esc(level)}">
+                    ${plugs.length
+                      ? plugs.map((plug) => renderMasterworkOption(row, socket, plug, selectedHash, fixedHash, level)).join("")
+                      : renderWeaponUtilityEmptySlot()}
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `)
+        .join("")}
+    </div>
+  `;
+}
+
+function renderWeaponUtilityOptionGrid(row, socket, options, selectedHash, fixedHash, fixedOnly) {
+  if (isWeaponRow(row) && socket.kind === "mod") {
+    return renderWeaponModOptionGrid(row, socket, options, selectedHash, fixedHash);
+  }
+  if (isWeaponRow(row) && socket.kind === "masterwork") {
+    return renderWeaponMasterworkOptionGrid(row, socket, options, selectedHash, fixedHash);
+  }
+  return `
+    <div class="plug-option-grid" role="listbox" aria-label="${esc(socket.label)}">
+      ${fixedOnly ? "" : renderClearPlugOption(socket, selectedHash)}
+      ${options.map((plug) => renderPlugOption(row, socket, plug, selectedHash, fixedHash)).join("")}
+    </div>
+  `;
+}
+
 function renderSocketSelectors(row, sockets) {
   return `
     <div class="plug-grid">
@@ -4142,17 +4335,7 @@ function renderSocketSelectors(row, sockets) {
               </button>
               ${
                 isOpen
-                  ? `<div class="plug-option-grid" role="listbox" aria-label="${esc(socket.label)}">
-                      ${
-                        fixedOnly
-                          ? ""
-                          : `<button class="plug-option plug-option--clear${selectedHash ? "" : " is-selected"}" type="button" data-plug-button data-socket-index="${esc(socket.index)}" data-plug-hash="" title="${esc(t("selectPlug"))}" aria-pressed="${esc(String(!selectedHash))}">
-                              <span class="plug-option-icon">OFF</span>
-                              <span class="plug-option-name">${esc(t("selectPlug"))}</span>
-                            </button>`
-                      }
-                      ${options.map((plug) => renderPlugOption(row, socket, plug, selectedHash, fixedHash)).join("")}
-                    </div>`
+                  ? renderWeaponUtilityOptionGrid(row, socket, options, selectedHash, fixedHash, fixedOnly)
                   : ""
               }
             </div>
