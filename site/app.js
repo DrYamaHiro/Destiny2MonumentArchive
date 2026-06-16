@@ -1,5 +1,5 @@
 const LIMIT = 250;
-const DATA_VERSION = "20260616-no-internal-plug-scroll";
+const DATA_VERSION = "20260616-split-enhanced-perks";
 
 const finalReleaseVersions = new Set(["v950", "v960", "v970"]);
 const finalReleaseSeasonNumbers = new Set([29]);
@@ -127,6 +127,8 @@ const text = {
     weaponPerkColumn4: "4列目",
     weaponPerkOrigin: "起源特性",
     weaponPerkSelected: "選択中",
+    weaponPerkNormal: "通常",
+    weaponPerkEnhanced: "強化",
     selectPlug: "未選択（基準値）",
     enhancedPlug: "強化",
     selectedEffects: "選択中の効果",
@@ -401,6 +403,8 @@ const text = {
     weaponPerkColumn4: "Column 4",
     weaponPerkOrigin: "Origin Trait",
     weaponPerkSelected: "Selected",
+    weaponPerkNormal: "Normal",
+    weaponPerkEnhanced: "Enhanced",
     selectPlug: "No selection (base)",
     enhancedPlug: "Enhanced",
     selectedEffects: "Selected effects",
@@ -3957,6 +3961,37 @@ function renderWeaponPerkOption(row, socket, plug, activeHash) {
   `;
 }
 
+function renderWeaponPerkOptionLane(row, socket, plugs, activeHash, label) {
+  if (!plugs.length) return "";
+  return `
+    <div class="weapon-perk-lane">
+      <span class="weapon-perk-lane-title">${esc(label)}</span>
+      <div class="weapon-perk-lane-icons">
+        ${plugs.map((plug) => renderWeaponPerkOption(row, socket, plug, activeHash)).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderWeaponPerkOptions(row, entry, options, activeHash) {
+  const label = weaponPerkColumnLabel(entry, options);
+  const normal = options.filter((plug) => !isEnhancedPlug(plug));
+  const enhanced = options.filter(isEnhancedPlug);
+  if (!enhanced.length) {
+    return `
+      <div class="weapon-perk-options" role="listbox" aria-label="${esc(label)}">
+        ${options.map((plug) => renderWeaponPerkOption(row, entry.socket, plug, activeHash)).join("")}
+      </div>
+    `;
+  }
+  return `
+    <div class="weapon-perk-options weapon-perk-options--split" role="listbox" aria-label="${esc(label)}">
+      ${renderWeaponPerkOptionLane(row, entry.socket, normal, activeHash, t("weaponPerkNormal"))}
+      ${renderWeaponPerkOptionLane(row, entry.socket, enhanced, activeHash, t("weaponPerkEnhanced"))}
+    </div>
+  `;
+}
+
 function renderWeaponPerkBuilder(row, embedded = false) {
   const columns = weaponPerkColumns(row);
   const utilitySockets = weaponUtilitySockets(row);
@@ -3975,9 +4010,7 @@ function renderWeaponPerkBuilder(row, embedded = false) {
                   return `
                     <div class="weapon-perk-column">
                       <h4 class="weapon-perk-column-title">${esc(weaponPerkColumnLabel(entry, options))}</h4>
-                      <div class="weapon-perk-options" role="listbox" aria-label="${esc(weaponPerkColumnLabel(entry, options))}">
-                        ${options.map((plug) => renderWeaponPerkOption(row, entry.socket, plug, activeHash)).join("")}
-                      </div>
+                      ${renderWeaponPerkOptions(row, entry, options, activeHash)}
                     </div>
                   `;
                 })

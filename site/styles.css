@@ -1511,6 +1511,38 @@ h1 {
   border-color: #facc15;
 }
 
+.weapon-perk-options--split {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  justify-content: stretch;
+}
+
+.weapon-perk-lane {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 5px;
+  justify-items: center;
+  align-content: start;
+  min-width: 0;
+}
+
+.weapon-perk-lane-title {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 1000;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.weapon-perk-lane-icons {
+  display: grid;
+  grid-template-columns: 28px;
+  gap: 5px;
+  justify-content: center;
+  align-content: start;
+  min-width: 0;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .weapon-perk-button[data-tooltip]:hover::after,
   .weapon-perk-button[data-tooltip]:focus-visible::after {
@@ -3406,6 +3438,24 @@ h1 {
 
   .weapon-detail-shell .weapon-perk-icon {
     border-radius: 5px;
+  }
+
+  .weapon-detail-shell .weapon-perk-options--split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3px;
+  }
+
+  .weapon-detail-shell .weapon-perk-lane {
+    gap: 4px;
+  }
+
+  .weapon-detail-shell .weapon-perk-lane-title {
+    font-size: 7px;
+  }
+
+  .weapon-detail-shell .weapon-perk-lane-icons {
+    grid-template-columns: 24px;
+    gap: 4px;
   }
 
   .weapon-detail-shell .weapon-utility-selectors {
